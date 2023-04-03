@@ -1,8 +1,9 @@
 import boardLib from './board.js';
-const { board, displayMoves, displayCaptures } = boardLib;
+const { board, _squares, displayMovesInBoard, displayCapturesInBoard } =
+  boardLib;
 
 let idCount = 0;
-var selectedPiece = {};
+var selectedPiece = null;
 const pieces = [];
 
 function buildImg(type, color) {
@@ -16,7 +17,52 @@ function piece(name, row, col, color) {
     row,
     col,
     color,
-    placeAt() { }
+    moves: [],
+    captures: [],
+    placeAt([row, col]) {
+      board[this.row][this.col] = null;
+      _squares[this.row][this.col].innerHTML = null;
+
+      this.row = row;
+      this.col = col;
+
+      // Capture
+      const currentPieceInCell = board[row][col];
+      if (currentPieceInCell && currentPieceInCell.color !== this.color) {
+        const enemyPieceIdx = pieces.findIndex(
+          piece => piece.id === currentPieceInCell.id
+        );
+        pieces.splice(enemyPieceIdx, 1);
+      }
+
+      board[row][col] = this;
+      _squares[row][col].innerHTML = this.img;
+
+      // Pawn
+      if (this.name === P) {
+        this.isAtStartingPosition = false;
+        if (row === 0 || row === COL_Z) {
+          log('promotion!');
+        }
+      }
+
+      // Check if the move comes with check
+      this.computeMoves();
+      const isCheck = this.captures.find(
+        ([row, col]) => board[row][col].name === K
+      );
+      log('check', !!isCheck);
+
+      this.moves = [];
+      this.captures = [];
+    },
+    showMoves() {
+      if (!this.moves.length) {
+        this.computeMoves();
+      }
+      displayMovesInBoard(this.moves);
+      displayCapturesInBoard(this.captures);
+    },
   };
 }
 
@@ -123,12 +169,29 @@ function rookLikeMoves(piece) {
   return { moves, captures };
 }
 
+function specificMoves(potentialMoves, pieceColor) {
+  const moves = [];
+  const captures = [];
+  for (let i = 0; i < potentialMoves.length; i++) {
+    const [row, col] = potentialMoves[i];
+    if (row > ROW_Z || row < 0 || col > COL_Z || col < 0) continue;
+    const boardPiece = board[row][col];
+    if (boardPiece) {
+      if (boardPiece.color !== pieceColor) {
+        captures.push([row, col]);
+      }
+      continue;
+    }
+    moves.push([row, col]);
+  }
+  return { moves, captures };
+}
 
 function pawn(row, col, color) {
   return {
     ...piece(P, row, col, color),
     img: buildImg(P, color),
-    delta: color === 'b' ? 1 : -1,
+    delta: color === 'w' ? -1 : 1,
     isAtStartingPosition: true,
     computeMoves() {
       let boardPiece;
@@ -160,10 +223,9 @@ function pawn(row, col, color) {
         captures.push(theOther);
       }
 
-      // TODO: EN PASSANT
-
-      displayMoves(moves);
-      displayCaptures(captures);
+      // TODO: EN-PASSANT
+      this.moves = moves.concat(captures);
+      this.captures = captures;
     },
   };
 }
@@ -182,27 +244,12 @@ function knight(row, col, color) {
         [row - 1, col + 2],
         [row - 2, col + 1],
         [row + 1, col - 2],
-        [row + 2, col - 1]
-
+        [row + 2, col - 1],
       ];
 
-      const moves = [];
-      const captures = [];
-      for (let i = 0; i < potentialMoves.length; i++) {
-        const [row, col] = potentialMoves[i];
-        if (row > ROW_Z || row < 0 || col > COL_Z || col < 0) continue;
-        const boardPiece = board[row][col];
-        if (boardPiece) {
-          if (boardPiece.color !== this.color) {
-            captures.push([row, col]);
-          }
-          continue;
-        }
-        moves.push([row, col]);
-      }
-
-      displayMoves(moves);
-      displayCaptures(captures);
+      const { moves, captures } = specificMoves(potentialMoves, this.color);
+      this.moves = moves.concat(captures);
+      this.captures = captures;
     },
   };
 }
@@ -213,8 +260,8 @@ function bishop(row, col, color) {
     img: buildImg(B, color),
     computeMoves() {
       const { moves, captures } = bishopLikeMoves(this);
-      displayMoves(moves);
-      displayCaptures(captures);
+      this.moves = moves.concat(captures);
+      this.captures = captures;
     },
   };
 }
@@ -225,8 +272,8 @@ function rook(row, col, color) {
     img: buildImg(R, color),
     computeMoves() {
       const { moves, captures } = rookLikeMoves(this);
-      displayMoves(moves);
-      displayCaptures(captures);
+      this.moves = moves.concat(captures);
+      this.captures = captures;
     },
   };
 }
@@ -241,8 +288,8 @@ function queen(row, col, color) {
       const moves = bishopLike.moves.concat(rookLike.moves);
       const captures = bishopLike.captures.concat(rookLike.captures);
 
-      displayMoves(moves);
-      displayCaptures(captures);
+      this.moves = moves.concat(captures);
+      this.captures = captures;
     },
   };
 }
@@ -252,15 +299,32 @@ function king(row, col, color) {
     ...piece(K, row, col, color),
     img: buildImg(K, color),
     computeMoves() {
-      const moves = [];
-      const captures = [];
+      const { row, col } = this;
+      const potentialMoves = [
+        [row + 1, col],
+        [row - 1, col],
+        [row + 1, col + 1],
+        [row - 1, col + 1],
+        [row + 1, col - 1],
+        [row - 1, col - 1],
+        [row, col + 1],
+        [row, col - 1],
+      ];
 
-      displayMoves(moves);
-      displayCaptures(captures);
+      const { moves, captures } = specificMoves(potentialMoves, this.color);
+      this.moves = moves.concat(captures);
+      this.captures = captures;
     },
   };
 }
 
-
-
-export default { pawn, knight, bishop, rook, queen, king, selectedPiece, pieces };
+export default {
+  pawn,
+  knight,
+  bishop,
+  rook,
+  queen,
+  king,
+  selectedPiece,
+  pieces,
+};

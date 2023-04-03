@@ -1,4 +1,5 @@
-import piecesLib from "./pieces.js";
+import piecesLib from './pieces.js';
+import players from './players.js';
 
 const board = [
   [null, null, null, null, null, null, null, null],
@@ -21,7 +22,7 @@ const _squares = [
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null]
+  [null, null, null, null, null, null, null, null],
 ];
 
 board.putPiece = function (piece) {
@@ -45,9 +46,7 @@ function drawBoard() {
         _square.innerHTML = piece.img;
         _square.classList.add(piece.name, piece.color);
       }
-      _square.addEventListener('mousedown', () =>
-        squareClick(row, col)
-      );
+      _square.addEventListener('mousedown', () => squareClick([row, col]));
       _squares[row][col] = _square;
       _row.appendChild(_square);
     }
@@ -59,16 +58,18 @@ var potentialMoveSquares = [];
 var captureSquares = [];
 
 function clearMarks() {
-  clearPotentialMoves()
-  clearCaptures()
+  clearPotentialMoves();
+  clearCaptures();
 }
 
 function clearPotentialMoves() {
-  potentialMoveSquares.forEach(_square => _square.classList.remove('potential-move'));
+  potentialMoveSquares.forEach(_square =>
+    _square.classList.remove('potential-move')
+  );
   potentialMoveSquares = [];
 }
 
-function displayMoves(moves) {
+function displayMovesInBoard(moves) {
   clearPotentialMoves();
   moves.forEach(([row, col]) => {
     if (row < 0 || col < 0 || row > ROW_Z || col > COL_Z) {
@@ -82,11 +83,13 @@ function displayMoves(moves) {
 }
 
 function clearCaptures() {
-  captureSquares.forEach(_square => _square.classList.remove('potential-capture'));
+  captureSquares.forEach(_square =>
+    _square.classList.remove('potential-capture')
+  );
   captureSquares = [];
 }
 
-function displayCaptures(captures) {
+function displayCapturesInBoard(captures) {
   clearCaptures();
   captures.forEach(([row, col]) => {
     if (row < 0 || col < 0 || row > ROW_Z || col > COL_Z) {
@@ -105,27 +108,47 @@ function unselectCurrentSquare() {
   if (!selectedSquare) return;
   selectedSquare.classList.remove('highlight');
   selectedSquare = null;
-
-  piecesLib.selectedPiece = null;
 }
 
-
-function selectSquare(row, col) {
+function selectSquare([row, col]) {
   selectedSquare = _squares[row][col];
   selectedSquare.classList.add('highlight');
 }
 
-function squareClick(row, col) {
+function squareClick([row, col]) {
   unselectCurrentSquare();
-  selectSquare(row, col);
+  selectSquare([row, col]);
+
+  const selectedPiece = piecesLib.selectedPiece;
+  if (selectedPiece) {
+    if (players.turn === selectedPiece.color) {
+      const selectedPieceCanMoveHere = selectedPiece.moves.find(
+        move => move[0] === row && move[1] === col
+      );
+      if (selectedPieceCanMoveHere) {
+        selectedPiece.placeAt([row, col]);
+        piecesLib.selectedPiece = null;
+        players.turn = players.turn === 'w' ? 'b' : 'w';
+        return;
+      }
+    }
+  }
+
+  piecesLib.selectedPiece = null;
 
   const piece = board[row][col];
   if (!piece) return;
 
   piecesLib.selectedPiece = piece;
-  piece.computeMoves();
+  piece.showMoves();
 }
 
-const exportObj = { board, drawBoard, displayMoves, displayCaptures };
+const exportObj = {
+  board,
+  _squares,
+  drawBoard,
+  displayMovesInBoard,
+  displayCapturesInBoard,
+};
 
 export default exportObj;
