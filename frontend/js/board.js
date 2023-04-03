@@ -58,6 +58,11 @@ function drawBoard() {
 var potentialMoveSquares = [];
 var captureSquares = [];
 
+function clearMarks() {
+  clearPotentialMoves()
+  clearCaptures()
+}
+
 function clearPotentialMoves() {
   potentialMoveSquares.forEach(_square => _square.classList.remove('potential-move'));
   potentialMoveSquares = [];
@@ -78,7 +83,7 @@ function displayMoves(moves) {
 
 function clearCaptures() {
   captureSquares.forEach(_square => _square.classList.remove('potential-capture'));
-  potentialMoveSquares = [];
+  captureSquares = [];
 }
 
 function displayCaptures(captures) {
@@ -90,12 +95,12 @@ function displayCaptures(captures) {
     const _square = _squares[row][col];
     if (!_square) return log('inexistent square');
     _square.classList.add('potential-capture');
-    potentialMoveSquares.push(_square);
+    captureSquares.push(_square);
   });
 }
 
 function unselectCurrentSquare() {
-  clearPotentialMoves();
+  clearMarks();
 
   if (!selectedSquare) return;
   selectedSquare.classList.remove('highlight');
