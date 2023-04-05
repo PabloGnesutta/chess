@@ -1,14 +1,14 @@
 import { colorPieces } from './pieces.js';
 
 const board = [
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
 ];
 
 board.putPiece = function (piece) {
@@ -65,4 +65,4 @@ function passTurn() {
   startTurn();
 }
 
-export { players, state, board, passTurn };
+export { players, state, board, startTurn, passTurn };

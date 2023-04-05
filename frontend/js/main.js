@@ -1,7 +1,7 @@
 import createPiece from './pieces.js';
 import { allPieces, colorPieces } from './pieces.js';
 import { drawBoard } from './board.js';
-import { board } from './gameState.js';
+import { board, startTurn } from './gameState.js';
 
 const initialPieces = [
   [K, 0, 4, 'b'],
@@ -46,6 +46,7 @@ function initGame() {
     allPieces.push(piece);
     colorPieces[piece.color].push(piece);
     board.putPiece(piece);
+    startTurn()
   }
 
   drawBoard();

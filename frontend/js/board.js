@@ -1,14 +1,14 @@
 import { state, board, passTurn } from './gameState.js';
 
 const _squares = [
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
 ];
 
 var selectedSquare = null;

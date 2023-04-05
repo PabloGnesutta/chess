@@ -32,7 +32,7 @@ function piece(name, row, col, color) {
     color,
     moves: [],
     captures: [],
-    movesComputedBeforeMoving: false,
+    // movesComputedBeforeMoving: false,
 
     placeAt([row, col]) {
       board[this.row][this.col] = null;
@@ -71,10 +71,10 @@ function piece(name, row, col, color) {
     },
 
     showMoves() {
-      if (!this.movesComputedBeforeMoving) {
-        this.computeMoves();
-        this.movesComputedBeforeMoving = true;
-      }
+      // if (!this.movesComputedBeforeMoving) {
+      //   this.computeMoves();
+      //   this.movesComputedBeforeMoving = true;
+      // }
       displayMovesInBoard(this.moves);
       displayCapturesInBoard(this.captures);
     },
@@ -207,7 +207,7 @@ function pawn(row, col, color) {
     ...piece(P, row, col, color),
     img: buildImg(P, color),
     delta: color === 'w' ? -1 : 1,
-    isAtStartingPosition: true,
+    startingRow: color === 'w' ? 6 : 1,
     computeMoves() {
       let boardPiece;
       const moves = [];
@@ -216,7 +216,7 @@ function pawn(row, col, color) {
       boardPiece = board[oneStep[0]][oneStep[1]];
       if (!boardPiece) {
         moves.push(oneStep);
-        if (this.isAtStartingPosition) {
+        if (this.row == this.startingRow) {
           const twoSteps = [this.row + this.delta * 2, this.col];
           boardPiece = board[twoSteps[0]][twoSteps[1]];
           if (!boardPiece) {
