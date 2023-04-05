@@ -1,15 +1,4 @@
-import { players, state, passTurn } from './gameState.js';
-
-const board = [
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, null, null],
-];
+import { state, board, passTurn } from './gameState.js';
 
 const _squares = [
   [null, null, null, null, null, null, null, null],
@@ -23,11 +12,6 @@ const _squares = [
 ];
 
 var selectedSquare = null;
-
-board.putPiece = function (piece) {
-  this[piece.row][piece.col] = piece;
-  return this;
-};
 
 function drawBoard() {
   const _board = document.getElementById('board');

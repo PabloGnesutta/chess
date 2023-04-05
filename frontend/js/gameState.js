@@ -1,5 +1,20 @@
-import { board } from './board.js';
-import { allPieces, colorPieces } from './pieces.js';
+import { colorPieces } from './pieces.js';
+
+const board = [
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+];
+
+board.putPiece = function (piece) {
+  this[piece.row][piece.col] = piece;
+  return this;
+};
 
 const players = {
   w: {
@@ -22,7 +37,6 @@ const state = {
 
 function startTurn() {
   // Am I in check?
-  console.time('a')
   const potentialChecks = [];
   colorPieces[state.opositeColor].forEach(piece => {
     piece.computeMoves();
@@ -42,7 +56,6 @@ function startTurn() {
   }
 
   colorPieces[state.currentColor].forEach(piece => piece.computeMoves());
-  console.timeEnd('a')
 }
 
 function passTurn() {
@@ -52,4 +65,4 @@ function passTurn() {
   startTurn();
 }
 
-export { players, state, passTurn };
+export { players, state, board, passTurn };
