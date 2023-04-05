@@ -66,7 +66,6 @@
 [row='7'][col='5'],
 [row='7'][col='7'] {
   background-color: #ff9229;
-
 }
 
 .square.highlight {
@@ -90,20 +89,5 @@
 
 .piece {
   position: absolute;
-  text-transform: uppercase;
-  padding: 12px 5px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-}
-
-.piece.w {
-  border-color: black;
-  background-color: white;
-  color: black;
-}
-
-.piece.b {
-  border-color: white;
-  background-color: black;
-  color: white;
+  width: 56px;
 }

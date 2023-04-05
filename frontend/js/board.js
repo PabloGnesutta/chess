@@ -1,5 +1,4 @@
-import piecesLib from './pieces.js';
-import players from './players.js';
+import { players, state, passTurn } from './gameState.js';
 
 const board = [
   [null, null, null, null, null, null, null, null],
@@ -12,8 +11,6 @@ const board = [
   [null, null, null, null, null, null, null, null],
 ];
 
-var selectedSquare = null;
-
 const _squares = [
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
@@ -24,6 +21,8 @@ const _squares = [
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
 ];
+
+var selectedSquare = null;
 
 board.putPiece = function (piece) {
   this[piece.row][piece.col] = piece;
@@ -119,36 +118,33 @@ function squareClick([row, col]) {
   unselectCurrentSquare();
   selectSquare([row, col]);
 
-  const selectedPiece = piecesLib.selectedPiece;
+  const selectedPiece = state.selectedPiece;
   if (selectedPiece) {
-    if (players.turn === selectedPiece.color) {
+    if (state.currentColor === selectedPiece.color) {
       const selectedPieceCanMoveHere = selectedPiece.moves.find(
         move => move[0] === row && move[1] === col
       );
       if (selectedPieceCanMoveHere) {
         selectedPiece.placeAt([row, col]);
-        piecesLib.selectedPiece = null;
-        players.turn = players.turn === 'w' ? 'b' : 'w';
+        passTurn();
         return;
       }
     }
   }
 
-  piecesLib.selectedPiece = null;
+  state.selectedPiece = null;
 
   const piece = board[row][col];
   if (!piece) return;
 
-  piecesLib.selectedPiece = piece;
+  state.selectedPiece = piece;
   piece.showMoves();
 }
 
-const exportObj = {
+export {
   board,
   _squares,
   drawBoard,
   displayMovesInBoard,
   displayCapturesInBoard,
 };
-
-export default exportObj;

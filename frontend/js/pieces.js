@@ -1,13 +1,26 @@
-import boardLib from './board.js';
-const { board, _squares, displayMovesInBoard, displayCapturesInBoard } =
-  boardLib;
+import {
+  board,
+  _squares,
+  displayMovesInBoard,
+  displayCapturesInBoard,
+} from './board.js';
+
+import { players, state } from './gameState.js';
 
 let idCount = 0;
-var selectedPiece = null;
-const pieces = [];
+
+const allPieces = [];
+const colorPieces = {
+  w: [],
+  b: [],
+};
 
 function buildImg(type, color) {
-  return `<div class="piece ${type} ${color}">${type}</div>`;
+  const colorCode = color === 'w' ? 'l' : 'd';
+  let pieceCode = type[0];
+  if (type === 'knight') pieceCode = 'n';
+  const fileName = 'Chess_' + pieceCode + colorCode + 't45.svg';
+  return `<img src='./svg/${fileName}' class="piece ${type} ${color}"></img>`;
 }
 
 function piece(name, row, col, color) {
@@ -19,6 +32,8 @@ function piece(name, row, col, color) {
     color,
     moves: [],
     captures: [],
+    movesComputedBeforeMoving: false,
+
     placeAt([row, col]) {
       board[this.row][this.col] = null;
       _squares[this.row][this.col].innerHTML = null;
@@ -26,13 +41,21 @@ function piece(name, row, col, color) {
       this.row = row;
       this.col = col;
 
-      // Capture
+      // Capture:
       const currentPieceInCell = board[row][col];
       if (currentPieceInCell && currentPieceInCell.color !== this.color) {
-        const enemyPieceIdx = pieces.findIndex(
+        const enemyPieceIdx = allPieces.findIndex(
           piece => piece.id === currentPieceInCell.id
         );
-        pieces.splice(enemyPieceIdx, 1);
+
+        const capturedPiece = allPieces.splice(enemyPieceIdx, 1)[0];
+
+        const colorPieceIndex = colorPieces[capturedPiece.color].findIndex(
+          piece => piece.id === capturedPiece.id
+        );
+        colorPieces[capturedPiece.color].splice(colorPieceIndex, 1);
+
+        players[state.currentColor].captures.push(capturedPiece);
       }
 
       board[row][col] = this;
@@ -45,20 +68,12 @@ function piece(name, row, col, color) {
           log('promotion!');
         }
       }
-
-      // Check if the move comes with check
-      this.computeMoves();
-      const isCheck = this.captures.find(
-        ([row, col]) => board[row][col].name === K
-      );
-      log('check', !!isCheck);
-
-      this.moves = [];
-      this.captures = [];
     },
+
     showMoves() {
-      if (!this.moves.length) {
+      if (!this.movesComputedBeforeMoving) {
         this.computeMoves();
+        this.movesComputedBeforeMoving = true;
       }
       displayMovesInBoard(this.moves);
       displayCapturesInBoard(this.captures);
@@ -325,6 +340,6 @@ export default {
   rook,
   queen,
   king,
-  selectedPiece,
-  pieces,
 };
+
+export { allPieces, colorPieces };
