@@ -1,15 +1,14 @@
+import { players, state } from './gameState.js';
 import {
   board,
   _squares,
   displayMovesInBoard,
   displayCapturesInBoard,
 } from './board.js';
-
-import { players, state } from './gameState.js';
+import { boardCopy, colorPiecesCopy } from './simulation.js';
 
 let idCount = 0;
 
-const allPieces = [];
 const colorPieces = {
   w: [],
   b: [],
@@ -32,56 +31,57 @@ function piece(name, row, col, color) {
     color,
     moves: [],
     captures: [],
-    // movesComputedBeforeMoving: false,
+
+    showMoves() {
+      displayMovesInBoard(this.moves);
+      displayCapturesInBoard(this.captures);
+    },
 
     placeAt([row, col]) {
-      board[this.row][this.col] = null;
+      const { currentColor, opositeColor } = state;
       _squares[this.row][this.col].innerHTML = null;
+
+      board[this.row][this.col] = null;
+      boardCopy[this.row][this.col] = null;
+
+      // Capture:
+      const capturablePiece = board[row][col];
+      if (capturablePiece) {
+        log('capture!');
+        const colorPieceIndex = colorPieces[opositeColor].findIndex(
+          piece => piece.id === capturablePiece.id
+        );
+        const capturedPiece = colorPieces[opositeColor].splice(
+          colorPieceIndex,
+          1
+        );
+        colorPiecesCopy[opositeColor].splice(colorPieceIndex, 1);
+
+        players[currentColor].captures.push(capturedPiece);
+      }
+
+      // Pawn promotion
+      if (this.name === P && (row === 0 || row === COL_Z)) {
+        log('promotion!');
+      }
 
       this.row = row;
       this.col = col;
+      const copyPieceIndex = colorPiecesCopy[currentColor].findIndex(
+        piece => piece.id === this.id
+      );
 
-      // Capture:
-      const currentPieceInCell = board[row][col];
-      if (currentPieceInCell && currentPieceInCell.color !== this.color) {
-        const enemyPieceIdx = allPieces.findIndex(
-          piece => piece.id === currentPieceInCell.id
-        );
-
-        const capturedPiece = allPieces.splice(enemyPieceIdx, 1)[0];
-
-        const colorPieceIndex = colorPieces[capturedPiece.color].findIndex(
-          piece => piece.id === capturedPiece.id
-        );
-        colorPieces[capturedPiece.color].splice(colorPieceIndex, 1);
-
-        players[state.currentColor].captures.push(capturedPiece);
-      }
-
+      // colorPiecesCopy[currentColor][copyPieceIndex] = { ...this };
+      colorPiecesCopy[currentColor][copyPieceIndex].row = row;
+      colorPiecesCopy[currentColor][copyPieceIndex].col = col;
       board[row][col] = this;
+      boardCopy[row][col] = colorPiecesCopy[currentColor][copyPieceIndex];
       _squares[row][col].innerHTML = this.img;
-
-      // Pawn
-      if (this.name === P) {
-        this.isAtStartingPosition = false;
-        if (row === 0 || row === COL_Z) {
-          log('promotion!');
-        }
-      }
-    },
-
-    showMoves() {
-      // if (!this.movesComputedBeforeMoving) {
-      //   this.computeMoves();
-      //   this.movesComputedBeforeMoving = true;
-      // }
-      displayMovesInBoard(this.moves);
-      displayCapturesInBoard(this.captures);
     },
   };
 }
 
-function bishopLikeMoves(piece) {
+function bishopLikeMoves(board, piece) {
   const moves = [];
   const captures = [];
   let { row, col } = piece;
@@ -133,7 +133,7 @@ function bishopLikeMoves(piece) {
   return { moves, captures };
 }
 
-function rookLikeMoves(piece) {
+function rookLikeMoves(board, piece) {
   const moves = [];
   const captures = [];
   let { row, col } = piece;
@@ -184,7 +184,7 @@ function rookLikeMoves(piece) {
   return { moves, captures };
 }
 
-function specificMoves(potentialMoves, pieceColor) {
+function specificMoves(board, potentialMoves, pieceColor) {
   const moves = [];
   const captures = [];
   for (let i = 0; i < potentialMoves.length; i++) {
@@ -208,7 +208,7 @@ function pawn(row, col, color) {
     img: buildImg(P, color),
     delta: color === 'w' ? -1 : 1,
     startingRow: color === 'w' ? 6 : 1,
-    computeMoves() {
+    computeMoves(board) {
       let boardPiece;
       const moves = [];
 
@@ -249,7 +249,7 @@ function knight(row, col, color) {
   return {
     ...piece(N, row, col, color),
     img: buildImg(N, color),
-    computeMoves() {
+    computeMoves(board) {
       const { row, col } = this;
       const potentialMoves = [
         [row + 1, col + 2],
@@ -262,7 +262,11 @@ function knight(row, col, color) {
         [row + 2, col - 1],
       ];
 
-      const { moves, captures } = specificMoves(potentialMoves, this.color);
+      const { moves, captures } = specificMoves(
+        board,
+        potentialMoves,
+        this.color
+      );
       this.moves = moves.concat(captures);
       this.captures = captures;
     },
@@ -273,8 +277,8 @@ function bishop(row, col, color) {
   return {
     ...piece(B, row, col, color),
     img: buildImg(B, color),
-    computeMoves() {
-      const { moves, captures } = bishopLikeMoves(this);
+    computeMoves(board) {
+      const { moves, captures } = bishopLikeMoves(board, this);
       this.moves = moves.concat(captures);
       this.captures = captures;
     },
@@ -285,8 +289,8 @@ function rook(row, col, color) {
   return {
     ...piece(R, row, col, color),
     img: buildImg(R, color),
-    computeMoves() {
-      const { moves, captures } = rookLikeMoves(this);
+    computeMoves(board) {
+      const { moves, captures } = rookLikeMoves(board, this);
       this.moves = moves.concat(captures);
       this.captures = captures;
     },
@@ -297,9 +301,9 @@ function queen(row, col, color) {
   return {
     ...piece(Q, row, col, color),
     img: buildImg(Q, color),
-    computeMoves() {
-      const bishopLike = bishopLikeMoves(this);
-      const rookLike = rookLikeMoves(this);
+    computeMoves(board) {
+      const bishopLike = bishopLikeMoves(board, this);
+      const rookLike = rookLikeMoves(board, this);
       const moves = bishopLike.moves.concat(rookLike.moves);
       const captures = bishopLike.captures.concat(rookLike.captures);
 
@@ -313,7 +317,7 @@ function king(row, col, color) {
   return {
     ...piece(K, row, col, color),
     img: buildImg(K, color),
-    computeMoves() {
+    computeMoves(board) {
       const { row, col } = this;
       const potentialMoves = [
         [row + 1, col],
@@ -326,7 +330,11 @@ function king(row, col, color) {
         [row, col - 1],
       ];
 
-      const { moves, captures } = specificMoves(potentialMoves, this.color);
+      const { moves, captures } = specificMoves(
+        board,
+        potentialMoves,
+        this.color
+      );
       this.moves = moves.concat(captures);
       this.captures = captures;
     },
@@ -342,4 +350,4 @@ export default {
   king,
 };
 
-export { allPieces, colorPieces };
+export { colorPieces };

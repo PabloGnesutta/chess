@@ -1,4 +1,5 @@
 import { colorPieces } from './pieces.js';
+import { computeLegalMoves } from './simulation.js';
 
 const board = [
   new Array(8).fill(null),
@@ -39,7 +40,7 @@ function startTurn() {
   // Am I in check?
   const potentialChecks = [];
   colorPieces[state.opositeColor].forEach(piece => {
-    piece.computeMoves();
+    piece.computeMoves(board);
     potentialChecks.push(...piece.captures);
   });
 
@@ -55,7 +56,19 @@ function startTurn() {
     // Is it check mate?
   }
 
-  colorPieces[state.currentColor].forEach(piece => piece.computeMoves());
+  let numLegalMoves = 0;
+  colorPieces[state.currentColor].forEach(piece => {
+    piece.computeMoves(board);
+    const { legalMoves, legalCaptures } = computeLegalMoves(piece);
+    // log(piece.name, legalMoves, legalCaptures);
+    numLegalMoves += legalMoves.length;
+    piece.moves = legalMoves;
+    piece.captures = legalCaptures;
+  });
+
+  if (!numLegalMoves) {
+    alert('Check Mate!');
+  }
 }
 
 function passTurn() {

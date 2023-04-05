@@ -21,6 +21,10 @@ function drawBoard() {
     _row.className = 'row';
     for (let col = 0; col < 8; col++) {
       const _square = document.createElement('div');
+      const _rowCol = document.createElement('div');
+      _rowCol.innerText = row + '_' + col;
+      _rowCol.classList.add('row-col-indicator');
+      _square.appendChild(_rowCol);
       const piece = board[row][col];
       _square.className = 'square';
       _square.setAttribute('row', row);
