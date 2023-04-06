@@ -1,5 +1,8 @@
 import { computeLegalMoves } from './simulation.js';
 
+const boardHistory = [];
+const movesHistory = [];
+
 const colorPieces = {
   w: [],
   b: [],
@@ -41,15 +44,16 @@ const state = {
 };
 
 function startTurn() {
+  const { currentColor, opositeColor } = state;
   // Am I in check?
-  const potentialChecks = [];
-  colorPieces[state.opositeColor].forEach(piece => {
+  const oponentCaptures = [];
+  colorPieces[opositeColor].forEach(piece => {
     piece.computeMoves(board);
-    potentialChecks.push(...piece.captures);
+    oponentCaptures.push(...piece.captures);
   });
 
   const checks = [];
-  potentialChecks.forEach(([row, col]) => {
+  oponentCaptures.forEach(([row, col]) => {
     if (board[row][col].name === K) {
       checks.push([row, col]);
     }
@@ -57,21 +61,29 @@ function startTurn() {
 
   if (checks.length) {
     log('Ceck!', checks);
-    // Is it check mate?
   }
 
+  // Compute all legal moves for current player.
+  // If no legal moves, then it's check mate :)
   let numLegalMoves = 0;
-  colorPieces[state.currentColor].forEach(piece => {
+  colorPieces[currentColor].forEach(piece => {
     piece.computeMoves(board);
     const { legalMoves, legalCaptures } = computeLegalMoves(piece);
-    // log(piece.name, legalMoves, legalCaptures);
-    numLegalMoves += legalMoves.length;
+    numLegalMoves += legalMoves.length + legalCaptures.length;
     piece.moves = legalMoves;
     piece.captures = legalCaptures;
   });
 
   if (!numLegalMoves) {
-    alert('Check Mate!');
+    if (checks.length) {
+      setTimeout(() => {
+        alert('Check Mate!');
+      }, 100);
+    } else {
+      setTimeout(() => {
+        alert('Stale Mate!');
+      }, 100);
+    }
   }
 }
 

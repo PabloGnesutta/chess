@@ -31,22 +31,19 @@ function piece(name, row, col, color) {
       displayCapturesInBoard(this.captures);
     },
 
-    placeAt([row, col]) {
+    placeAt(moveOrCapture, [row, col]) {
       const { currentColor, opositeColor } = state;
       _imgContainers[this.row][this.col].innerHTML = null;
 
       board[this.row][this.col] = null;
 
       // Capture:
-      const capturablePiece = board[row][col];
-      if (capturablePiece) {
-        const colorPieceIndex = colorPieces[opositeColor].findIndex(
+      if (moveOrCapture === 'capture') {
+        const capturablePiece = board[row][col];
+        const pieceIndex = colorPieces[opositeColor].findIndex(
           piece => piece.id === capturablePiece.id
         );
-        const capturedPiece = colorPieces[opositeColor].splice(
-          colorPieceIndex,
-          1
-        );
+        const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
 
         players[currentColor].captures.push(capturedPiece);
       }
@@ -222,7 +219,7 @@ function pawn(row, col, color) {
       }
 
       // TODO: EN-PASSANT
-      this.moves = moves.concat(captures);
+      this.moves = moves;
       this.captures = captures;
     },
   };
@@ -250,7 +247,7 @@ function knight(row, col, color) {
         potentialMoves,
         this.color
       );
-      this.moves = moves.concat(captures);
+      this.moves = moves;
       this.captures = captures;
     },
   };
@@ -262,7 +259,7 @@ function bishop(row, col, color) {
     img: buildImg(B, color),
     computeMoves(board) {
       const { moves, captures } = bishopLikeMoves(board, this);
-      this.moves = moves.concat(captures);
+      this.moves = moves;
       this.captures = captures;
     },
   };
@@ -274,7 +271,7 @@ function rook(row, col, color) {
     img: buildImg(R, color),
     computeMoves(board) {
       const { moves, captures } = rookLikeMoves(board, this);
-      this.moves = moves.concat(captures);
+      this.moves = moves;
       this.captures = captures;
     },
   };
@@ -290,7 +287,7 @@ function queen(row, col, color) {
       const moves = bishopLike.moves.concat(rookLike.moves);
       const captures = bishopLike.captures.concat(rookLike.captures);
 
-      this.moves = moves.concat(captures);
+      this.moves = moves;
       this.captures = captures;
     },
   };
@@ -318,7 +315,7 @@ function king(row, col, color) {
         potentialMoves,
         this.color
       );
-      this.moves = moves.concat(captures);
+      this.moves = moves;
       this.captures = captures;
     },
   };

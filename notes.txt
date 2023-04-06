@@ -1,0 +1,1 @@
+no need to pass the board as parameter to compute moves

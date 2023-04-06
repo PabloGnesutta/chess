@@ -46,7 +46,6 @@ function drawBoard(pov = 'w') {
     colInc = -1;
   }
 
-  // if (pov === 'w') {
   for (let row = rowStart; rowEval(row); row += rowInc) {
     const _row = document.createElement('div');
     _row.className = 'row';
@@ -82,31 +81,25 @@ function drawBoard(pov = 'w') {
   }
 }
 
-var potentialMoveSquares = [];
+var moveSquares = [];
 var captureSquares = [];
 
 function clearMarks() {
-  clearPotentialMoves();
+  clearMoves();
   clearCaptures();
 }
 
-function clearPotentialMoves() {
-  potentialMoveSquares.forEach(_square =>
-    _square.classList.remove('potential-move')
-  );
-  potentialMoveSquares = [];
+function clearMoves() {
+  moveSquares.forEach(_square => _square.classList.remove('potential-move'));
+  moveSquares = [];
 }
 
 function displayMovesInBoard(moves) {
-  clearPotentialMoves();
+  clearMoves();
   moves.forEach(([row, col]) => {
-    if (row < 0 || col < 0 || row > ROW_Z || col > COL_Z) {
-      return log('Invalid square', { row, col });
-    }
     const _square = _squares[row][col];
-    if (!_square) return log('inexistent square');
     _square.classList.add('potential-move');
-    potentialMoveSquares.push(_square);
+    moveSquares.push(_square);
   });
 }
 
@@ -120,11 +113,7 @@ function clearCaptures() {
 function displayCapturesInBoard(captures) {
   clearCaptures();
   captures.forEach(([row, col]) => {
-    if (row < 0 || col < 0 || row > ROW_Z || col > COL_Z) {
-      return log('Invalid square', { row, col });
-    }
     const _square = _squares[row][col];
-    if (!_square) return log('inexistent square');
     _square.classList.add('potential-capture');
     captureSquares.push(_square);
   });
@@ -132,7 +121,6 @@ function displayCapturesInBoard(captures) {
 
 function unselectCurrentSquare() {
   clearMarks();
-
   if (!selectedSquare) return;
   selectedSquare.classList.remove('highlight');
   selectedSquare = null;
@@ -147,14 +135,24 @@ function squareClick([row, col]) {
   unselectCurrentSquare();
   selectSquare([row, col]);
 
-  const selectedPiece = state.selectedPiece;
+  const { selectedPiece, currentColor } = state;
+
   if (selectedPiece) {
-    if (state.currentColor === selectedPiece.color) {
-      const selectedPieceCanMoveHere = selectedPiece.moves.find(
+    if (currentColor === selectedPiece.color) {
+      // Make move
+      const pieceCanMoveHere = selectedPiece.moves.find(
         move => move[0] === row && move[1] === col
       );
-      if (selectedPieceCanMoveHere) {
-        selectedPiece.placeAt([row, col]);
+      if (pieceCanMoveHere) {
+        selectedPiece.placeAt('move', [row, col]);
+        passTurn();
+        return;
+      }
+      const pieceCanCaptureHere = selectedPiece.captures.find(
+        capture => capture[0] === row && capture[1] === col
+      );
+      if (pieceCanCaptureHere) {
+        selectedPiece.placeAt('capture', [row, col]);
         passTurn();
         return;
       }
@@ -171,7 +169,6 @@ function squareClick([row, col]) {
 }
 
 export {
-  // board,
   _imgContainers,
   drawBoard,
   displayMovesInBoard,
