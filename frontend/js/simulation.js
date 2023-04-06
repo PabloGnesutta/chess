@@ -1,32 +1,11 @@
-import { state } from './gameState.js';
-
-const colorPiecesCopy = {
-  w: [],
-  b: [],
-};
-
-const boardCopy = [
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-];
-
-boardCopy.putPiece = function (piece) {
-  this[piece.row][piece.col] = piece;
-  return this;
-};
+import { state, board, colorPieces } from './gameState.js';
 
 function generateTempBoard() {
   const tempBoard = [];
   for (let row = 0; row < 8; row++) {
     const tempRow = [];
     for (let col = 0; col < 8; col++) {
-      tempRow.push(boardCopy[row][col]);
+      tempRow.push(board[row][col]);
     }
     tempBoard.push(tempRow);
   }
@@ -35,10 +14,10 @@ function generateTempBoard() {
 
 function generateTempColorPieces() {
   const tempColorPieces = { w: [], b: [] };
-  colorPiecesCopy.w.forEach(piece => {
+  colorPieces.w.forEach(piece => {
     tempColorPieces.w.push({ ...piece });
   });
-  colorPiecesCopy.b.forEach(piece => {
+  colorPieces.b.forEach(piece => {
     tempColorPieces.b.push({ ...piece });
   });
   return tempColorPieces;
@@ -60,9 +39,6 @@ function simulateMove(piece, [row, col]) {
     );
 
     colorPieces[state.opositeColor].splice(colorPieceIndex, 1);
-    // colorPieces[state.opositeColor] = colorPieces[state.opositeColor].filter(
-    //   _piece => _piece.id === capturablePiece.id
-    // );
   }
 
   board[row][col] = piece;
@@ -101,7 +77,6 @@ function computeLegalMoves(piece) {
   const legalMoves = [];
   const legalCaptures = [];
   piece.moves.forEach(move => {
-    // log('*** move ', piece.name, 'to', move[0], move[1]);
     const { isLegal, isCapture } = simulateMove({ ...piece }, move);
     if (isLegal) {
       legalMoves.push(move);
@@ -114,4 +89,4 @@ function computeLegalMoves(piece) {
   return { legalMoves, legalCaptures };
 }
 
-export { colorPiecesCopy, boardCopy, computeLegalMoves };
+export { computeLegalMoves };

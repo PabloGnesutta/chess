@@ -1,5 +1,9 @@
-import { colorPieces } from './pieces.js';
 import { computeLegalMoves } from './simulation.js';
+
+const colorPieces = {
+  w: [],
+  b: [],
+};
 
 const board = [
   new Array(8).fill(null),
@@ -78,4 +82,4 @@ function passTurn() {
   startTurn();
 }
 
-export { players, state, board, startTurn, passTurn };
+export { players, state, board, colorPieces, startTurn, passTurn };

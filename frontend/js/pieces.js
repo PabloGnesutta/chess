@@ -1,17 +1,11 @@
-import { players, board, state } from './gameState.js';
+import { players, board, state, colorPieces } from './gameState.js';
 import {
   _imgContainers,
   displayMovesInBoard,
   displayCapturesInBoard,
 } from './board.js';
-import { boardCopy, colorPiecesCopy } from './simulation.js';
 
 let idCount = 0;
-
-const colorPieces = {
-  w: [],
-  b: [],
-};
 
 function buildImg(type, color) {
   const colorCode = color === 'w' ? 'l' : 'd';
@@ -42,12 +36,10 @@ function piece(name, row, col, color) {
       _imgContainers[this.row][this.col].innerHTML = null;
 
       board[this.row][this.col] = null;
-      boardCopy[this.row][this.col] = null;
 
       // Capture:
       const capturablePiece = board[row][col];
       if (capturablePiece) {
-        log('capture!');
         const colorPieceIndex = colorPieces[opositeColor].findIndex(
           piece => piece.id === capturablePiece.id
         );
@@ -55,7 +47,6 @@ function piece(name, row, col, color) {
           colorPieceIndex,
           1
         );
-        colorPiecesCopy[opositeColor].splice(colorPieceIndex, 1);
 
         players[currentColor].captures.push(capturedPiece);
       }
@@ -67,14 +58,7 @@ function piece(name, row, col, color) {
 
       this.row = row;
       this.col = col;
-      const copyPieceIndex = colorPiecesCopy[currentColor].findIndex(
-        piece => piece.id === this.id
-      );
-
-      colorPiecesCopy[currentColor][copyPieceIndex].row = row;
-      colorPiecesCopy[currentColor][copyPieceIndex].col = col;
       board[row][col] = this;
-      boardCopy[row][col] = colorPiecesCopy[currentColor][copyPieceIndex];
       _imgContainers[row][col].innerHTML = this.img;
     },
   };
