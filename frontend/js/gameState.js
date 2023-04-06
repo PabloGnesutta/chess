@@ -1,7 +1,8 @@
 import { computeLegalMoves } from './simulation.js';
+import { copyBoard } from './utils/utils.js';
 
-const boardHistory = [];
 const movesHistory = [];
+const boardHistory = [];
 
 const colorPieces = {
   w: [],
@@ -43,6 +44,10 @@ const state = {
   selectedPiece: null,
 };
 
+function isStalemateByRepetition() {
+  return false;
+}
+
 function makeMove(piece, moveOrCapture, [row, col]) {
   const historyItem = {
     piece: piece.name,
@@ -58,7 +63,16 @@ function makeMove(piece, moveOrCapture, [row, col]) {
 }
 
 function startTurn() {
+  boardHistory.push(copyBoard(board));
+
+  if (isStalemateByRepetition()) {
+    setTimeout(() => {
+      alert('Stalemate by repetition');
+    }, 100);
+  }
+
   const { currentColor, opositeColor } = state;
+
   // Am I in check?
   const oponentCaptures = [];
   colorPieces[opositeColor].forEach(piece => {
@@ -78,9 +92,9 @@ function startTurn() {
   }
 
   // Compute all legal moves for current player.
-  // If no legal moves, then it's check mate :)
-  log('compute moves for current player', state.currentColor);
+  // If no legal moves, then it's check (or stale) mate.
   let numLegalMoves = 0;
+
   colorPieces[currentColor].forEach(piece => {
     piece.computeMoves(board);
     const { legalMoves, legalCaptures } = computeLegalMoves(piece);
@@ -115,6 +129,7 @@ export {
   board,
   colorPieces,
   movesHistory,
+  boardHistory,
   startTurn,
   passTurn,
   makeMove,

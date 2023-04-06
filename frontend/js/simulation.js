@@ -1,46 +1,25 @@
 import { state, board, colorPieces } from './gameState.js';
-
-function generateTempBoard() {
-  const tempBoard = [];
-  for (let row = 0; row < 8; row++) {
-    const tempRow = [];
-    for (let col = 0; col < 8; col++) {
-      tempRow.push(board[row][col]);
-    }
-    tempBoard.push(tempRow);
-  }
-  return tempBoard;
-}
-
-function generateTempColorPieces() {
-  const tempColorPieces = { w: [], b: [] };
-  colorPieces.w.forEach(piece => {
-    tempColorPieces.w.push({ ...piece });
-  });
-  colorPieces.b.forEach(piece => {
-    tempColorPieces.b.push({ ...piece });
-  });
-  return tempColorPieces;
-}
+import { copyBoard, copyPieces } from './utils/utils.js';
 
 function isMoveLegal(moveOrCapture, piece, [row, col]) {
   const opositeColor = state.opositeColor;
-  const board = generateTempBoard();
-  let colorPieces = generateTempColorPieces();
 
-  board[piece.row][piece.col] = null;
+  const boardCopy = copyBoard(board);
+  let colorPiecesCopy = copyPieces(colorPieces);
+
+  boardCopy[piece.row][piece.col] = null;
 
   // Capture:
   if (moveOrCapture === 'capture') {
-    const capturablePiece = board[row][col];
-    const pieceIdx = colorPieces[opositeColor].findIndex(
+    const capturablePiece = boardCopy[row][col];
+    const pieceIdx = colorPiecesCopy[opositeColor].findIndex(
       p => p.id === capturablePiece.id
     );
 
-    colorPieces[opositeColor].splice(pieceIdx, 1);
+    colorPiecesCopy[opositeColor].splice(pieceIdx, 1);
   }
 
-  board[row][col] = piece;
+  boardCopy[row][col] = piece;
 
   // Pawn promotion
   if (piece.name === P && (row === 0 || row === COL_Z)) {
@@ -54,13 +33,13 @@ function isMoveLegal(moveOrCapture, piece, [row, col]) {
   const checks = [];
   const oponentCaptures = [];
 
-  colorPieces[opositeColor].forEach(piece => {
-    piece.computeMoves(board);
+  colorPiecesCopy[opositeColor].forEach(piece => {
+    piece.computeMoves(boardCopy);
     oponentCaptures.push(...piece.captures);
   });
 
   oponentCaptures.forEach(([row, col]) => {
-    const target = board[row][col];
+    const target = boardCopy[row][col];
     if (target && target.name === K) {
       checks.push([row, col]);
     }
