@@ -227,15 +227,18 @@ function pawn(row, col, color) {
 
       // TODO: EN-PASSANT
       if (this.row === this.enPassantRow) {
-        const previousMove = movesHistory[movesHistory.length - 1];
-        if (previousMove.piece === P) {
-          const previousMoveTo = previousMove.to;
-          if (previousMoveTo[0] === this.enPassantRow) {
-            if (
-              previousMoveTo[1] === this.col + 1 ||
-              previousMoveTo[1] === this.col - 1
-            ) {
-              // captures.push([previousMoveTo[0] - 1, previousMoveTo[1]]);
+        const lastMove = movesHistory[movesHistory.length - 1];
+        if (lastMove.piece === P) {
+          const lastMoveTo = lastMove.to;
+          const lastMoveFrom = lastMove.from;
+          if (lastMoveTo[0] === this.enPassantRow) {
+            if (lastMoveFrom[0] === this.enPassantRow + this.delta * 2) {
+              if (
+                lastMoveTo[1] === this.col + 1 ||
+                lastMoveTo[1] === this.col - 1
+              ) {
+                captures.push([lastMoveTo[0] - 1, lastMoveTo[1]]);
+              }
             }
           }
         }
