@@ -1,4 +1,10 @@
-import { players, board, state, colorPieces } from './gameState.js';
+import {
+  players,
+  board,
+  state,
+  colorPieces,
+  movesHistory,
+} from './gameState.js';
 import {
   _imgContainers,
   displayMovesInBoard,
@@ -188,6 +194,7 @@ function pawn(row, col, color) {
     img: buildImg(P, color),
     delta: color === 'w' ? -1 : 1,
     startingRow: color === 'w' ? 6 : 1,
+    enPassantRow: color === 'w' ? 3 : 4,
     computeMoves(board) {
       let boardPiece;
       const moves = [];
@@ -219,6 +226,21 @@ function pawn(row, col, color) {
       }
 
       // TODO: EN-PASSANT
+      if (this.row === this.enPassantRow) {
+        const previousMove = movesHistory[movesHistory.length - 1];
+        if (previousMove.piece === P) {
+          const previousMoveTo = previousMove.to;
+          if (previousMoveTo[0] === this.enPassantRow) {
+            if (
+              previousMoveTo[1] === this.col + 1 ||
+              previousMoveTo[1] === this.col - 1
+            ) {
+              // captures.push([previousMoveTo[0] - 1, previousMoveTo[1]]);
+            }
+          }
+        }
+      }
+
       this.moves = moves;
       this.captures = captures;
     },

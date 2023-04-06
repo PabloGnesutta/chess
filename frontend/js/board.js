@@ -1,4 +1,4 @@
-import { state, board, passTurn } from './gameState.js';
+import { state, board, passTurn, makeMove } from './gameState.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -143,19 +143,15 @@ function squareClick([row, col]) {
       const pieceCanMoveHere = selectedPiece.moves.find(
         move => move[0] === row && move[1] === col
       );
-      if (pieceCanMoveHere) {
-        selectedPiece.placeAt('move', [row, col]);
-        passTurn();
-        return;
-      }
+
+      if (pieceCanMoveHere) return makeMove(selectedPiece, 'move', [row, col]);
+
       const pieceCanCaptureHere = selectedPiece.captures.find(
         capture => capture[0] === row && capture[1] === col
       );
-      if (pieceCanCaptureHere) {
-        selectedPiece.placeAt('capture', [row, col]);
-        passTurn();
-        return;
-      }
+
+      if (pieceCanCaptureHere)
+        return makeMove(selectedPiece, 'capture', [row, col]);
     }
   }
 

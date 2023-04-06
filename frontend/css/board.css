@@ -10,8 +10,8 @@
 
 .board {
   border: 1px solid black;
-  width: 544px;
-  height: 544px;
+  width: 546px;
+  height: 546px;
 }
 
 .row {
@@ -39,45 +39,6 @@
   user-select: none;
   font-weight: bold;
   background-color: #ff9229;
-}
-
-[row='0'][col='0'],
-[row='0'][col='2'],
-[row='0'][col='4'],
-[row='0'][col='6'],
-[row='1'][col='1'],
-[row='1'][col='3'],
-[row='1'][col='5'],
-[row='1'][col='7'],
-[row='2'][col='0'],
-[row='2'][col='2'],
-[row='2'][col='4'],
-[row='2'][col='6'],
-[row='3'][col='1'],
-[row='3'][col='3'],
-[row='3'][col='5'],
-[row='3'][col='7'],
-[row='4'][col='0'],
-[row='4'][col='2'],
-[row='4'][col='4'],
-[row='4'][col='6'],
-[row='5'][col='1'],
-[row='5'][col='3'],
-[row='5'][col='5'],
-[row='5'][col='7'],
-[row='6'][col='0'],
-[row='6'][col='2'],
-[row='6'][col='4'],
-[row='6'][col='6'],
-[row='7'][col='1'],
-[row='7'][col='3'],
-[row='7'][col='5'],
-[row='7'][col='7'] {
-  background-color: #fee3c9;
-}
-
-.square.highlight {
-  background-color: teal;
 }
 
 .square::after {

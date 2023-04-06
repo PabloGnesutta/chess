@@ -43,6 +43,20 @@ const state = {
   selectedPiece: null,
 };
 
+function makeMove(piece, moveOrCapture, [row, col]) {
+  const historyItem = {
+    piece: piece.name,
+    from: [piece.row, piece.col],
+    to: [row, col],
+  };
+  movesHistory.push({ color: state.currentColor, ...historyItem });
+  players[state.currentColor].movesHistory.push({ historyItem });
+
+  piece.placeAt(moveOrCapture, [row, col]);
+
+  passTurn();
+}
+
 function startTurn() {
   const { currentColor, opositeColor } = state;
   // Am I in check?
@@ -65,6 +79,7 @@ function startTurn() {
 
   // Compute all legal moves for current player.
   // If no legal moves, then it's check mate :)
+  log('compute moves for current player', state.currentColor);
   let numLegalMoves = 0;
   colorPieces[currentColor].forEach(piece => {
     piece.computeMoves(board);
@@ -94,4 +109,13 @@ function passTurn() {
   startTurn();
 }
 
-export { players, state, board, colorPieces, startTurn, passTurn };
+export {
+  players,
+  state,
+  board,
+  colorPieces,
+  movesHistory,
+  startTurn,
+  passTurn,
+  makeMove,
+};
