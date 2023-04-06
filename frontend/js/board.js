@@ -11,32 +11,73 @@ const _squares = [
   new Array(8).fill(null),
 ];
 
+const _imgContainers = [
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+  new Array(8).fill(null),
+];
+
 var selectedSquare = null;
 
-function drawBoard() {
+function drawBoard(pov = 'w') {
   const _board = document.getElementById('board');
+  _board.innerHTML = null;
 
-  for (let row = 0; row < 8; row++) {
+  let rowStart = 0;
+  let rowEval = row => row <= ROW_Z;
+  let rowInc = 1;
+
+  let colStart = 0;
+  let colEval = col => col <= COL_Z;
+  let colInc = 1;
+
+  if (pov === 'b') {
+    rowStart = ROW_Z;
+    rowEval = row => row >= 0;
+    rowInc = -1;
+
+    colStart = COL_Z;
+    colEval = col => col >= 0;
+    colInc = -1;
+  }
+
+  // if (pov === 'w') {
+  for (let row = rowStart; rowEval(row); row += rowInc) {
     const _row = document.createElement('div');
     _row.className = 'row';
-    for (let col = 0; col < 8; col++) {
+
+    for (let col = colStart; colEval(col); col += colInc) {
       const _square = document.createElement('div');
+
       const _rowCol = document.createElement('div');
       _rowCol.innerText = row + '_' + col;
       _rowCol.classList.add('row-col-indicator');
       _square.appendChild(_rowCol);
+
+      const _imgContainer = document.createElement('div');
+      _imgContainer.classList.add('img-container');
+      _square.appendChild(_imgContainer);
+
       const piece = board[row][col];
       _square.className = 'square';
       _square.setAttribute('row', row);
       _square.setAttribute('col', col);
       if (piece) {
-        _square.innerHTML = piece.img;
+        _imgContainer.innerHTML = piece.img;
         _square.classList.add(piece.name, piece.color);
       }
+
       _square.addEventListener('mousedown', () => squareClick([row, col]));
       _squares[row][col] = _square;
+      _imgContainers[row][col] = _imgContainer;
       _row.appendChild(_square);
     }
+
     _board.appendChild(_row);
   }
 }
@@ -130,8 +171,8 @@ function squareClick([row, col]) {
 }
 
 export {
-  board,
-  _squares,
+  // board,
+  _imgContainers,
   drawBoard,
   displayMovesInBoard,
   displayCapturesInBoard,

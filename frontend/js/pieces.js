@@ -1,7 +1,6 @@
-import { players, state } from './gameState.js';
+import { players, board, state } from './gameState.js';
 import {
-  board,
-  _squares,
+  _imgContainers,
   displayMovesInBoard,
   displayCapturesInBoard,
 } from './board.js';
@@ -19,7 +18,8 @@ function buildImg(type, color) {
   let pieceCode = type[0];
   if (type === 'knight') pieceCode = 'n';
   const fileName = 'Chess_' + pieceCode + colorCode + 't45.svg';
-  return `<img src='./svg/${fileName}' class="piece ${type} ${color}"></img>`;
+  const filePath = `./svg/${fileName}`;
+  return `<img src=${filePath} class="piece ${type} ${color}"></img>`;
 }
 
 function piece(name, row, col, color) {
@@ -39,7 +39,7 @@ function piece(name, row, col, color) {
 
     placeAt([row, col]) {
       const { currentColor, opositeColor } = state;
-      _squares[this.row][this.col].innerHTML = null;
+      _imgContainers[this.row][this.col].innerHTML = null;
 
       board[this.row][this.col] = null;
       boardCopy[this.row][this.col] = null;
@@ -71,12 +71,11 @@ function piece(name, row, col, color) {
         piece => piece.id === this.id
       );
 
-      // colorPiecesCopy[currentColor][copyPieceIndex] = { ...this };
       colorPiecesCopy[currentColor][copyPieceIndex].row = row;
       colorPiecesCopy[currentColor][copyPieceIndex].col = col;
       board[row][col] = this;
       boardCopy[row][col] = colorPiecesCopy[currentColor][copyPieceIndex];
-      _squares[row][col].innerHTML = this.img;
+      _imgContainers[row][col].innerHTML = this.img;
     },
   };
 }
