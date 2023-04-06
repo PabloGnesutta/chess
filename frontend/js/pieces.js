@@ -225,20 +225,26 @@ function pawn(row, col, color) {
         captures.push(theOther);
       }
 
-      // TODO: EN-PASSANT
+      // EN-PASSANT
+      // Pawn is in en-passant rank
       if (this.row === this.enPassantRow) {
         const lastMove = movesHistory[movesHistory.length - 1];
+        // Last oponent move was a pawn
         if (lastMove.piece === P) {
           const lastMoveTo = lastMove.to;
           const lastMoveFrom = lastMove.from;
-          if (lastMoveTo[0] === this.enPassantRow) {
-            if (lastMoveFrom[0] === this.enPassantRow + this.delta * 2) {
-              if (
-                lastMoveTo[1] === this.col + 1 ||
-                lastMoveTo[1] === this.col - 1
-              ) {
-                // captures.push([lastMoveTo[0] + this.delta, lastMoveTo[1]]);
-              }
+          // Oponent pawn was at starting rank and moved to this' rank
+          if (
+            lastMoveFrom[0] === this.enPassantRow + this.delta * 2 &&
+            lastMoveTo[0] === this.enPassantRow
+          ) {
+            // Oponent pawn is adjacent to this
+            if (
+              lastMoveTo[1] === this.col + 1 ||
+              lastMoveTo[1] === this.col - 1
+            ) {
+              // Capture one row ahead at opponent pawn's file
+              // captures.push([this.row + this.delta, lastMoveTo[1]]);
             }
           }
         }
