@@ -5,7 +5,7 @@ import { board, startTurn } from './js/gameState.js';
 
 const initialPieces = [
   [K, 7, 3, 'w'],
-  [P, 5, 7, 'w'],
+  [P, 6, 7, 'w'],
   
   [K, 0, 4, 'b'],
   [Q, 1, 2, 'b'],

@@ -237,7 +237,7 @@ function pawn(row, col, color) {
                 lastMoveTo[1] === this.col + 1 ||
                 lastMoveTo[1] === this.col - 1
               ) {
-                captures.push([lastMoveTo[0] - 1, lastMoveTo[1]]);
+                // captures.push([lastMoveTo[0] + this.delta, lastMoveTo[1]]);
               }
             }
           }
