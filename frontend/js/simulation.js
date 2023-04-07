@@ -1,13 +1,11 @@
 import { state, board, colorPieces } from './gameState.js';
-import { copyBoard, copyPieces } from './utils/utils.js';
+import { copyBoard, copyPieces, isPlayerInCheckAtPosition } from './utils/utils.js';
 
 function doesMovePutMeInCheck(moveOrCapture, piece, [row, col]) {
   const opositeColor = state.opositeColor;
 
   const boardCopy = copyBoard(board);
   const colorPiecesCopy = copyPieces(colorPieces);
-
-  let putsMeInCheck = true;
 
   boardCopy[piece.row][piece.col] = null;
 
@@ -28,22 +26,7 @@ function doesMovePutMeInCheck(moveOrCapture, piece, [row, col]) {
 
   // Move puts me in check?
   const oponentPieces = colorPiecesCopy[opositeColor];
-  for (let p = 0; p < oponentPieces.length; p++) {
-    const piece = oponentPieces[p];
-    piece.computeMoves(boardCopy);
-    const captures = piece.captures;
-    if (!captures.length) continue;
-
-    for (let c = 0; c < captures.length; c++) {
-      const [row, col] = captures[c];
-      const target = boardCopy[row][col];
-      if (target && target.name === K) {
-        putsMeInCheck = false;
-        break;
-      }
-    }
-  }
-
+  const putsMeInCheck = isPlayerInCheckAtPosition(boardCopy, oponentPieces);
 
   return putsMeInCheck;
 }
@@ -52,7 +35,7 @@ function computeLegalMoves(piece) {
   const legalMoves = [];
   piece.moves.forEach(move => {
     const putsMeInCheck = doesMovePutMeInCheck('move', { ...piece }, move);
-    if (putsMeInCheck) {
+    if (!putsMeInCheck) {
       legalMoves.push(move);
     }
   });
@@ -60,7 +43,7 @@ function computeLegalMoves(piece) {
   const legalCaptures = [];
   piece.captures.forEach(capture => {
     const putsMeInCheck = doesMovePutMeInCheck('capture', { ...piece }, capture);
-    if (putsMeInCheck) {
+    if (!putsMeInCheck) {
       legalCaptures.push(capture);
     }
   });

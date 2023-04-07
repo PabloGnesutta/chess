@@ -1,5 +1,5 @@
 import { computeLegalMoves } from './simulation.js';
-import { copyBoard } from './utils/utils.js';
+import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -74,21 +74,11 @@ function startTurn() {
   const { currentColor, opositeColor } = state;
 
   // Am I in check?
-  const oponentCaptures = [];
-  colorPieces[opositeColor].forEach(piece => {
-    piece.computeMoves(board);
-    oponentCaptures.push(...piece.captures);
-  });
+  const oponentPieces = colorPieces[opositeColor];
+  const imInCheck = isPlayerInCheckAtPosition(board, oponentPieces);
 
-  const checks = [];
-  oponentCaptures.forEach(([row, col]) => {
-    if (board[row][col].name === K) {
-      checks.push([row, col]);
-    }
-  });
-
-  if (checks.length) {
-    log('Ceck!', checks);
+  if (imInCheck) {
+    log('check');
   }
 
   // Compute all legal moves for current player.
@@ -104,7 +94,7 @@ function startTurn() {
   });
 
   if (!numLegalMoves) {
-    if (checks.length) {
+    if (imInCheck) {
       setTimeout(() => {
         alert('Check Mate!');
       }, 100);
