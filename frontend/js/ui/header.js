@@ -1,5 +1,15 @@
 import { drawBoard } from '../board.js';
-import { movesHistory, boardHistory } from '../gameState.js';
+import { board, colorPieces, movesHistory, boardHistory } from '../gameState.js';
+
+const showBoard = document.getElementById('show-board');
+showBoard.addEventListener('click', function () {
+  log(board);
+});
+
+const showPieces = document.getElementById('show-pieces');
+showPieces.addEventListener('click', function () {
+  log(colorPieces);
+});
 
 let pov = 'w';
 const flipBoard = document.getElementById('flip-board');

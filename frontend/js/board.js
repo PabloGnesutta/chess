@@ -1,4 +1,4 @@
-import { state, board, passTurn, makeMove } from './gameState.js';
+import { state, board, makeMove } from './gameState.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -82,45 +82,28 @@ function drawBoard(pov = 'w') {
 }
 
 var moveSquares = [];
-var captureSquares = [];
-
-function clearMarks() {
-  clearMoves();
-  clearCaptures();
-}
 
 function clearMoves() {
-  moveSquares.forEach(_square => _square.classList.remove('potential-move'));
+  moveSquares.forEach(_square => {
+    _square.classList.remove('potential-move');
+    _square.classList.remove('potential-capture');
+  });
   moveSquares = [];
 }
 
-function displayMovesInBoard(moves) {
+function displayMoves(moves) {
   clearMoves();
-  moves.forEach(([row, col]) => {
+  moves.forEach((move) => {
+    const [row, col] = move.moveTo;
     const _square = _squares[row][col];
-    _square.classList.add('potential-move');
+    const type = move.captureAt ? 'capture' : 'move';
+    _square.classList.add('potential-' + type);
     moveSquares.push(_square);
   });
 }
 
-function clearCaptures() {
-  captureSquares.forEach(_square =>
-    _square.classList.remove('potential-capture')
-  );
-  captureSquares = [];
-}
-
-function displayCapturesInBoard(captures) {
-  clearCaptures();
-  captures.forEach(([row, col]) => {
-    const _square = _squares[row][col];
-    _square.classList.add('potential-capture');
-    captureSquares.push(_square);
-  });
-}
-
 function unselectCurrentSquare() {
-  clearMarks();
+  clearMoves();
   if (!selectedSquare) return;
   selectedSquare.classList.remove('highlight');
   selectedSquare = null;
@@ -140,18 +123,11 @@ function squareClick([row, col]) {
   if (selectedPiece) {
     if (currentColor === selectedPiece.color) {
       // Make move
-      const pieceCanMoveHere = selectedPiece.moves.find(
-        move => move[0] === row && move[1] === col
+      const move = selectedPiece.moves.find(
+        ({ moveTo }) => moveTo[0] === row && moveTo[1] === col
       );
 
-      if (pieceCanMoveHere) return makeMove(selectedPiece, 'move', [row, col]);
-
-      const pieceCanCaptureHere = selectedPiece.captures.find(
-        capture => capture[0] === row && capture[1] === col
-      );
-
-      if (pieceCanCaptureHere)
-        return makeMove(selectedPiece, 'capture', [row, col]);
+      if (move) return makeMove(selectedPiece, move);
     }
   }
 
@@ -167,6 +143,5 @@ function squareClick([row, col]) {
 export {
   _imgContainers,
   drawBoard,
-  displayMovesInBoard,
-  displayCapturesInBoard,
+  displayMoves,
 };

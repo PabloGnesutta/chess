@@ -48,16 +48,16 @@ function isStalemateByRepetition() {
   return false;
 }
 
-function makeMove(piece, moveOrCapture, [row, col]) {
+function makeMove(piece, move) {
   const historyItem = {
     piece: piece.name,
     from: [piece.row, piece.col],
-    to: [row, col],
+    to: move.moveTo,
   };
   movesHistory.push({ color: state.currentColor, ...historyItem });
   players[state.currentColor].movesHistory.push({ historyItem });
 
-  piece.placeAt(moveOrCapture, [row, col]);
+  piece.doMove(move);
 
   passTurn();
 }
@@ -87,10 +87,9 @@ function startTurn() {
 
   colorPieces[currentColor].forEach(piece => {
     piece.computeMoves(board);
-    const { legalMoves, legalCaptures } = computeLegalMoves(piece);
-    numLegalMoves += legalMoves.length + legalCaptures.length;
+    const legalMoves = computeLegalMoves(piece);
+    numLegalMoves += legalMoves;
     piece.moves = legalMoves;
-    piece.captures = legalCaptures;
   });
 
   if (!numLegalMoves) {

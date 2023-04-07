@@ -26,7 +26,16 @@ function isPlayerInCheckAtPosition(board, oponentPieces) {
   for (let p = 0; p < oponentPieces.length; p++) {
     const piece = oponentPieces[p];
     piece.computeMoves(board);
-    const captures = piece.captures;
+
+    const captures = [];
+    const moves = piece.moves;
+    for (let m = 0; m < moves.length; m++) {
+      const move = moves[m];
+      if (move.captureAt) {
+        captures.push([move.captureAt[0], move.captureAt[1]]);
+      }
+    }
+
     if (!captures.length) continue;
 
     for (let c = 0; c < captures.length; c++) {

@@ -7,11 +7,18 @@ import {
 } from './gameState.js';
 import {
   _imgContainers,
-  displayMovesInBoard,
-  displayCapturesInBoard,
+  displayMoves,
 } from './board.js';
 
 let idCount = 0;
+
+function _moveObj(moveTo, captureAt) {
+  const moveObj = { moveTo };
+  if (captureAt) {
+    moveObj.captureAt = captureAt;
+  }
+  return moveObj;
+}
 
 function buildImg(type, color) {
   const colorCode = color === 'w' ? 'l' : 'd';
@@ -30,35 +37,46 @@ function piece(name, row, col, color) {
     col,
     color,
     moves: [],
-    captures: [],
 
     showMoves() {
-      displayMovesInBoard(this.moves);
-      displayCapturesInBoard(this.captures);
+      displayMoves(this.moves);
     },
 
-    placeAt(moveOrCapture, [row, col]) {
-      const { currentColor, opositeColor } = state;
+    doMove(move) {
+      const { moveTo, captureAt } = move;
+      const [row, col] = moveTo;
+
+      // Remove piece from the board at current position
+      board[this.row][this.col] = null;
       _imgContainers[this.row][this.col].innerHTML = null;
 
-      board[this.row][this.col] = null;
+      const { currentColor, opositeColor } = state;
 
       // Capture:
-      if (moveOrCapture === 'capture') {
-        const capturablePiece = board[row][col];
+      if (captureAt) {
+        // Remove captured piece from board
+        const [_row, _col] = captureAt;
+        const captuerdBoardPiece = board[_row][_col];
+
+        // Remove from colorPieces
         const pieceIndex = colorPieces[opositeColor].findIndex(
-          piece => piece.id === capturablePiece.id
+          piece => piece.id === captuerdBoardPiece.id
         );
         const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
 
         players[currentColor].captures.push(capturedPiece);
+
+        // for en-passant
+        board[_row][_col] = null;
+        _imgContainers[_row][_col].innerHTML = null;
       }
 
       // Pawn promotion
       if (this.name === P && (row === 0 || row === COL_Z)) {
-        log('promotion!');
+        // TODO
       }
 
+      // Place piece on the board at new position
       this.row = row;
       this.col = col;
       board[row][col] = this;
@@ -69,17 +87,19 @@ function piece(name, row, col, color) {
 
 function bishopLikeMoves(board, piece) {
   const moves = [];
-  const captures = [];
   let { row, col } = piece;
 
   while (row < ROW_Z && col < COL_Z) {
     const cell = [++row, ++col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      }
       break;
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
 
   row = piece.row;
@@ -88,50 +108,62 @@ function bishopLikeMoves(board, piece) {
     const cell = [--row, --col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      }
       break;
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
+
   row = piece.row;
   col = piece.col;
   while (row < ROW_Z && col > 0) {
     const cell = [++row, --col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      }
       break;
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
+
   row = piece.row;
   col = piece.col;
   while (row > 0 && col < COL_Z) {
     const cell = [--row, ++col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      }
       break;
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
 
-  return { moves, captures };
+  return moves;
 }
 
 function rookLikeMoves(board, piece) {
   const moves = [];
-  const captures = [];
   let { row, col } = piece;
 
   while (row < ROW_Z) {
     const cell = [++row, col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
-      break;
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      };
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
 
   row = piece.row;
@@ -139,10 +171,12 @@ function rookLikeMoves(board, piece) {
     const cell = [--row, col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
-      break;
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      };
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
 
   row = piece.row;
@@ -150,10 +184,12 @@ function rookLikeMoves(board, piece) {
     const cell = [row, ++col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
-      break;
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      };
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
 
   col = piece.col;
@@ -161,31 +197,34 @@ function rookLikeMoves(board, piece) {
     const cell = [row, --col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
-      if (boardPiece.color !== piece.color) captures.push(cell);
-      break;
+      if (boardPiece.color !== piece.color) {
+        moves.push(_moveObj(cell, cell));
+      };
+    } else {
+      moves.push(_moveObj(cell));
     }
-    moves.push(cell);
   }
 
-  return { moves, captures };
+  return moves;
 }
 
 function specificMoves(board, potentialMoves, pieceColor) {
   const moves = [];
-  const captures = [];
+
   for (let i = 0; i < potentialMoves.length; i++) {
     const [row, col] = potentialMoves[i];
     if (row > ROW_Z || row < 0 || col > COL_Z || col < 0) continue;
     const boardPiece = board[row][col];
     if (boardPiece) {
       if (boardPiece.color !== pieceColor) {
-        captures.push([row, col]);
+        moves.push(_moveObj([row, col], [row, col]));
       }
-      continue;
+    } else {
+      moves.push(_moveObj([row, col]));
     }
-    moves.push([row, col]);
   }
-  return { moves, captures };
+
+  return moves;
 }
 
 function pawn(row, col, color) {
@@ -199,32 +238,30 @@ function pawn(row, col, color) {
       const moves = [];
       const oneRankAhead = this.row + this.delta;
 
-      let blockingPiece;
-      blockingPiece = board[oneRankAhead][this.col];
+      let blockingPiece = board[oneRankAhead][this.col];
       if (!blockingPiece) {
-        moves.push([oneRankAhead, this.col]);
+        moves.push(_moveObj([oneRankAhead, this.col]));
 
         if (this.row == this.startingRow) {
           const twoRanksAhead = this.row + this.delta * 2;
           blockingPiece = board[twoRanksAhead][this.col];
           if (!blockingPiece) {
-            moves.push([twoRanksAhead, this.col]);
+            moves.push(_moveObj([twoRanksAhead, this.col]));
           }
         }
       }
 
-      const captures = [];
-
       const adjacentCol1 = this.col + 1;
       let oponentPiece = board[oneRankAhead][adjacentCol1];
       if (oponentPiece && oponentPiece.color !== this.color) {
-        captures.push([oneRankAhead, adjacentCol1]);
+        moves.push(_moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1]));
       }
 
       const adjacentCol2 = this.col - 1;
       oponentPiece = board[oneRankAhead][adjacentCol2];
       if (oponentPiece && oponentPiece.color !== this.color) {
-        captures.push([oneRankAhead, adjacentCol2]);
+        moves.push(_moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2]));
+
       }
 
       // EN-PASSANT
@@ -246,14 +283,13 @@ function pawn(row, col, color) {
               lastMoveTo[1] === this.col - 1
             ) {
               // Capture one row ahead at opponent pawn's file
-              // captures.push([this.row + this.delta, lastMoveTo[1]]);
+              moves.push(_moveObj([this.row + this.delta, lastMoveTo[1]], lastMoveTo));
             }
           }
         }
       }
 
       this.moves = moves;
-      this.captures = captures;
     },
   };
 }
@@ -275,13 +311,11 @@ function knight(row, col, color) {
         [row + 2, col - 1],
       ];
 
-      const { moves, captures } = specificMoves(
+      this.moves = specificMoves(
         board,
         potentialMoves,
         this.color
       );
-      this.moves = moves;
-      this.captures = captures;
     },
   };
 }
@@ -291,9 +325,7 @@ function bishop(row, col, color) {
     ...piece(B, row, col, color),
     img: buildImg(B, color),
     computeMoves(board) {
-      const { moves, captures } = bishopLikeMoves(board, this);
-      this.moves = moves;
-      this.captures = captures;
+      this.moves = bishopLikeMoves(board, this);
     },
   };
 }
@@ -303,9 +335,7 @@ function rook(row, col, color) {
     ...piece(R, row, col, color),
     img: buildImg(R, color),
     computeMoves(board) {
-      const { moves, captures } = rookLikeMoves(board, this);
-      this.moves = moves;
-      this.captures = captures;
+      this.moves = rookLikeMoves(board, this);
     },
   };
 }
@@ -317,11 +347,7 @@ function queen(row, col, color) {
     computeMoves(board) {
       const bishopLike = bishopLikeMoves(board, this);
       const rookLike = rookLikeMoves(board, this);
-      const moves = bishopLike.moves.concat(rookLike.moves);
-      const captures = bishopLike.captures.concat(rookLike.captures);
-
-      this.moves = moves;
-      this.captures = captures;
+      this.moves = bishopLike.concat(rookLike);
     },
   };
 }
@@ -343,13 +369,11 @@ function king(row, col, color) {
         [row, col - 1],
       ];
 
-      const { moves, captures } = specificMoves(
+      this.moves = specificMoves(
         board,
         potentialMoves,
         this.color
       );
-      this.moves = moves;
-      this.captures = captures;
     },
   };
 }
