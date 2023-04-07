@@ -9,10 +9,13 @@ import {
 
 let idCount = 0;
 
-function _moveObj(moveTo, captureAt) {
+function _moveObj(moveTo, captureAt, isCastle) {
   const moveObj = { moveTo };
   if (captureAt) {
     moveObj.captureAt = captureAt;
+  }
+  if (isCastle) {
+    moveObj.isCastle = isCastle;
   }
   return moveObj;
 }
@@ -378,10 +381,10 @@ function king(row, col, color) {
 }
 
 export default {
-  pawn,
-  knight,
   bishop,
-  rook,
-  queen,
   king,
+  knight,
+  pawn,
+  queen,
+  rook,
 };

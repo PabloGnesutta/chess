@@ -1,4 +1,4 @@
-import { state, board, colorPieces } from './gameState.js';
+import { board, colorPieces, state } from './gameState.js';
 import { copyBoard, copyPieces, isPlayerInCheckAtPosition } from './utils/utils.js';
 
 function doesMovePutMeInCheck(piece, move) {

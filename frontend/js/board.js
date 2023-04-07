@@ -1,4 +1,4 @@
-import { state, board, makeMove } from './gameState.js';
+import { board, makeMove, state } from './gameState.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -142,6 +142,6 @@ function squareClick([row, col]) {
 
 export {
   _imgContainers,
-  drawBoard,
   displayMoves,
+  drawBoard,
 };

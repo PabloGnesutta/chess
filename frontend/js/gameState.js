@@ -74,8 +74,7 @@ function startTurn() {
   const { currentColor, opositeColor } = state;
 
   // Am I in check?
-  const oponentPieces = colorPieces[opositeColor];
-  const imInCheck = isPlayerInCheckAtPosition(board, oponentPieces);
+  const imInCheck = isPlayerInCheckAtPosition(board, colorPieces[opositeColor]);
 
   if (imInCheck) {
     log('check');
@@ -113,13 +112,13 @@ function passTurn() {
 }
 
 export {
-  players,
-  state,
   board,
+  boardHistory,
   colorPieces,
   movesHistory,
-  boardHistory,
-  startTurn,
-  passTurn,
+  players,
+  state,
   makeMove,
+  passTurn,
+  startTurn,
 };
