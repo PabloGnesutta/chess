@@ -1,7 +1,6 @@
-import createPiece from './js/pieces.js';
-import { colorPieces } from './js/pieces.js';
+import createPiece from './js/createPieces.js';
 import { drawBoard } from './js/board.js';
-import { board, startTurn } from './js/gameState.js';
+import { board, colorPieces, startTurn } from './js/gameState.js';
 
 const initialPieces = [
   [K, 5, 6, 'w'],

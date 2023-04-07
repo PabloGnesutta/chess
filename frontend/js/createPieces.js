@@ -1,14 +1,11 @@
+import { displayMoves, _imgContainers } from './board.js';
 import {
-  players,
   board,
-  state,
   colorPieces,
   movesHistory,
+  players,
+  state,
 } from './gameState.js';
-import {
-  _imgContainers,
-  displayMoves,
-} from './board.js';
 
 let idCount = 0;
 
@@ -311,6 +308,8 @@ function knight(row, col, color) {
         [row + 2, col - 1],
       ];
 
+      // TODO: Castle
+
       this.moves = specificMoves(
         board,
         potentialMoves,
@@ -386,5 +385,3 @@ export default {
   queen,
   king,
 };
-
-export { colorPieces };
