@@ -28,11 +28,13 @@ board.putPiece = function (piece) {
 const players = {
   w: {
     color: 'w',
+    isInCheck: false,
     movesHistory: [],
     captures: [],
   },
   b: {
     color: 'b',
+    isInCheck: false,
     movesHistory: [],
     captures: [],
   },
@@ -77,6 +79,7 @@ function startTurn() {
   const imInCheck = isPlayerInCheckAtPosition(board, colorPieces[opositeColor]);
 
   if (imInCheck) {
+    players[currentColor].isInCheck = true;
     log('check');
   }
 
@@ -105,6 +108,7 @@ function startTurn() {
 }
 
 function passTurn() {
+  players[state.currentColor].isInCheck = false;
   state.selectedPiece = null;
   state.currentColor = state.currentColor === 'w' ? 'b' : 'w';
   state.opositeColor = state.opositeColor === 'b' ? 'w' : 'b';

@@ -3,11 +3,13 @@ import { drawBoard } from './js/board.js';
 import { board, colorPieces, startTurn } from './js/gameState.js';
 
 const initialPieces = [
-  [K, 5, 6, 'w'],
-  [N, 5, 3, 'w'],
-  [B, 4, 3, 'w'],
+  [K, 7, 4, 'w'],
+  [R, 7, 0, 'w'],
+  [R, 7, 7, 'w'],
+  // [N, 7, 1, 'w'],
+  // [B, 7, 2, 'w'],
+  // [Q, 7, 3, 'w'],
   [P, 6, 1, 'w'],
-  [Q, 2, 5, 'w'],
 
   [N, 3, 4, 'b'],
   [P, 1, 2, 'b'],

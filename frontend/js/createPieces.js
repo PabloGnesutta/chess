@@ -9,13 +9,10 @@ import {
 
 let idCount = 0;
 
-function _moveObj(moveTo, captureAt, isCastle) {
+function _moveObj(moveTo, captureAt) {
   const moveObj = { moveTo };
   if (captureAt) {
     moveObj.captureAt = captureAt;
-  }
-  if (isCastle) {
-    moveObj.isCastle = isCastle;
   }
   return moveObj;
 }
@@ -37,6 +34,7 @@ function piece(name, row, col, color) {
     col,
     color,
     moves: [],
+    hasntMoveYet: true,
 
     showMoves() {
       displayMoves(this.moves);
@@ -81,6 +79,7 @@ function piece(name, row, col, color) {
       this.col = col;
       board[row][col] = this;
       _imgContainers[row][col].innerHTML = this.img;
+      this.hasntMoveYet = false;
     },
   };
 }
@@ -311,8 +310,6 @@ function knight(row, col, color) {
         [row + 2, col - 1],
       ];
 
-      // TODO: Castle
-
       this.moves = specificMoves(
         board,
         potentialMoves,
@@ -371,11 +368,67 @@ function king(row, col, color) {
         [row, col - 1],
       ];
 
-      this.moves = specificMoves(
+      const castleMoves = [];
+
+      castle: {
+        if (!this.hasntMoveYet || players[state.currentColor].isInCheck) {
+          break castle;
+        }
+
+        rook1: {
+          const rook = board[row][0];
+          if (!rook || !rook.hasntMoveYet) {
+            break rook1;
+          }
+
+          const castleSteps = [];
+          for (var kCol = col - 1; kCol > rook.col; kCol--) {
+            const blockingPiece = board[row][kCol];
+            if (blockingPiece) {
+              break rook1;
+            }
+            castleSteps.push([row, kCol]);
+          }
+
+          castleMoves.push({
+            moveTo: [row, kCol + 1],
+            steps: castleSteps,
+            rookFrom: [row, rook.col],
+            rookTo: [row, col - 1]
+          });
+        }
+
+        rook2: {
+          const rook = board[row][ROW_Z];
+          if (!rook || !rook.hasntMoveYet) {
+            break rook2;
+          }
+
+          const castleSteps = [];
+          for (var kCol = col + 1; kCol < rook.col; kCol++) {
+            const blockingPiece = board[row][kCol];
+            if (blockingPiece) {
+              break rook2;
+            }
+            castleSteps.push([row, kCol]);
+          }
+
+          castleMoves.push({
+            moveTo: [row, kCol - 1],
+            steps: castleSteps,
+            rookFrom: [row, rook.col],
+            rookTo: [row, col + 1]
+          });
+        }
+      }
+
+      const moves = specificMoves(
         board,
         potentialMoves,
         this.color
       );
+
+      this.moves = moves.concat(castleMoves);
     },
   };
 }
