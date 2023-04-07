@@ -196,33 +196,35 @@ function pawn(row, col, color) {
     startingRow: color === 'w' ? 6 : 1,
     enPassantRow: color === 'w' ? 3 : 4,
     computeMoves(board) {
-      let boardPiece;
       const moves = [];
+      const oneRankAhead = this.row + this.delta;
 
-      const oneStep = [this.row + this.delta, this.col];
-      boardPiece = board[oneStep[0]][oneStep[1]];
-      if (!boardPiece) {
-        moves.push(oneStep);
+      let blockingPiece;
+      blockingPiece = board[oneRankAhead][this.col];
+      if (!blockingPiece) {
+        moves.push([oneRankAhead, this.col]);
+
         if (this.row == this.startingRow) {
-          const twoSteps = [this.row + this.delta * 2, this.col];
-          boardPiece = board[twoSteps[0]][twoSteps[1]];
-          if (!boardPiece) {
-            moves.push(twoSteps);
+          const twoRanksAhead = this.row + this.delta * 2;
+          blockingPiece = board[twoRanksAhead][this.col];
+          if (!blockingPiece) {
+            moves.push([twoRanksAhead, this.col]);
           }
         }
       }
 
       const captures = [];
-      const oneWay = [this.row + this.delta, this.col + 1];
-      boardPiece = board[oneWay[0]][oneWay[1]];
-      if (boardPiece && boardPiece.color !== this.color) {
-        captures.push(oneWay);
+
+      const adjacentCol1 = this.col + 1;
+      let oponentPiece = board[oneRankAhead][adjacentCol1];
+      if (oponentPiece && oponentPiece.color !== this.color) {
+        captures.push([oneRankAhead, adjacentCol1]);
       }
 
-      const theOther = [this.row + this.delta, this.col - 1];
-      boardPiece = board[theOther[0]][theOther[1]];
-      if (boardPiece && boardPiece.color !== this.color) {
-        captures.push(theOther);
+      const adjacentCol2 = this.col - 1;
+      oponentPiece = board[oneRankAhead][adjacentCol2];
+      if (oponentPiece && oponentPiece.color !== this.color) {
+        captures.push([oneRankAhead, adjacentCol2]);
       }
 
       // EN-PASSANT
