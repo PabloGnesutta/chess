@@ -1,11 +1,13 @@
 import { state, board, colorPieces } from './gameState.js';
 import { copyBoard, copyPieces } from './utils/utils.js';
 
-function isMoveLegal(moveOrCapture, piece, [row, col]) {
+function doesMovePutMeInCheck(moveOrCapture, piece, [row, col]) {
   const opositeColor = state.opositeColor;
 
   const boardCopy = copyBoard(board);
-  let colorPiecesCopy = copyPieces(colorPieces);
+  const colorPiecesCopy = copyPieces(colorPieces);
+
+  let putsMeInCheck = true;
 
   boardCopy[piece.row][piece.col] = null;
 
@@ -21,50 +23,44 @@ function isMoveLegal(moveOrCapture, piece, [row, col]) {
 
   boardCopy[row][col] = piece;
 
-  // Pawn promotion
-  if (piece.name === P && (row === 0 || row === COL_Z)) {
-    // TODO
-  }
-
   piece.row = row;
   piece.col = col;
 
-  // Am I in check?
-  const checks = [];
-  const oponentCaptures = [];
-
-  colorPiecesCopy[opositeColor].forEach(piece => {
+  // Move puts me in check?
+  const oponentPieces = colorPiecesCopy[opositeColor];
+  for (let p = 0; p < oponentPieces.length; p++) {
+    const piece = oponentPieces[p];
     piece.computeMoves(boardCopy);
-    oponentCaptures.push(...piece.captures);
-  });
+    const captures = piece.captures;
+    if (!captures.length) continue;
 
-  oponentCaptures.forEach(([row, col]) => {
-    const target = boardCopy[row][col];
-    if (target && target.name === K) {
-      checks.push([row, col]);
+    for (let c = 0; c < captures.length; c++) {
+      const [row, col] = captures[c];
+      const target = boardCopy[row][col];
+      if (target && target.name === K) {
+        putsMeInCheck = false;
+        break;
+      }
     }
-  });
-
-  if (checks.length) {
-    return false;
-  } else {
-    return true;
   }
+
+
+  return putsMeInCheck;
 }
 
 function computeLegalMoves(piece) {
   const legalMoves = [];
   piece.moves.forEach(move => {
-    const isLegal = isMoveLegal('move', { ...piece }, move);
-    if (isLegal) {
+    const putsMeInCheck = doesMovePutMeInCheck('move', { ...piece }, move);
+    if (putsMeInCheck) {
       legalMoves.push(move);
     }
   });
 
   const legalCaptures = [];
   piece.captures.forEach(capture => {
-    const isLegal = isMoveLegal('capture', { ...piece }, capture);
-    if (isLegal) {
+    const putsMeInCheck = doesMovePutMeInCheck('capture', { ...piece }, capture);
+    if (putsMeInCheck) {
       legalCaptures.push(capture);
     }
   });
