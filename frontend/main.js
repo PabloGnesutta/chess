@@ -11,9 +11,11 @@ const initialPieces = [
   // [Q, 7, 3, 'w'],
   [P, 6, 1, 'w'],
 
+  [K, 0, 3, 'b'],
   [N, 3, 4, 'b'],
   [P, 1, 2, 'b'],
-  [R, 0, 7, 'b'],
+  [R, 0, 6, 'b'],
+  [R, 4, 1, 'b'],
 ];
 
 // const initialPieces = [
