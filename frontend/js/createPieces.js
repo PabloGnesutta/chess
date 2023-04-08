@@ -1,7 +1,7 @@
 import { displayMoves, _imgContainers } from './board.js';
 import {
   board,
-  colorPieces,
+  pieces,
   movesHistory,
   players,
   state,
@@ -42,6 +42,18 @@ function displcePieceTo(piece, moveTo) {
   piece.hasntMoveYet = false;
 }
 
+function promotePawnAt(pawn, [row, col]) {
+  const { currentColor } = state;
+  const pieceIndex = pieces[currentColor].findIndex(piece => piece.id === pawn.id);
+  pieces[currentColor].splice(pieceIndex, 1);
+  board[row][col] = null;
+
+  const promotedPiece = queen(row, col, currentColor);
+  pieces[currentColor].push(promotedPiece);
+  board.putPiece(promotedPiece);
+  _imgContainers[row][col].innerHTML = promotedPiece.img;
+}
+
 function _doMove(piece, move) {
   const { currentColor, opositeColor } = state;
   const { moveTo, captureAt } = move;
@@ -54,11 +66,11 @@ function _doMove(piece, move) {
     // Remove captured piece from board
     const [rowCapt, colCapt] = captureAt;
     const captuerdBoardPiece = board[rowCapt][colCapt];
-    // Remove it from colorPieces
-    const pieceIndex = colorPieces[opositeColor].findIndex(
+    // Remove it from pieces
+    const pieceIndex = pieces[opositeColor].findIndex(
       piece => piece.id === captuerdBoardPiece.id
     );
-    const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
+    const capturedPiece = pieces[opositeColor].splice(pieceIndex, 1);
     // Add to player's captures
     players[currentColor].captures.push(capturedPiece);
     // en-passant
@@ -69,7 +81,7 @@ function _doMove(piece, move) {
   }
 
   if (piece.name === P && (rowTo === 0 || rowTo === ROW_Z)) {
-    // Pawn promotion TODO
+    promotePawnAt(piece, [rowTo, colTo]);
   }
 }
 
@@ -365,7 +377,6 @@ function queen(row, col, color) {
 }
 
 
-
 function doCastle(piece, move) {
   const { moveTo, rookFrom, rookTo } = move;
 
@@ -375,7 +386,6 @@ function doCastle(piece, move) {
   const [_row, _col] = rookFrom;
   const rook = board[_row][_col];
   if (!rook) warn('Rook not found while castling');
-  log(rook);
   displcePieceTo(rook, rookTo);
 }
 

@@ -10,15 +10,15 @@ function copyBoard(board) {
   return copiedBoard;
 }
 
-function copyPieces(colorPieces) {
-  const copiedColorPieces = { w: [], b: [] };
-  colorPieces.w.forEach(piece => {
-    copiedColorPieces.w.push({ ...piece });
+function copyPieces(pieces) {
+  const copiedPieces = { w: [], b: [] };
+  pieces.w.forEach(piece => {
+    copiedPieces.w.push({ ...piece });
   });
-  colorPieces.b.forEach(piece => {
-    copiedColorPieces.b.push({ ...piece });
+  pieces.b.forEach(piece => {
+    copiedPieces.b.push({ ...piece });
   });
-  return copiedColorPieces;
+  return copiedPieces;
 }
 
 function isPlayerInCheckAtPosition(board, oponentPieces) {

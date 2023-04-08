@@ -1,5 +1,5 @@
 import { drawBoard } from '../board.js';
-import { board, colorPieces, movesHistory, boardHistory } from '../gameState.js';
+import { board, pieces, movesHistory, boardHistory } from '../gameState.js';
 
 const showBoard = document.getElementById('show-board');
 showBoard.addEventListener('click', function () {
@@ -8,7 +8,7 @@ showBoard.addEventListener('click', function () {
 
 const showPieces = document.getElementById('show-pieces');
 showPieces.addEventListener('click', function () {
-  log(colorPieces);
+  log(pieces);
 });
 
 let pov = 'w';

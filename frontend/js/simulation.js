@@ -1,4 +1,4 @@
-import { board, colorPieces, state } from './gameState.js';
+import { board, pieces, state } from './gameState.js';
 import { copyBoard, copyPieces, isPlayerInCheckAtPosition } from './utils/utils.js';
 
 function doesMovePutMeInCheck(piece, move) {
@@ -8,7 +8,7 @@ function doesMovePutMeInCheck(piece, move) {
   const opositeColor = state.opositeColor;
 
   const boardCopy = copyBoard(board);
-  const colorPiecesCopy = copyPieces(colorPieces);
+  const piecesCopy = copyPieces(pieces);
 
   boardCopy[piece.row][piece.col] = null;
 
@@ -16,11 +16,11 @@ function doesMovePutMeInCheck(piece, move) {
   if (captureAt) {
     const [_row, _col] = captureAt;
     const capturablePiece = boardCopy[_row][_col];
-    const pieceIdx = colorPiecesCopy[opositeColor].findIndex(
+    const pieceIdx = piecesCopy[opositeColor].findIndex(
       p => p.id === capturablePiece.id
     );
 
-    colorPiecesCopy[opositeColor].splice(pieceIdx, 1);
+    piecesCopy[opositeColor].splice(pieceIdx, 1);
   }
 
   boardCopy[row][col] = piece;
@@ -29,7 +29,7 @@ function doesMovePutMeInCheck(piece, move) {
   piece.col = col;
 
   // Move puts me in check?
-  const oponentPieces = colorPiecesCopy[opositeColor];
+  const oponentPieces = piecesCopy[opositeColor];
   const putsMeInCheck = isPlayerInCheckAtPosition(boardCopy, oponentPieces);
 
   return putsMeInCheck;

@@ -52,6 +52,10 @@ function drawBoard(pov = 'w') {
 
     for (let col = colStart; colEval(col); col += colInc) {
       const _square = document.createElement('div');
+      _square.className = 'square';
+      _square.setAttribute('row', row);
+      _square.setAttribute('col', col);
+      _square.addEventListener('mousedown', () => squareClick([row, col]));
 
       const _rowCol = document.createElement('div');
       _rowCol.innerText = row + '_' + col;
@@ -63,15 +67,10 @@ function drawBoard(pov = 'w') {
       _square.appendChild(_imgContainer);
 
       const piece = board[row][col];
-      _square.className = 'square';
-      _square.setAttribute('row', row);
-      _square.setAttribute('col', col);
       if (piece) {
         _imgContainer.innerHTML = piece.img;
-        _square.classList.add(piece.name, piece.color);
       }
 
-      _square.addEventListener('mousedown', () => squareClick([row, col]));
       _squares[row][col] = _square;
       _imgContainers[row][col] = _imgContainer;
       _row.appendChild(_square);

@@ -4,7 +4,7 @@ import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
 const movesHistory = [];
 const boardHistory = [];
 
-const colorPieces = {
+const pieces = {
   w: [],
   b: [],
 };
@@ -76,7 +76,7 @@ function startTurn() {
   const { currentColor, opositeColor } = state;
 
   // Am I in check?
-  const imInCheck = isPlayerInCheckAtPosition(board, colorPieces[opositeColor]);
+  const imInCheck = isPlayerInCheckAtPosition(board, pieces[opositeColor]);
 
   if (imInCheck) {
     players[currentColor].isInCheck = true;
@@ -87,7 +87,7 @@ function startTurn() {
   // If no legal moves, then it's check (or stale) mate.
   let numLegalMoves = 0;
 
-  colorPieces[currentColor].forEach(piece => {
+  pieces[currentColor].forEach(piece => {
     piece.computeMoves(board);
     const legalMoves = computeLegalMoves(piece);
     numLegalMoves += legalMoves;
@@ -118,7 +118,7 @@ function passTurn() {
 export {
   board,
   boardHistory,
-  colorPieces,
+  pieces,
   movesHistory,
   players,
   state,

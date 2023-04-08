@@ -1,6 +1,6 @@
 import createPiece from './js/createPieces.js';
 import { drawBoard } from './js/board.js';
-import { board, colorPieces, startTurn } from './js/gameState.js';
+import { board, pieces, startTurn } from './js/gameState.js';
 
 const initialPieces = [
   [K, 7, 4, 'w'],
@@ -9,13 +9,13 @@ const initialPieces = [
   // [N, 7, 1, 'w'],
   // [B, 7, 2, 'w'],
   // [Q, 7, 3, 'w'],
-  [P, 6, 1, 'w'],
+  [P, 1, 1, 'w'],
 
   [K, 0, 3, 'b'],
   [N, 3, 4, 'b'],
   [P, 1, 2, 'b'],
-  [R, 0, 6, 'b'],
-  [R, 4, 1, 'b'],
+  // [R, 0, 6, 'b'],
+  // [R, 4, 1, 'b'],
 ];
 
 // const initialPieces = [
@@ -69,7 +69,7 @@ function initGame() {
   for (let c = 0; c < initialPieces.length; c++) {
     const [type, row, col, color] = initialPieces[c];
     const piece = createPiece[type](row, col, color);
-    colorPieces[color].push(piece);
+    pieces[color].push(piece);
     board.putPiece(piece);
   }
 
