@@ -26,6 +26,53 @@ function buildImg(type, color) {
   return `<img src=${filePath} class="piece ${type} ${color}"></img>`;
 }
 
+function displcePieceTo(piece, moveTo) {
+  const { row, col } = piece;
+  const [rowTo, colTo] = moveTo;
+
+  // Remove piece from the board at current position
+  board[row][col] = null;
+  _imgContainers[row][col].innerHTML = null;
+
+  // Place piece on the board at new position
+  piece.row = rowTo;
+  piece.col = colTo;
+  board[rowTo][colTo] = piece;
+  _imgContainers[rowTo][colTo].innerHTML = piece.img;
+  piece.hasntMoveYet = false;
+}
+
+function _doMove(piece, move) {
+  const { currentColor, opositeColor } = state;
+  const { moveTo, captureAt } = move;
+  const [rowTo, colTo] = moveTo;
+
+  displcePieceTo(piece, moveTo);
+
+  // Capture:
+  if (captureAt) {
+    // Remove captured piece from board
+    const [rowCapt, colCapt] = captureAt;
+    const captuerdBoardPiece = board[rowCapt][colCapt];
+    // Remove it from colorPieces
+    const pieceIndex = colorPieces[opositeColor].findIndex(
+      piece => piece.id === captuerdBoardPiece.id
+    );
+    const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
+    // Add to player's captures
+    players[currentColor].captures.push(capturedPiece);
+    // en-passant
+    if (colTo !== colCapt || rowTo !== rowCapt) {
+      board[rowCapt][colCapt] = null;
+      _imgContainers[rowCapt][colCapt].innerHTML = null;
+    }
+  }
+
+  if (piece.name === P && (rowTo === 0 || rowTo === ROW_Z)) {
+    // Pawn promotion TODO
+  }
+}
+
 function piece(name, row, col, color) {
   return {
     id: ++idCount,
@@ -41,45 +88,7 @@ function piece(name, row, col, color) {
     },
 
     doMove(move) {
-      const { moveTo, captureAt } = move;
-      const [row, col] = moveTo;
-
-      // Remove piece from the board at current position
-      board[this.row][this.col] = null;
-      _imgContainers[this.row][this.col].innerHTML = null;
-
-      const { currentColor, opositeColor } = state;
-
-      // Capture:
-      if (captureAt) {
-        // Remove captured piece from board
-        const [_row, _col] = captureAt;
-        const captuerdBoardPiece = board[_row][_col];
-
-        // Remove from colorPieces
-        const pieceIndex = colorPieces[opositeColor].findIndex(
-          piece => piece.id === captuerdBoardPiece.id
-        );
-        const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
-
-        players[currentColor].captures.push(capturedPiece);
-
-        // for en-passant
-        board[_row][_col] = null;
-        _imgContainers[_row][_col].innerHTML = null;
-      }
-
-      // Pawn promotion
-      if (this.name === P && (row === 0 || row === COL_Z)) {
-        // TODO
-      }
-
-      // Place piece on the board at new position
-      this.row = row;
-      this.col = col;
-      board[row][col] = this;
-      _imgContainers[row][col].innerHTML = this.img;
-      this.hasntMoveYet = false;
+      _doMove(this, move);
     },
   };
 }
@@ -160,6 +169,7 @@ function rookLikeMoves(board, piece) {
       if (boardPiece.color !== piece.color) {
         moves.push(_moveObj(cell, cell));
       };
+      break;
     } else {
       moves.push(_moveObj(cell));
     }
@@ -173,6 +183,7 @@ function rookLikeMoves(board, piece) {
       if (boardPiece.color !== piece.color) {
         moves.push(_moveObj(cell, cell));
       };
+      break;
     } else {
       moves.push(_moveObj(cell));
     }
@@ -186,6 +197,7 @@ function rookLikeMoves(board, piece) {
       if (boardPiece.color !== piece.color) {
         moves.push(_moveObj(cell, cell));
       };
+      break;
     } else {
       moves.push(_moveObj(cell));
     }
@@ -199,6 +211,7 @@ function rookLikeMoves(board, piece) {
       if (boardPiece.color !== piece.color) {
         moves.push(_moveObj(cell, cell));
       };
+      break;
     } else {
       moves.push(_moveObj(cell));
     }
@@ -351,10 +364,32 @@ function queen(row, col, color) {
   };
 }
 
+
+
+function doCastle(piece, move) {
+  const { moveTo, rookFrom, rookTo } = move;
+
+  displcePieceTo(piece, moveTo);
+
+  // Move corresponding rook
+  const [_row, _col] = rookFrom;
+  const rook = board[_row][_col];
+  if (!rook) warn('Rook not found while castling');
+  log(rook);
+  displcePieceTo(rook, rookTo);
+}
+
 function king(row, col, color) {
   return {
     ...piece(K, row, col, color),
     img: buildImg(K, color),
+    doMove(move) {
+      if (move.rookFrom) {
+        doCastle(this, move);
+      } else {
+        _doMove(this, move);
+      }
+    },
     computeMoves(board) {
       const { row, col } = this;
       const potentialMoves = [
@@ -391,7 +426,7 @@ function king(row, col, color) {
           }
 
           castleMoves.push({
-            moveTo: [row, kCol + 1],
+            moveTo: [row, col - 2],
             steps: castleSteps,
             rookFrom: [row, rook.col],
             rookTo: [row, col - 1]
@@ -414,7 +449,7 @@ function king(row, col, color) {
           }
 
           castleMoves.push({
-            moveTo: [row, kCol - 1],
+            moveTo: [row, col + 2],
             steps: castleSteps,
             rookFrom: [row, rook.col],
             rookTo: [row, col + 1]
