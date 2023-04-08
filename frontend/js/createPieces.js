@@ -9,12 +9,10 @@ import {
 
 let idCount = 0;
 
-function _moveObj(moveTo, captureAt) {
-  const moveObj = { moveTo };
-  if (captureAt) {
-    moveObj.captureAt = captureAt;
-  }
-  return moveObj;
+function moveObj(moveTo, captureAt) {
+  const obj = { moveTo };
+  if (captureAt) obj.captureAt = captureAt;
+  return obj;
 }
 
 function buildImg(type, color) {
@@ -114,11 +112,11 @@ function bishopLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       }
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -129,11 +127,11 @@ function bishopLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       }
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -144,11 +142,11 @@ function bishopLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       }
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -159,11 +157,11 @@ function bishopLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       }
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -179,11 +177,11 @@ function rookLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       };
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -193,11 +191,11 @@ function rookLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       };
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -207,11 +205,11 @@ function rookLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       };
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -221,11 +219,11 @@ function rookLikeMoves(board, piece) {
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
-        moves.push(_moveObj(cell, cell));
+        moves.push(moveObj(cell, cell));
       };
       break;
     } else {
-      moves.push(_moveObj(cell));
+      moves.push(moveObj(cell));
     }
   }
 
@@ -241,10 +239,10 @@ function specificMoves(board, potentialMoves, pieceColor) {
     const boardPiece = board[row][col];
     if (boardPiece) {
       if (boardPiece.color !== pieceColor) {
-        moves.push(_moveObj([row, col], [row, col]));
+        moves.push(moveObj([row, col], [row, col]));
       }
     } else {
-      moves.push(_moveObj([row, col]));
+      moves.push(moveObj([row, col]));
     }
   }
 
@@ -264,13 +262,13 @@ function pawn(row, col, color) {
 
       let blockingPiece = board[oneRankAhead][this.col];
       if (!blockingPiece) {
-        moves.push(_moveObj([oneRankAhead, this.col]));
+        moves.push(moveObj([oneRankAhead, this.col]));
 
         if (this.row == this.startingRow) {
           const twoRanksAhead = this.row + this.delta * 2;
           blockingPiece = board[twoRanksAhead][this.col];
           if (!blockingPiece) {
-            moves.push(_moveObj([twoRanksAhead, this.col]));
+            moves.push(moveObj([twoRanksAhead, this.col]));
           }
         }
       }
@@ -278,13 +276,13 @@ function pawn(row, col, color) {
       const adjacentCol1 = this.col + 1;
       let oponentPiece = board[oneRankAhead][adjacentCol1];
       if (oponentPiece && oponentPiece.color !== this.color) {
-        moves.push(_moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1]));
+        moves.push(moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1]));
       }
 
       const adjacentCol2 = this.col - 1;
       oponentPiece = board[oneRankAhead][adjacentCol2];
       if (oponentPiece && oponentPiece.color !== this.color) {
-        moves.push(_moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2]));
+        moves.push(moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2]));
 
       }
 
@@ -307,7 +305,7 @@ function pawn(row, col, color) {
               lastMoveTo[1] === this.col - 1
             ) {
               // Capture one row ahead at opponent pawn's file
-              moves.push(_moveObj([this.row + this.delta, lastMoveTo[1]], lastMoveTo));
+              moves.push(moveObj([this.row + this.delta, lastMoveTo[1]], lastMoveTo));
             }
           }
         }
