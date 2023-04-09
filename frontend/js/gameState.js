@@ -1,5 +1,6 @@
 import { computeLegalMoves } from './simulation.js';
 import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
+import { markLastMove, unselectCurrentSquare } from './board.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -61,11 +62,17 @@ function makeMove(piece, move) {
 
   piece.doMove(move);
 
+  unselectCurrentSquare();
   passTurn();
 }
 
 function startTurn() {
   boardHistory.push(copyBoard(board));
+
+  if (movesHistory.length) {
+    const lastMove = movesHistory[movesHistory.length - 1];
+    markLastMove(lastMove.from, lastMove.to);
+  }
 
   if (isStalemateByRepetition()) {
     setTimeout(() => {

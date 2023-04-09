@@ -23,6 +23,8 @@ const _imgContainers = [
 ];
 
 var selectedSquare = null;
+var lastMoveCells = [[0, 0], [0, 0]];
+var movementMarkSquares = [];
 
 function drawBoard(pov = 'w') {
   const _board = document.getElementById('board');
@@ -80,14 +82,32 @@ function drawBoard(pov = 'w') {
   }
 }
 
-var moveSquares = [];
+function clearLastMoveMarks() {
+  const [row, col] = lastMoveCells[0];
+  _imgContainers[row][col].classList.remove('last-move-from');
+  const [_row, _col] = lastMoveCells[1];
+  _imgContainers[_row][_col].classList.remove('last-move-to');
+}
+
+function markLastMove(from, to) {
+  clearLastMoveMarks();
+  const [row, col] = from;
+  const fromSquare = _imgContainers[row][col];
+  fromSquare.classList.add('last-move-from');
+  lastMoveCells[0] = from;
+
+  const [_row, _col] = to;
+  const toSquare = _imgContainers[_row][_col];
+  toSquare.classList.add('last-move-to');
+  lastMoveCells[1] = to;
+}
 
 function clearMoves() {
-  moveSquares.forEach(_square => {
+  movementMarkSquares.forEach(_square => {
     _square.classList.remove('potential-move');
     _square.classList.remove('potential-capture');
   });
-  moveSquares = [];
+  movementMarkSquares = [];
 }
 
 function displayMoves(moves) {
@@ -97,7 +117,7 @@ function displayMoves(moves) {
     const _square = _squares[row][col];
     const type = move.captureAt ? 'capture' : 'move';
     _square.classList.add('potential-' + type);
-    moveSquares.push(_square);
+    movementMarkSquares.push(_square);
   });
 }
 
@@ -141,6 +161,8 @@ function squareClick([row, col]) {
 
 export {
   _imgContainers,
+  unselectCurrentSquare,
+  markLastMove,
   displayMoves,
   drawBoard,
 };

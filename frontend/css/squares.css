@@ -33,6 +33,38 @@
   background-color: #fee3c9;
 }
 
+.square {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  cursor: default;
+  user-select: none;
+  font-weight: bold;
+  background-color: #ff9229;
+}
+
+.square::after {
+  content: '';
+  border-radius: 50%;
+}
+
+.square.potential-move::after {
+  width: 18px;
+  height: 18px;
+  background-color: rgba(117, 117, 117, 0.5);
+}
+
+.square.potential-capture::after {
+  width: 58px;
+  height: 58px;
+  border: 5px solid rgba(117, 117, 117, 0.5);
+}
+
 .square.highlight {
   background-color: teal;
 }
