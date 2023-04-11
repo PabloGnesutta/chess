@@ -52,6 +52,8 @@ function isStalemateByRepetition() {
 }
 
 function makeMove(piece, move) {
+  markLastMove([piece.row, piece.col], move.moveTo);
+
   const historyItem = {
     piece: piece.name,
     from: [piece.row, piece.col],
@@ -68,11 +70,6 @@ function makeMove(piece, move) {
 
 function startTurn() {
   boardHistory.push(copyBoard(board));
-
-  if (movesHistory.length) {
-    const lastMove = movesHistory[movesHistory.length - 1];
-    markLastMove(lastMove.from, lastMove.to);
-  }
 
   if (isStalemateByRepetition()) {
     setTimeout(() => {
