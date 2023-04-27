@@ -1,6 +1,10 @@
 import { computeLegalMoves } from './simulation.js';
 import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
-import { markLastMove, unselectCurrentSquare } from './board.js';
+import {
+  _imgContainers,
+  markLastMove,
+  unselectCurrentSquare,
+} from './board.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -45,7 +49,35 @@ const state = {
   currentColor: 'w',
   opositeColor: 'b',
   selectedPiece: null,
+  isMultiPlayer: false,
+  playerIsColor: null,
 };
+
+function resetState() {
+  for (const color in players) {
+    const player = players[color];
+    pieces[color].splice(0, pieces[color].length);
+    player.isInCheck = false;
+    player.movesHistory = [];
+    player.captures = [];
+  }
+
+  for (let row = 0; row < _Z; row++) {
+    for (let col = 0; col < _Z; col++) {
+      board[row][col] = null;
+      _imgContainers[row][col].innerHTML = null;
+    }
+  }
+
+  movesHistory.splice(0, movesHistory.length);
+  boardHistory.splice(0, boardHistory.length);
+
+  state.currentColor = 'w';
+  state.opositeColor = 'b';
+  state.selectedPiece = null;
+  state.isMultiPlayer = false;
+  state.playerIsColor = null;
+}
 
 function _isStalemateByRepetition() {
   // TODO
@@ -73,11 +105,7 @@ function makeMove(piece, move) {
 function startTurn() {
   boardHistory.push(copyBoard(board));
 
-  if (_isStalemateByRepetition()) {
-    setTimeout(() => {
-      alert('Stalemate by repetition');
-    }, 100);
-  }
+  // TODO: stalemate by repetition
 
   const { currentColor, opositeColor } = state;
 
@@ -128,6 +156,7 @@ export {
   movesHistory,
   players,
   state,
+  resetState,
   makeMove,
   startTurn,
 };

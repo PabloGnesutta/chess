@@ -1,34 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chess</title>
-  <link rel="stylesheet" href="css/header.css" />
-  <link rel="stylesheet" href="css/board.css" />
-  <link rel="stylesheet" href="css/squares.css" />
-  <script src="js/globals.js"></script>
-  <script src="main.js" type="module"></script>
-  <script src="js/ui/header.js" type="module"></script>
-</head>
+    <title>Chess</title>
 
-<body>
-  <div>
+    <link rel="stylesheet" href="css/utils.css" />
+    <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="css/board.css" />
+    <link rel="stylesheet" href="css/squares.css" />
+
+    <script src="js/globals.js"></script>
+    <script src="js/ui/header-UI.js" type="module"></script>
+    <script src="main.js" type="module" defer></script>
+  </head>
+
+  <body>
     <div id="app">
-      <header id="header">
+      <div class="connection-details">
+        <div id="client-id">Offline</div>
+        <div id="room-id"></div>
+      </div>
+
+      <br />
+
+      <div class="play-buttons">
+        <button id="single-player-btn">Single Player</button>
+        <button id="multi-player-btn">Multi Player</button>
+      </div>
+
+      <header id="header" class="">
         <div class="inner">
+          <button id="show-state">State</button>
           <button id="show-board">Board</button>
           <button id="show-pieces">Pieces</button>
           <button id="show-moves-history">Moves History</button>
           <button id="show-board-history">Board History</button>
-          <button id="flip-board">Flip</button>
+          <button id="flip-board">Flip Board</button>
         </div>
       </header>
-      <div id="board" class="board"></div>
-    </div>
-  </div>
-</body>
 
+      <div id="board" class="board display-none"></div>
+    </div>
+  </body>
 </html>

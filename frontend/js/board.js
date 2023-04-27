@@ -76,11 +76,6 @@ function drawBoard(board, pov = 'w') {
       _imgContainer.classList.add('img-container');
       _square.appendChild(_imgContainer);
 
-      const piece = board[row][col];
-      if (piece) {
-        _imgContainer.innerHTML = piece.img;
-      }
-
       _squares[row][col] = _square;
       _imgContainers[row][col] = _imgContainer;
       _row.appendChild(_square);
@@ -150,12 +145,12 @@ function unselectCurrentSquare() {
 }
 
 function selectSquare([row, col]) {
+  unselectCurrentSquare();
   selectedSquare = _squares[row][col];
   selectedSquare.classList.add('highlight');
 }
 
 function squareClick(board, [row, col]) {
-  unselectCurrentSquare();
   selectSquare([row, col]);
 
   const { selectedPiece, currentColor } = state;
@@ -183,6 +178,7 @@ function squareClick(board, [row, col]) {
 export {
   _imgContainers,
   unselectCurrentSquare,
+  clearLastMoveMarks,
   markLastMove,
   displayMoves,
   drawBoard,

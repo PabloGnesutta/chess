@@ -68,8 +68,14 @@ function processMessage(_s, clientId, data) {
 
   switch (data.type) {
     case 'JOIN_ROOM': {
-      const room = joinRandomRoom(clientId);
-      sendMessage(_s, { type: 'ROOM_JOINED', room });
+      const { room, isCreator } = joinRandomRoom(clientId);
+      const isRoomFilledAndReady = room.activeClientsCount === room.peopleLimit;
+      sendMessage(_s, {
+        type: 'ROOM_JOINED',
+        isCreator,
+        room,
+        isRoomFilledAndReady,
+      });
       break;
     }
 

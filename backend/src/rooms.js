@@ -21,15 +21,17 @@ function createRoom(clientId) {
 }
 
 function joinRandomRoom(clientId) {
+  let isCreator = false;
   let room = rooms.find(r => r.activeClientsCount < r.peopleLimit);
   if (!room) {
+    isCreator = true;
     room = createRoom(clientId);
   }
 
   room.activeClientIds.push(clientId);
   room.activeClientsCount++;
 
-  return room;
+  return { room, isCreator };
 }
 
 function leaveRoom(roomId, clientId) {

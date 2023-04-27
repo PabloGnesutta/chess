@@ -1,5 +1,16 @@
 import { drawBoard } from '../board.js';
-import { board, pieces, movesHistory, boardHistory } from '../gameState.js';
+import {
+  board,
+  pieces,
+  movesHistory,
+  boardHistory,
+  state,
+} from '../gameState.js';
+
+const showState = document.getElementById('show-state');
+showState.addEventListener('click', function () {
+  log(state);
+});
 
 const showBoard = document.getElementById('show-board');
 showBoard.addEventListener('click', function () {
