@@ -8,7 +8,7 @@ const R = 'rook';
 const N = 'knight';
 const B = 'bishop';
 
-const _Z = 7; // Larges row/col index
+const _Z = 7; // Largest row/col index
 
 const log = console.log;
 const warn = console.warn;

@@ -75,7 +75,7 @@ function initGame() {
     board.putPiece(piece);
   }
 
-  drawBoard();
+  drawBoard(board);
   startTurn();
 }
 

@@ -1,4 +1,4 @@
-import { board, makeMove, state } from './gameState.js';
+import { makeMove, state } from './gameState.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -29,7 +29,7 @@ var lastMoveCells = [
 ];
 var movementMarkSquares = [];
 
-function drawBoard(pov = 'w') {
+function drawBoard(board, pov = 'w') {
   const _board = document.getElementById('board');
   _board.innerHTML = null;
 
@@ -63,7 +63,9 @@ function drawBoard(pov = 'w') {
       _square.className = 'square';
       _square.setAttribute('row', row);
       _square.setAttribute('col', col);
-      _square.addEventListener('mousedown', () => squareClick([row, col]));
+      _square.addEventListener('mousedown', () =>
+        squareClick(board, [row, col])
+      );
 
       const _rowCol = document.createElement('div');
       _rowCol.innerText = row + '_' + col;
@@ -152,7 +154,7 @@ function selectSquare([row, col]) {
   selectedSquare.classList.add('highlight');
 }
 
-function squareClick([row, col]) {
+function squareClick(board, [row, col]) {
   unselectCurrentSquare();
   selectSquare([row, col]);
 

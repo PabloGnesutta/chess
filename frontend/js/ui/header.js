@@ -15,7 +15,7 @@ let pov = 'w';
 const flipBoard = document.getElementById('flip-board');
 flipBoard.addEventListener('click', function () {
   pov = pov === 'w' ? 'b' : 'w';
-  drawBoard(pov);
+  drawBoard(board, pov);
 });
 
 const showMovesHistory = document.getElementById('show-moves-history');
