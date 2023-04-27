@@ -34,25 +34,25 @@ function drawBoard(pov = 'w') {
   _board.innerHTML = null;
 
   let rowStart = 0;
-  let rowEval = row => row <= ROW_Z;
+  let rowEval = row => row <= _Z;
   let rowInc = 1;
 
   let colStart = 0;
-  let colEval = col => col <= COL_Z;
+  let colEval = col => col <= _Z;
   let colInc = 1;
 
   if (pov === 'b') {
-    rowStart = ROW_Z;
+    rowStart = _Z;
     rowEval = row => row >= 0;
     rowInc = -1;
 
-    colStart = COL_Z;
+    colStart = _Z;
     colEval = col => col >= 0;
     colInc = -1;
   }
 
-  let rankIndicatorAtCol = pov === 'w' ? 0 : COL_Z;
-  let fileIndicatorAtRow = pov === 'w' ? ROW_Z : 0;
+  let rankIndicatorAtCol = pov === 'w' ? 0 : _Z;
+  let fileIndicatorAtRow = pov === 'w' ? _Z : 0;
 
   for (let row = rowStart; rowEval(row); row += rowInc) {
     const _row = document.createElement('div');

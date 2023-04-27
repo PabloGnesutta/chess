@@ -74,7 +74,7 @@ function _doMove(piece, move) {
     }
   }
 
-  if (piece.name === P && (rowTo === 0 || rowTo === ROW_Z)) {
+  if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {
     promotePawnAt(piece, [rowTo, colTo]);
   }
 }
@@ -103,7 +103,7 @@ function bishopLikeMoves(board, piece) {
   const moves = [];
   let { row, col } = piece;
 
-  while (row < ROW_Z && col < COL_Z) {
+  while (row < _Z && col < _Z) {
     const cell = [++row, ++col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
@@ -133,7 +133,7 @@ function bishopLikeMoves(board, piece) {
 
   row = piece.row;
   col = piece.col;
-  while (row < ROW_Z && col > 0) {
+  while (row < _Z && col > 0) {
     const cell = [++row, --col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
@@ -148,7 +148,7 @@ function bishopLikeMoves(board, piece) {
 
   row = piece.row;
   col = piece.col;
-  while (row > 0 && col < COL_Z) {
+  while (row > 0 && col < _Z) {
     const cell = [--row, ++col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
@@ -168,7 +168,7 @@ function rookLikeMoves(board, piece) {
   const moves = [];
   let { row, col } = piece;
 
-  while (row < ROW_Z) {
+  while (row < _Z) {
     const cell = [++row, col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
@@ -196,7 +196,7 @@ function rookLikeMoves(board, piece) {
   }
 
   row = piece.row;
-  while (col < COL_Z) {
+  while (col < _Z) {
     const cell = [row, ++col];
     const boardPiece = board[cell[0]][cell[1]];
     if (boardPiece) {
@@ -231,7 +231,7 @@ function specificMoves(board, potentialMoves, pieceColor) {
 
   for (let i = 0; i < potentialMoves.length; i++) {
     const [row, col] = potentialMoves[i];
-    if (row > ROW_Z || row < 0 || col > COL_Z || col < 0) continue;
+    if (row > _Z || row < 0 || col > _Z || col < 0) continue;
     const boardPiece = board[row][col];
     if (boardPiece) {
       if (boardPiece.color !== pieceColor) {
@@ -449,7 +449,7 @@ function king(row, col, color) {
         }
 
         rook2: {
-          const rook = board[row][ROW_Z];
+          const rook = board[row][_Z];
           if (!rook || !rook.hasntMoveYet) {
             break rook2;
           }
