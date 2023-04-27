@@ -47,7 +47,8 @@ const state = {
   selectedPiece: null,
 };
 
-function isStalemateByRepetition() {
+function _isStalemateByRepetition() {
+  // TODO
   return false;
 }
 
@@ -62,16 +63,17 @@ function makeMove(piece, move) {
   movesHistory.push({ color: state.currentColor, ...historyItem });
   players[state.currentColor].movesHistory.push({ historyItem });
 
-  piece.doMove(move);
-
   unselectCurrentSquare();
-  passTurn();
+
+  // TODO: Delegate this to websocket
+  piece.doMove(move);
+  _passTurn();
 }
 
 function startTurn() {
   boardHistory.push(copyBoard(board));
 
-  if (isStalemateByRepetition()) {
+  if (_isStalemateByRepetition()) {
     setTimeout(() => {
       alert('Stalemate by repetition');
     }, 100);
@@ -111,7 +113,7 @@ function startTurn() {
   }
 }
 
-function passTurn() {
+function _passTurn() {
   players[state.currentColor].isInCheck = false;
   state.selectedPiece = null;
   state.currentColor = state.currentColor === 'w' ? 'b' : 'w';
@@ -127,6 +129,5 @@ export {
   players,
   state,
   makeMove,
-  passTurn,
   startTurn,
 };

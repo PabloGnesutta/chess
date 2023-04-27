@@ -1,11 +1,5 @@
 import { displayMoves, _imgContainers } from './board.js';
-import {
-  board,
-  pieces,
-  movesHistory,
-  players,
-  state,
-} from './gameState.js';
+import { board, pieces, movesHistory, players, state } from './gameState.js';
 
 let idCount = 0;
 
@@ -30,26 +24,28 @@ function displcePieceTo(piece, moveTo) {
 
   // Remove piece from the board at current position
   board[row][col] = null;
-  _imgContainers[row][col].innerHTML = null;
+  _imgContainers[row][col].innerHTML = null; // render
 
   // Place piece on the board at new position
   piece.row = rowTo;
   piece.col = colTo;
   board[rowTo][colTo] = piece;
-  _imgContainers[rowTo][colTo].innerHTML = piece.img;
+  _imgContainers[rowTo][colTo].innerHTML = piece.img; // render
   piece.hasntMoveYet = false;
 }
 
 function promotePawnAt(pawn, [row, col]) {
   const { currentColor } = state;
-  const pieceIndex = pieces[currentColor].findIndex(piece => piece.id === pawn.id);
+  const pieceIndex = pieces[currentColor].findIndex(
+    piece => piece.id === pawn.id
+  );
   pieces[currentColor].splice(pieceIndex, 1);
   board[row][col] = null;
 
   const promotedPiece = queen(row, col, currentColor);
   pieces[currentColor].push(promotedPiece);
   board.putPiece(promotedPiece);
-  _imgContainers[row][col].innerHTML = promotedPiece.img;
+  _imgContainers[row][col].innerHTML = promotedPiece.img; // render
 }
 
 function _doMove(piece, move) {
@@ -74,7 +70,7 @@ function _doMove(piece, move) {
     // en-passant
     if (colTo !== colCapt || rowTo !== rowCapt) {
       board[rowCapt][colCapt] = null;
-      _imgContainers[rowCapt][colCapt].innerHTML = null;
+      _imgContainers[rowCapt][colCapt].innerHTML = null; // render
     }
   }
 
@@ -178,7 +174,7 @@ function rookLikeMoves(board, piece) {
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
-      };
+      }
       break;
     } else {
       moves.push(moveObj(cell));
@@ -192,7 +188,7 @@ function rookLikeMoves(board, piece) {
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
-      };
+      }
       break;
     } else {
       moves.push(moveObj(cell));
@@ -206,7 +202,7 @@ function rookLikeMoves(board, piece) {
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
-      };
+      }
       break;
     } else {
       moves.push(moveObj(cell));
@@ -220,7 +216,7 @@ function rookLikeMoves(board, piece) {
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
-      };
+      }
       break;
     } else {
       moves.push(moveObj(cell));
@@ -253,9 +249,11 @@ function pawn(row, col, color) {
   return {
     ...piece(P, row, col, color),
     img: buildImg(P, color),
+
     delta: color === 'w' ? -1 : 1,
     startingRow: color === 'w' ? 6 : 1,
     enPassantRow: color === 'w' ? 3 : 4,
+
     computeMoves(board) {
       const moves = [];
       const oneRankAhead = this.row + this.delta;
@@ -276,14 +274,17 @@ function pawn(row, col, color) {
       const adjacentCol1 = this.col + 1;
       let oponentPiece = board[oneRankAhead][adjacentCol1];
       if (oponentPiece && oponentPiece.color !== this.color) {
-        moves.push(moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1]));
+        moves.push(
+          moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1])
+        );
       }
 
       const adjacentCol2 = this.col - 1;
       oponentPiece = board[oneRankAhead][adjacentCol2];
       if (oponentPiece && oponentPiece.color !== this.color) {
-        moves.push(moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2]));
-
+        moves.push(
+          moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2])
+        );
       }
 
       // EN-PASSANT
@@ -305,7 +306,9 @@ function pawn(row, col, color) {
               lastMoveTo[1] === this.col - 1
             ) {
               // Capture one row ahead at opponent pawn's file
-              moves.push(moveObj([this.row + this.delta, lastMoveTo[1]], lastMoveTo));
+              moves.push(
+                moveObj([this.row + this.delta, lastMoveTo[1]], lastMoveTo)
+              );
             }
           }
         }
@@ -320,6 +323,7 @@ function knight(row, col, color) {
   return {
     ...piece(N, row, col, color),
     img: buildImg(N, color),
+
     computeMoves(board) {
       const { row, col } = this;
       const potentialMoves = [
@@ -333,11 +337,7 @@ function knight(row, col, color) {
         [row + 2, col - 1],
       ];
 
-      this.moves = specificMoves(
-        board,
-        potentialMoves,
-        this.color
-      );
+      this.moves = specificMoves(board, potentialMoves, this.color);
     },
   };
 }
@@ -346,6 +346,7 @@ function bishop(row, col, color) {
   return {
     ...piece(B, row, col, color),
     img: buildImg(B, color),
+
     computeMoves(board) {
       this.moves = bishopLikeMoves(board, this);
     },
@@ -356,6 +357,7 @@ function rook(row, col, color) {
   return {
     ...piece(R, row, col, color),
     img: buildImg(R, color),
+
     computeMoves(board) {
       this.moves = rookLikeMoves(board, this);
     },
@@ -366,6 +368,7 @@ function queen(row, col, color) {
   return {
     ...piece(Q, row, col, color),
     img: buildImg(Q, color),
+
     computeMoves(board) {
       const bishopLike = bishopLikeMoves(board, this);
       const rookLike = rookLikeMoves(board, this);
@@ -374,8 +377,7 @@ function queen(row, col, color) {
   };
 }
 
-
-function doCastle(piece, move) {
+function _doCastle(piece, move) {
   const { moveTo, rookFrom, rookTo } = move;
 
   displcePieceTo(piece, moveTo);
@@ -383,7 +385,9 @@ function doCastle(piece, move) {
   // Move corresponding rook
   const [_row, _col] = rookFrom;
   const rook = board[_row][_col];
-  if (!rook) warn('Rook not found while castling');
+
+  if (!rook) return warn('Rook not found while castling');
+
   displcePieceTo(rook, rookTo);
 }
 
@@ -391,13 +395,16 @@ function king(row, col, color) {
   return {
     ...piece(K, row, col, color),
     img: buildImg(K, color),
+
+    // Overwrite inherited doMove method
     doMove(move) {
       if (move.rookFrom) {
-        doCastle(this, move);
+        _doCastle(this, move);
       } else {
         _doMove(this, move);
       }
     },
+
     computeMoves(board) {
       const { row, col } = this;
       const potentialMoves = [
@@ -437,7 +444,7 @@ function king(row, col, color) {
             moveTo: [row, col - 2],
             steps: castleSteps,
             rookFrom: [row, rook.col],
-            rookTo: [row, col - 1]
+            rookTo: [row, col - 1],
           });
         }
 
@@ -460,16 +467,12 @@ function king(row, col, color) {
             moveTo: [row, col + 2],
             steps: castleSteps,
             rookFrom: [row, rook.col],
-            rookTo: [row, col + 1]
+            rookTo: [row, col + 1],
           });
         }
       }
 
-      const moves = specificMoves(
-        board,
-        potentialMoves,
-        this.color
-      );
+      const moves = specificMoves(board, potentialMoves, this.color);
 
       this.moves = moves.concat(castleMoves);
     },

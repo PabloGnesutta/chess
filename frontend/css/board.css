@@ -18,14 +18,6 @@
   display: flex;
 }
 
-.row-col-indicator {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  font-size: 12px;
-  z-index: 999;
-}
-
 .piece {
   position: absolute;
   width: 56px;
@@ -44,5 +36,5 @@
 
 .img-container.last-move-from,
 .img-container.last-move-to {
-  background-color: rgba(150, 0, 105, 0.9);
+  background-color: rgba(150, 0, 105, 0.4);
 }

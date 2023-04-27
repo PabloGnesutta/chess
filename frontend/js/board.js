@@ -23,7 +23,10 @@ const _imgContainers = [
 ];
 
 var selectedSquare = null;
-var lastMoveCells = [[0, 0], [0, 0]];
+var lastMoveCells = [
+  [0, 0],
+  [0, 0],
+];
 var movementMarkSquares = [];
 
 function drawBoard(pov = 'w') {
@@ -47,6 +50,9 @@ function drawBoard(pov = 'w') {
     colEval = col => col >= 0;
     colInc = -1;
   }
+
+  let rankIndicatorAtCol = pov === 'w' ? 0 : COL_Z;
+  let fileIndicatorAtRow = pov === 'w' ? ROW_Z : 0;
 
   for (let row = rowStart; rowEval(row); row += rowInc) {
     const _row = document.createElement('div');
@@ -76,6 +82,19 @@ function drawBoard(pov = 'w') {
       _squares[row][col] = _square;
       _imgContainers[row][col] = _imgContainer;
       _row.appendChild(_square);
+
+      if (col === rankIndicatorAtCol) {
+        const rankIndicator = document.createElement('div');
+        rankIndicator.classList.add('rank-indicator');
+        rankIndicator.innerText = ROW_MAP[row];
+        _square.appendChild(rankIndicator);
+      }
+      if (row === fileIndicatorAtRow) {
+        const fileIndicator = document.createElement('div');
+        fileIndicator.classList.add('file-indicator');
+        fileIndicator.innerText = COL_MAP[col];
+        _square.appendChild(fileIndicator);
+      }
     }
 
     _board.appendChild(_row);
@@ -112,7 +131,7 @@ function clearMoves() {
 
 function displayMoves(moves) {
   clearMoves();
-  moves.forEach((move) => {
+  moves.forEach(move => {
     const [row, col] = move.moveTo;
     const _square = _squares[row][col];
     const type = move.captureAt ? 'capture' : 'move';

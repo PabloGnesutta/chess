@@ -56,15 +56,42 @@
 .square.potential-move::after {
   width: 18px;
   height: 18px;
-  background-color: rgba(117, 117, 117, 0.5);
+  background-color: rgba(117, 117, 117, 0.65);
 }
 
 .square.potential-capture::after {
   width: 58px;
   height: 58px;
-  border: 5px solid rgba(117, 117, 117, 0.5);
+  border: 5px solid rgba(117, 117, 117, 0.65);
 }
 
 .square.highlight {
-  background-color: teal;
+  background-color: rgba(0, 128, 128, 0.75);
+}
+
+/* rows and cols, not ranks and files */
+.row-col-indicator {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 12px;
+  z-index: 999;
+}
+
+.rank-indicator,
+.file-indicator {
+  position: absolute;
+  color: black;
+  font-size: 12px;
+}
+.rank-indicator {
+  top: 4px;
+  left: 4px;
+}
+
+.file-indicator {
+  bottom: 0px;
+  right: 4px;
+  text-transform: uppercase;
 }
