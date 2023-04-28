@@ -1,5 +1,5 @@
 import { drawBoard } from '../board.js';
-import { board, state } from '../gameState.js';
+import { board, makeMoveMultiPlayer, state } from '../gameState.js';
 import { initGame } from '../initGame.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 
@@ -24,6 +24,7 @@ function connectWebSocket() {
       log('Websocket connection established');
       isWSOpen = true;
 
+      // send function
       send = obj => ws.send(JSON.stringify(obj));
 
       resolve(true);
@@ -50,24 +51,26 @@ function connectWebSocket() {
         case 'ROOM_JOINED': {
           activeRoomId = data.room.id;
           roomIdElement.innerText = 'On Room ' + activeRoomId;
-          state.playerIsColor = data.isCreator ? 'w' : 'b';
+          state.playerIsColor = data.isFirtToJoin ? 'w' : 'b';
+          if (data.isRoomFilledAndReady) {
+            drawBoard(board, state.playerIsColor);
+            initGame();
+            log(state);
+          } else {
+            log('Waiting for other player');
+          }
           break;
         }
         case 'ROOM_READY': {
-          // TODO
-          // if (data.isRoomFilledAndReady) {
-          //   log('ready to start game');
-          //   drawBoard(board, state.playerIsColor);
-          //   initGame();
-          // }
+          if (data.isRoomFilledAndReady) {
+            log('ready to start game');
+            drawBoard(board, state.playerIsColor);
+            initGame();
+          }
           break;
         }
-        case 'ROOM_LEFT': {
-          activeRoomId = null;
-          // roomChatArea.innerText = null;
-          // joinRoomBtn.innerText = 'Join Room';
-          // joinRoomBtn.disabled = false;
-          // leaveRoomBtn.disabled = true;
+        case 'OPONENT_MOVED': {
+          makeMoveMultiPlayer(data.moveData);
           break;
         }
         case 'ROOM_MESSAGE': {
@@ -139,4 +142,4 @@ function setSendToRoomButtonState(e) {
   sendToRoomBtn.disabled = e.target.value ? false : true;
 }
 
-export { connectWebSocket, joinRoom };
+export { connectWebSocket, joinRoom, send as wsSend };

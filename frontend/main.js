@@ -4,6 +4,10 @@ import { connectWebSocket, joinRoom } from './js/ws/ws.js';
 import { singlePlayerBtn, multiPlayerBtn } from './js/ui/lobby-UI.js';
 import { initGame } from './js/initGame.js';
 
+await connectWebSocket();
+state.isMultiPlayer = true;
+joinRoom();
+
 // SINGLE PLAYER
 singlePlayerBtn.onclick = e => {
   state.isMultiplayer = false;
@@ -14,10 +18,9 @@ singlePlayerBtn.onclick = e => {
 // MULTI PLAYER
 multiPlayerBtn.onclick = async e => {
   try {
-    await connectWebSocket();
     state.isMultiPlayer = true;
     joinRoom();
-  } catch (error) {
-    warn('error connecting to websocket', error);
+  } catch (err) {
+    warn('Error connecting to websocket', err);
   }
 };

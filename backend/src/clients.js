@@ -4,15 +4,26 @@ const { log } = require('./utils/utils');
 const WS_MAX_RESPONSE_LENGTH = 65535;
 
 const clientIds = [];
+const clientsData = [];
 const sockets = [];
+
+const getClientIdIndex = id => clientIds.findIndex(cId => cId === id);
 
 let idCount = 0;
 
+/**
+ * Register new web socket client
+ * @param {Socket} _s
+ */
 function registerClient(_s) {
   const clientId = ++idCount;
 
   sockets.push(_s);
   clientIds.push(clientId);
+  clientsData.push({
+    // id: clientId,
+    roomIsIn: null,
+  });
 
   sendMessage(_s, { type: 'CLIENT_REGISTERED', clientId });
 
@@ -30,78 +41,108 @@ function flushSocket(_s, clientId) {
   log('socket closed');
 
   _s.destroy();
-  const index = clientIds.findIndex(id => id === clientId);
-  sockets.splice(index, 1);
-  clientIds.splice(index, 1);
-  // TODO: Remove client from rooms
-}
+  const clientIdIndex = getClientIdIndex(clientId);
 
-function sendMsgToAll(msg, clientId) {
-  sockets.forEach(_s => {
-    sendMessage(_s, msg, clientId);
+  sockets.splice(clientIdIndex, 1);
+  clientIds.splice(clientIdIndex, 1);
+  clientsData.splice(clientIdIndex, 1);
+
+  // Remove client from rooms - TODO: Optimize this (we know the room)
+  rooms.forEach(room => {
+    const roomClientIdIndex = room.activeClientIds.findIndex(
+      id => id === clientId
+    );
+    if (roomClientIdIndex !== -1) {
+      log('removing client from room');
+      room.activeClientIds.splice(roomClientIdIndex, 1);
+    }
   });
 }
 
-function sendMsgToChannel(roomId, msg, clientId) {
+function sendMsgToChannel(roomId, msg, exceptClientId) {
   const room = rooms.find(r => r.id === roomId);
   if (!room) return log(' * Room not found');
 
-  log('room', room);
   const roomClientIds = room.activeClientIds;
-  log('roomClientIds', roomClientIds);
 
   roomClientIds.forEach(roomClientId => {
-    const index = clientIds.findIndex(client => client === roomClientId);
-    log(index);
-    if (index === -1) {
-      log(' * client not found');
+    // TODO: Optimize this
+    const clientIdIndex = clientIds.findIndex(
+      clientId => clientId === roomClientId && clientId !== exceptClientId
+    );
+    if (clientIdIndex === -1) {
+      log(' * client not found @sendMsgToChannel');
     } else {
-      sendMessage(sockets[index], { type: 'ROOM_MESSAGE', msg, clientId });
+      sendMessage(sockets[clientIdIndex], msg);
     }
   });
 }
 
 function processMessage(_s, clientId, data) {
-  log('processMessage', data);
-
+  log(' - processMessage', data);
   // sendMessage(_s, { type: 'ACKNOWLEDGE', clientId });
 
   switch (data.type) {
     case 'JOIN_ROOM': {
-      const { room, isCreator } = joinRandomRoom(clientId);
-      const isRoomFilledAndReady = room.activeClientsCount === room.peopleLimit;
+      const room = joinRandomRoom(clientId);
+      const isRoomFilledAndReady =
+        room.activeClientIds.length === room.peopleLimit;
+
+      clientsData[getClientIdIndex(clientId)].roomIsIn = room.id;
+
       sendMessage(_s, {
         type: 'ROOM_JOINED',
-        isCreator,
         room,
         isRoomFilledAndReady,
+        isFirtToJoin: room.activeClientIds.length === 1,
       });
+
+      if (isRoomFilledAndReady) {
+        sendMsgToChannel(
+          room.id,
+          {
+            type: 'ROOM_READY',
+            room,
+            isRoomFilledAndReady,
+          },
+          clientId
+        );
+      }
+      break;
+    }
+
+    case 'SIGNAL_MOVE': {
+      const clientIdIndex = getClientIdIndex(clientId);
+      const roomId = clientsData[clientIdIndex].roomIsIn;
+      sendMsgToChannel(
+        roomId,
+        {
+          type: 'OPONENT_MOVED',
+          moveData: data.moveData,
+        },
+        clientId
+      );
       break;
     }
 
     case 'LEAVE_ROOM': {
       const room = rooms.find(r => r.id === data.roomId);
       if (!room) {
-        return log('Room does not exist');
+        return log('Room does not exist @LEAVE_ROOM');
       }
       const clientIndex = room.activeClientIds.findIndex(
         roomClientId => roomClientId === clientId
       );
       if (clientIndex === -1) {
-        return log('Client not found in room');
+        return log('Client not found in room @LEAVE_ROOM');
       }
       room.activeClientIds.splice(clientIndex, 1);
-      room.activeClientsCount--;
       sendMessage(_s, { type: 'ROOM_LEFT', roomId: data.roomId });
       break;
     }
 
     case 'ROOM_MESSAGE':
-      sendMsgToChannel(data.roomId, data.msg, clientId);
-      break;
-
-    case 'ALL_MESSAGE':
-      sendMsgToAll({ type: 'TO_ALL_MESSAGE', msg: data.msg, clientId });
+      // sendMsgToChannel(data.roomId, data.msg);
       break;
 
     default:

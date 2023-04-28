@@ -1,4 +1,8 @@
-import { makeMove, state } from './gameState.js';
+import {
+  makeMoveSinglePlayer,
+  signalMoveMultiplayer,
+  state,
+} from './gameState.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -162,7 +166,18 @@ function squareClick(board, [row, col]) {
         ({ moveTo }) => moveTo[0] === row && moveTo[1] === col
       );
 
-      if (move) return makeMove(selectedPiece, move);
+      if (move) {
+        if (state.isMultiPlayer) {
+          if (state.playerIsColor === currentColor) {
+            signalMoveMultiplayer(selectedPiece, move);
+          }
+        } else {
+          makeMoveSinglePlayer(selectedPiece, move);
+        }
+        return;
+      }
+
+      // Multiplayer
     }
   }
 

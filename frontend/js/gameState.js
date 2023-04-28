@@ -5,6 +5,7 @@ import {
   markLastMove,
   unselectCurrentSquare,
 } from './board.js';
+import { wsSend } from './ws/ws.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -75,8 +76,6 @@ function resetState() {
   state.currentColor = 'w';
   state.opositeColor = 'b';
   state.selectedPiece = null;
-  state.isMultiPlayer = false;
-  state.playerIsColor = null;
 }
 
 function _isStalemateByRepetition() {
@@ -84,7 +83,40 @@ function _isStalemateByRepetition() {
   return false;
 }
 
-function makeMove(piece, move) {
+function makeMoveSinglePlayer(piece, move) {
+  markLastMove([piece.row, piece.col], move.moveTo);
+
+  const historyItem = {
+    piece: piece.name,
+    from: [piece.row, piece.col],
+    to: move.moveTo,
+  };
+  movesHistory.push({ color: state.currentColor, ...historyItem });
+  players[state.currentColor].movesHistory.push({ historyItem });
+
+  unselectCurrentSquare();
+
+  // TODO: Delegate this to websocket
+  piece.doMove(move);
+  _passTurn();
+}
+
+function signalMoveMultiplayer(piece, move) {
+  makeMoveSinglePlayer(piece, move);
+  wsSend({
+    type: 'SIGNAL_MOVE',
+    moveData: {
+      pieceId: piece.id,
+      move,
+    },
+  });
+}
+
+function makeMoveMultiPlayer(moveData) {
+  const { pieceId, move } = moveData;
+  const piece = pieces[state.currentColor].find(p => p.id === pieceId);
+  log('piece', piece);
+
   markLastMove([piece.row, piece.col], move.moveTo);
 
   const historyItem = {
@@ -157,6 +189,8 @@ export {
   players,
   state,
   resetState,
-  makeMove,
+  makeMoveSinglePlayer,
+  signalMoveMultiplayer,
+  makeMoveMultiPlayer,
   startTurn,
 };

@@ -13,7 +13,6 @@ function createRoom(clientId) {
     createdBy: clientId,
     peopleLimit: 2,
     activeClientIds: [],
-    activeClientsCount: 0,
   };
   rooms.push(room);
 
@@ -21,17 +20,14 @@ function createRoom(clientId) {
 }
 
 function joinRandomRoom(clientId) {
-  let isCreator = false;
-  let room = rooms.find(r => r.activeClientsCount < r.peopleLimit);
+  let room = rooms.find(r => r.activeClientIds.length < r.peopleLimit);
   if (!room) {
-    isCreator = true;
     room = createRoom(clientId);
   }
 
   room.activeClientIds.push(clientId);
-  room.activeClientsCount++;
 
-  return { room, isCreator };
+  return room;
 }
 
 function leaveRoom(roomId, clientId) {
@@ -48,7 +44,6 @@ function leaveRoom(roomId, clientId) {
   }
 
   room.activeClientIds.splice(activeClientIndex, 1);
-  room.activeClientsCount--;
 }
 
 module.exports = {
