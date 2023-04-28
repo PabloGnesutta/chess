@@ -43,43 +43,64 @@ function flushSocket(_s, clientId) {
   _s.destroy();
   const clientIdIndex = getClientIdIndex(clientId);
 
+  const roomIsIn = clientsData[clientIdIndex].roomIsIn;
+
+  // Remove client from room and finish match if existent
+  if (roomIsIn) {
+    const room = rooms.find(room => room.id === roomIsIn);
+    if (room) {
+      log('leaving room', clientId);
+      const room = rooms.find(r => r.id === roomIsIn);
+      if (!room) return log(' * Room does not exist @LEAVE_ROOM');
+
+      let roomClientIndex = -1;
+      for (let i = 0; i <= room.activeClientIds.length; i++) {
+        roomClientIndex = i;
+        const roomClientId = room.activeClientIds[roomClientIndex];
+        if (clientId === roomClientId) {
+          sendMessage(_s, { type: 'ROOM_LEFT', roomId: roomIsIn });
+        } else {
+          const clientIdIndex = getClientIdIndex(roomClientId);
+          if (clientIdIndex !== -1) {
+            sendMessage(sockets[clientIdIndex], {
+              type: 'OPONENT_ABANDONED',
+              roomId: roomIsIn,
+            });
+          } else {
+            log(' * Could not find client to send OPONENT_ABANDONED message');
+          }
+        }
+      }
+    } else {
+      log('could not find room @flushSocket');
+    }
+  }
+
   sockets.splice(clientIdIndex, 1);
   clientIds.splice(clientIdIndex, 1);
   clientsData.splice(clientIdIndex, 1);
-
-  // Remove client from rooms - TODO: Optimize this (we know the room)
-  rooms.forEach(room => {
-    const roomClientIdIndex = room.activeClientIds.findIndex(
-      id => id === clientId
-    );
-    if (roomClientIdIndex !== -1) {
-      log('removing client from room');
-      room.activeClientIds.splice(roomClientIdIndex, 1);
-    }
-  });
 }
 
 function sendMsgToChannel(roomId, msg, exceptClientId) {
   const room = rooms.find(r => r.id === roomId);
-  if (!room) return log(' * Room not found');
+  if (!room) return log(' * Room not found @sendMsgToChannel');
 
   const roomClientIds = room.activeClientIds;
 
   roomClientIds.forEach(roomClientId => {
-    // TODO: Optimize this
-    const clientIdIndex = clientIds.findIndex(
-      clientId => clientId === roomClientId && clientId !== exceptClientId
-    );
-    if (clientIdIndex === -1) {
-      log(' * client not found @sendMsgToChannel');
-    } else {
-      sendMessage(sockets[clientIdIndex], msg);
+    if (roomClientId !== exceptClientId) {
+      const clientIdIndex = getClientIdIndex(roomClientId);
+      if (clientIdIndex !== -1) {
+        sendMessage(sockets[clientIdIndex], msg);
+      } else {
+        log(' * client not found in room @sendMsgToChannel');
+      }
     }
   });
 }
 
 function processMessage(_s, clientId, data) {
-  log(' - processMessage', data);
+  log(' - @processMessage', data);
   // sendMessage(_s, { type: 'ACKNOWLEDGE', clientId });
 
   switch (data.type) {
@@ -94,7 +115,7 @@ function processMessage(_s, clientId, data) {
         type: 'ROOM_JOINED',
         room,
         isRoomFilledAndReady,
-        isFirtToJoin: room.activeClientIds.length === 1,
+        playerIsColorInRoom: room.activeClientIds.length === 1 ? 'w' : 'b',
       });
 
       if (isRoomFilledAndReady) {
@@ -126,23 +147,10 @@ function processMessage(_s, clientId, data) {
     }
 
     case 'LEAVE_ROOM': {
-      const room = rooms.find(r => r.id === data.roomId);
-      if (!room) {
-        return log('Room does not exist @LEAVE_ROOM');
-      }
-      const clientIndex = room.activeClientIds.findIndex(
-        roomClientId => roomClientId === clientId
-      );
-      if (clientIndex === -1) {
-        return log('Client not found in room @LEAVE_ROOM');
-      }
-      room.activeClientIds.splice(clientIndex, 1);
-      sendMessage(_s, { type: 'ROOM_LEFT', roomId: data.roomId });
       break;
     }
 
     case 'ROOM_MESSAGE':
-      // sendMsgToChannel(data.roomId, data.msg);
       break;
 
     default:

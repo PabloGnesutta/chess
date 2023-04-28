@@ -1,5 +1,5 @@
 import { drawBoard } from '../board.js';
-import { board, makeMoveMultiPlayer, state } from '../gameState.js';
+import { board, makeRemoteMove, resetState, state } from '../gameState.js';
 import { initGame } from '../initGame.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 
@@ -51,26 +51,32 @@ function connectWebSocket() {
         case 'ROOM_JOINED': {
           activeRoomId = data.room.id;
           roomIdElement.innerText = 'On Room ' + activeRoomId;
-          state.playerIsColor = data.isFirtToJoin ? 'w' : 'b';
+          state.playerIsColor = data.playerIsColorInRoom;
           if (data.isRoomFilledAndReady) {
             drawBoard(board, state.playerIsColor);
             initGame();
-            log(state);
           } else {
-            log('Waiting for other player');
+            log(' * WAITING FOR OTHER PLAYER');
           }
           break;
         }
         case 'ROOM_READY': {
           if (data.isRoomFilledAndReady) {
-            log('ready to start game');
+            log(' * READY TO START GAME');
             drawBoard(board, state.playerIsColor);
             initGame();
           }
           break;
         }
         case 'OPONENT_MOVED': {
-          makeMoveMultiPlayer(data.moveData);
+          makeRemoteMove(data.moveData);
+          break;
+        }
+        case 'OPONENT_ABANDONED': {
+          log(' * OPONENT ABANDONED, YOU WIN');
+          activeRoomId = false;
+          resetState();
+          document.getElementById('board').classList.add('display-none');
           break;
         }
         case 'ROOM_MESSAGE': {

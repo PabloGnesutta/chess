@@ -63,8 +63,8 @@ function resetState() {
     player.captures = [];
   }
 
-  for (let row = 0; row < _Z; row++) {
-    for (let col = 0; col < _Z; col++) {
+  for (let row = 0; row <= _Z; row++) {
+    for (let col = 0; col <= _Z; col++) {
       board[row][col] = null;
       _imgContainers[row][col].innerHTML = null;
     }
@@ -83,7 +83,7 @@ function _isStalemateByRepetition() {
   return false;
 }
 
-function makeMoveSinglePlayer(piece, move) {
+function makeLocalMove(piece, move) {
   markLastMove([piece.row, piece.col], move.moveTo);
 
   const historyItem = {
@@ -102,7 +102,7 @@ function makeMoveSinglePlayer(piece, move) {
 }
 
 function signalMoveMultiplayer(piece, move) {
-  makeMoveSinglePlayer(piece, move);
+  makeLocalMove(piece, move);
   wsSend({
     type: 'SIGNAL_MOVE',
     moveData: {
@@ -112,7 +112,7 @@ function signalMoveMultiplayer(piece, move) {
   });
 }
 
-function makeMoveMultiPlayer(moveData) {
+function makeRemoteMove(moveData) {
   const { pieceId, move } = moveData;
   const piece = pieces[state.currentColor].find(p => p.id === pieceId);
   log('piece', piece);
@@ -189,8 +189,8 @@ export {
   players,
   state,
   resetState,
-  makeMoveSinglePlayer,
+  makeLocalMove,
   signalMoveMultiplayer,
-  makeMoveMultiPlayer,
+  makeRemoteMove,
   startTurn,
 };

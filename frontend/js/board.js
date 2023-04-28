@@ -1,5 +1,5 @@
 import {
-  makeMoveSinglePlayer,
+  makeLocalMove,
   signalMoveMultiplayer,
   state,
 } from './gameState.js';
@@ -172,7 +172,7 @@ function squareClick(board, [row, col]) {
             signalMoveMultiplayer(selectedPiece, move);
           }
         } else {
-          makeMoveSinglePlayer(selectedPiece, move);
+          makeLocalMove(selectedPiece, move);
         }
         return;
       }
