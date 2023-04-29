@@ -1,3 +1,5 @@
+"use strict";
+
 import { displayMoves, _imgContainers } from './board.js';
 import { board, pieces, movesHistory, players, state } from './gameState.js';
 

@@ -1,3 +1,5 @@
+"use strict";
+
 import { _imgContainers, clearLastMoveMarks } from './board.js';
 import createPiece from './createPiece.js';
 import { board, pieces, resetState, startTurn } from './gameState.js';

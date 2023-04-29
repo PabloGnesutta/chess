@@ -1,3 +1,5 @@
+"use strict";
+
 import { computeLegalMoves } from './simulation.js';
 import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
 import {

@@ -1,3 +1,5 @@
+"use strict";
+
 import { _imgContainers, drawBoard } from './js/board.js';
 import { board, state } from './js/gameState.js';
 import { connectWebSocket, joinRoom } from './js/ws/ws.js';

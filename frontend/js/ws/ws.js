@@ -1,3 +1,5 @@
+"use strict";
+
 import { drawBoard } from '../board.js';
 import { board, makeRemoteMove, resetState, state } from '../gameState.js';
 import { initGame } from '../initGame.js';

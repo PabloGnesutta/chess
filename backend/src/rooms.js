@@ -1,3 +1,5 @@
+"use strict";
+
 const { log } = require('./utils/utils');
 
 const roomClientsLimit = 2;

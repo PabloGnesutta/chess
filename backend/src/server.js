@@ -1,3 +1,5 @@
+"use strict";
+
 const crypto = require('crypto');
 const { createServer } = require('http');
 const { log } = require('./utils/utils');

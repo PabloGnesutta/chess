@@ -1,3 +1,5 @@
+"use strict";
+
 import { board, pieces, state } from './gameState.js';
 import {
   copyBoard,

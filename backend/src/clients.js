@@ -1,3 +1,5 @@
+"use strict";
+
 const { joinOrCreateRoom, rooms, roomClientsLimit, getRoomIdIndex, roomIds } = require('./rooms');
 const { log } = require('./utils/utils');
 

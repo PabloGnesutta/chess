@@ -1,3 +1,5 @@
+"use strict";
+
 import { drawBoard } from '../board.js';
 import {
   board,

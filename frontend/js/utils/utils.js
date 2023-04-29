@@ -1,3 +1,5 @@
+"use strict";
+
 function copyBoard(board) {
   const copiedBoard = [];
   for (let row = 0; row < 8; row++) {
