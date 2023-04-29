@@ -1,26 +1,39 @@
 const { log } = require('./utils/utils');
 
+const roomClientsLimit = 2;
+
+const roomIds = [];
 const rooms = [];
+
+const getRoomIdIndex = roomId => roomIds.findIndex(rId => rId === roomId);
+
+const getRoomById = roomId => {
+  const roomIndex = getRoomIdIndex(roomId);
+  if (roomIndex !== -1) return rooms[roomIndex];
+  else return null;
+};
 
 let idCount = 0;
 
 function createRoom(clientId) {
-  roomId = ++idCount;
+  const roomId = ++idCount;
 
   const room = {
     id: roomId,
     name: 'room_' + Date.now(),
     createdBy: clientId,
-    peopleLimit: 2,
     activeClientIds: [],
   };
+
   rooms.push(room);
+  roomIds.push(roomId);
 
   return room;
 }
 
-function joinRandomRoom(clientId) {
-  let room = rooms.find(r => r.activeClientIds.length < r.peopleLimit);
+function joinOrCreateRoom(clientId) {
+  let room = rooms.find(r => r.activeClientIds.length < roomClientsLimit);
+
   if (!room) {
     room = createRoom(clientId);
   }
@@ -31,7 +44,7 @@ function joinRandomRoom(clientId) {
 }
 
 function leaveRoom(roomId, clientId) {
-  const room = room.find(r => r.id === roomId);
+  const room = getRoomById(roomId);
   if (!room) {
     return log('Attepted to leave non existent room');
   }
@@ -46,9 +59,14 @@ function leaveRoom(roomId, clientId) {
   room.activeClientIds.splice(activeClientIndex, 1);
 }
 
+// TODO: Encapsulate room-related functions in this file 
+
 module.exports = {
   rooms,
+  roomIds,
+  roomClientsLimit,
   createRoom,
-  joinRandomRoom,
+  joinOrCreateRoom,
   leaveRoom,
+  getRoomIdIndex,
 };

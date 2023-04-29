@@ -1,4 +1,4 @@
-const { joinRandomRoom, rooms } = require('./rooms');
+const { joinOrCreateRoom, rooms, roomClientsLimit, getRoomIdIndex, roomIds } = require('./rooms');
 const { log } = require('./utils/utils');
 
 const WS_MAX_RESPONSE_LENGTH = 65535;
@@ -21,7 +21,6 @@ function registerClient(_s) {
   sockets.push(_s);
   clientIds.push(clientId);
   clientsData.push({
-    // id: clientId,
     roomIsIn: null,
   });
 
@@ -31,49 +30,55 @@ function registerClient(_s) {
 
   _s.on('close', () => flushSocket(_s, clientId));
 
-  _s.on('end', () => log('end'));
-  _s.on('error', () => log('error'));
+  _s.on('end', () => log(' / socket end'));
+  _s.on('error', () => log(' / socket error'));
 
   // _s.on('data', chunk => {});
 }
 
 function flushSocket(_s, clientId) {
-  log('socket closed');
+  log('socket closed @flushSocket');
 
   _s.destroy();
+
   const clientIdIndex = getClientIdIndex(clientId);
 
-  const roomIsIn = clientsData[clientIdIndex].roomIsIn;
 
-  // Remove client from room and finish match if existent
-  if (roomIsIn) {
-    const room = rooms.find(room => room.id === roomIsIn);
-    if (room) {
-      log('leaving room', clientId);
-      const room = rooms.find(r => r.id === roomIsIn);
-      if (!room) return log(' * Room does not exist @LEAVE_ROOM');
+  removeFromRoom: {
+    // Remove client from room and the room itself
+    const roomIsIn = clientsData[clientIdIndex].roomIsIn;
 
-      let roomClientIndex = -1;
-      for (let i = 0; i <= room.activeClientIds.length; i++) {
-        roomClientIndex = i;
-        const roomClientId = room.activeClientIds[roomClientIndex];
-        if (clientId === roomClientId) {
-          sendMessage(_s, { type: 'ROOM_LEFT', roomId: roomIsIn });
+    if (!roomIsIn) break removeFromRoom;
+
+    const roomIndex = getRoomIdIndex(roomIsIn);
+
+    if (roomIndex === -1) {
+      log(' * Could not find the room in which the client is @flishSocket');
+      break removeFromRoom;
+    }
+
+    const room = rooms[roomIndex];
+
+    for (let i = 0; i < room.activeClientIds.length; i++) {
+      const roomClientId = room.activeClientIds[i];
+      if (clientId === roomClientId) {
+        sendMessage(_s, { type: 'ROOM_LEFT', roomId: roomIsIn });
+      } else {
+        const clientIdIndex = getClientIdIndex(roomClientId);
+        if (clientIdIndex !== -1) {
+          sendMessage(sockets[clientIdIndex], {
+            type: 'OPONENT_ABANDONED',
+            roomId: roomIsIn,
+          });
         } else {
-          const clientIdIndex = getClientIdIndex(roomClientId);
-          if (clientIdIndex !== -1) {
-            sendMessage(sockets[clientIdIndex], {
-              type: 'OPONENT_ABANDONED',
-              roomId: roomIsIn,
-            });
-          } else {
-            log(' * Could not find client to send OPONENT_ABANDONED message');
-          }
+          log(' * Could not find client to send OPONENT_ABANDONED message @flushSocket');
         }
       }
-    } else {
-      log('could not find room @flushSocket');
     }
+
+    // Delete Room (move to rooms.js)
+    rooms.splice(roomIndex, 1);
+    roomIds.splice(roomIndex, 1);
   }
 
   sockets.splice(clientIdIndex, 1);
@@ -93,7 +98,7 @@ function sendMsgToChannel(roomId, msg, exceptClientId) {
       if (clientIdIndex !== -1) {
         sendMessage(sockets[clientIdIndex], msg);
       } else {
-        log(' * client not found in room @sendMsgToChannel');
+        log(' * Client not found in room @sendMsgToChannel');
       }
     }
   });
@@ -101,15 +106,16 @@ function sendMsgToChannel(roomId, msg, exceptClientId) {
 
 function processMessage(_s, clientId, data) {
   log(' - @processMessage', data);
-  // sendMessage(_s, { type: 'ACKNOWLEDGE', clientId });
 
   switch (data.type) {
     case 'JOIN_ROOM': {
-      const room = joinRandomRoom(clientId);
+      const room = joinOrCreateRoom(clientId);
       const isRoomFilledAndReady =
-        room.activeClientIds.length === room.peopleLimit;
+        room.activeClientIds.length === roomClientsLimit;
 
       clientsData[getClientIdIndex(clientId)].roomIsIn = room.id;
+
+      // TODO: Send only one message to both when the room is ready
 
       sendMessage(_s, {
         type: 'ROOM_JOINED',
@@ -154,7 +160,7 @@ function processMessage(_s, clientId, data) {
       break;
 
     default:
-      log(' * Invalid message type');
+      log(' * Invalid message type @processMessage');
       break;
   }
 }
@@ -179,7 +185,7 @@ function readSocket(_s, clientId) {
       log(' - opCode=0. Message will continue on subsecuent frames');
       break;
     case 0x1:
-      log(' - Text frame');
+      // log(' - Text frame');
       break;
     case 0x2:
       log(' - Binary frame: not supported');
@@ -199,7 +205,7 @@ function readSocket(_s, clientId) {
 
   // if first bit=1, message is masked
   if (!(b2 & 0x80) === 0x80) {
-    log('Message not masked!');
+    log(' * Message not masked!');
     return;
   }
 
@@ -231,16 +237,14 @@ function readSocket(_s, clientId) {
     const jsonData = JSON.parse(unmaskedData);
     processMessage(_s, clientId, jsonData);
   } catch (error) {
-    return log('Invalid JSON:', unmaskedData);
+    return log(' * Invalid JSON:', unmaskedData);
   }
 
   // Excess data. Should never reach here.
   let b = _s.read(1);
   if (b) {
-    log('excess data');
-    while ((b = _s.read(1))) {
-      log('  b:', b);
-    }
+    log(' * Excess data');
+    while ((b = _s.read(1))) log('  b:', b);
   }
 }
 
@@ -266,7 +270,7 @@ function sendMessage(_s, _msg) {
       headerBuffer = Buffer.allocUnsafe(4);
     } else {
       // 64 bits messages not supported
-      log('Response message too large');
+      log(' * Response message too large');
       return;
     }
   } else {
