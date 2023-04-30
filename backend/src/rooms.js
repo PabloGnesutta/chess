@@ -1,21 +1,26 @@
-"use strict";
+'use strict';
 
 const { log } = require('./utils/utils');
 
 const roomClientsLimit = 2;
+
+let idCount = 0;
 
 const roomIds = [];
 const rooms = [];
 
 const getRoomIdIndex = roomId => roomIds.findIndex(rId => rId === roomId);
 
-const getRoomById = roomId => {
+const getRoom = roomId => {
   const roomIndex = getRoomIdIndex(roomId);
   if (roomIndex !== -1) return rooms[roomIndex];
   else return null;
 };
 
-let idCount = 0;
+const getRoomClients = roomId => {
+  const room = getRoom(roomId);
+  return room && room.clients;
+};
 
 function createRoom(clientId) {
   const roomId = ++idCount;
@@ -24,7 +29,7 @@ function createRoom(clientId) {
     id: roomId,
     name: 'room_' + Date.now(),
     createdBy: clientId,
-    activeClientIds: [],
+    clients: [],
   };
 
   rooms.push(room);
@@ -34,39 +39,39 @@ function createRoom(clientId) {
 }
 
 function joinOrCreateRoom(clientId) {
-  let room = rooms.find(r => r.activeClientIds.length < roomClientsLimit);
+  let room = rooms.find(r => r.clients.length < roomClientsLimit);
 
   if (!room) {
     room = createRoom(clientId);
   }
 
-  room.activeClientIds.push(clientId);
+  room.clients.push(clientId);
 
   return room;
 }
 
 function leaveRoom(roomId, clientId) {
-  const room = getRoomById(roomId);
+  const room = getRoom(roomId);
   if (!room) {
     return log('Attepted to leave non existent room');
   }
 
-  const activeClientIndex = room.activeClientIds.findIndex(
-    id => id === clientId
-  );
+  const activeClientIndex = room.clients.findIndex(id => id === clientId);
   if (activeClientIndex === -1) {
     return log('Client not found in room');
   }
 
-  room.activeClientIds.splice(activeClientIndex, 1);
+  room.clients.splice(activeClientIndex, 1);
 }
 
-// TODO: Encapsulate room-related functions in this file 
+// TODO: Encapsulate room-related functions in this file
 
 module.exports = {
   rooms,
   roomIds,
   roomClientsLimit,
+  getRoom,
+  getRoomClients,
   createRoom,
   joinOrCreateRoom,
   leaveRoom,

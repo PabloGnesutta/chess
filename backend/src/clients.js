@@ -1,17 +1,25 @@
-"use strict";
+'use strict';
 
-const { joinOrCreateRoom, rooms, roomClientsLimit, getRoomIdIndex, roomIds } = require('./rooms');
+const {
+  rooms,
+  roomIds,
+  roomClientsLimit,
+  joinOrCreateRoom,
+  getRoomIdIndex,
+  getRoom,
+  getRoomClients,
+} = require('./rooms');
 const { log } = require('./utils/utils');
 
 const WS_MAX_RESPONSE_LENGTH = 65535;
+
+let idCount = 0;
 
 const clientIds = [];
 const clientsData = [];
 const sockets = [];
 
-const getClientIdIndex = id => clientIds.findIndex(cId => cId === id);
-
-let idCount = 0;
+const getClientIndex = id => clientIds.findIndex(cId => cId === id);
 
 /**
  * Register new web socket client
@@ -26,11 +34,11 @@ function registerClient(_s) {
     roomIsIn: null,
   });
 
-  sendMessage(_s, { type: 'CLIENT_REGISTERED', clientId });
+  writeSocket(_s, { type: 'CLIENT_REGISTERED', clientId });
 
   _s.on('readable', () => readSocket(_s, clientId));
 
-  _s.on('close', () => flushSocket(_s, clientId));
+  _s.on('close', () => deleteClient(_s, clientId));
 
   _s.on('end', () => log(' / socket end'));
   _s.on('error', () => log(' / socket error'));
@@ -38,17 +46,16 @@ function registerClient(_s) {
   // _s.on('data', chunk => {});
 }
 
-function flushSocket(_s, clientId) {
-  log('socket closed @flushSocket');
+function deleteClient(_s, clientId) {
+  log('socket closed @deleteClient');
 
   _s.destroy();
 
-  const clientIdIndex = getClientIdIndex(clientId);
-
+  const clientIndex = getClientIndex(clientId);
 
   removeFromRoom: {
     // Remove client from room and the room itself
-    const roomIsIn = clientsData[clientIdIndex].roomIsIn;
+    const roomIsIn = clientsData[clientIndex].roomIsIn;
 
     if (!roomIsIn) break removeFromRoom;
 
@@ -61,19 +68,21 @@ function flushSocket(_s, clientId) {
 
     const room = rooms[roomIndex];
 
-    for (let i = 0; i < room.activeClientIds.length; i++) {
-      const roomClientId = room.activeClientIds[i];
-      if (clientId === roomClientId) {
-        sendMessage(_s, { type: 'ROOM_LEFT', roomId: roomIsIn });
+    for (let i = 0; i < room.clients.length; i++) {
+      const roomClient = room.clients[i];
+      if (clientId === roomClient) {
+        writeSocket(_s, { type: 'ROOM_LEFT', roomId: roomIsIn });
       } else {
-        const clientIdIndex = getClientIdIndex(roomClientId);
-        if (clientIdIndex !== -1) {
-          sendMessage(sockets[clientIdIndex], {
+        const clientIndex = getClientIndex(roomClient);
+        if (clientIndex !== -1) {
+          writeSocket(sockets[clientIndex], {
             type: 'OPONENT_ABANDONED',
             roomId: roomIsIn,
           });
         } else {
-          log(' * Could not find client to send OPONENT_ABANDONED message @flushSocket');
+          log(
+            ' * Could not find client to send OPONENT_ABANDONED message @deleteClient'
+          );
         }
       }
     }
@@ -83,92 +92,90 @@ function flushSocket(_s, clientId) {
     roomIds.splice(roomIndex, 1);
   }
 
-  sockets.splice(clientIdIndex, 1);
-  clientIds.splice(clientIdIndex, 1);
-  clientsData.splice(clientIdIndex, 1);
+  sockets.splice(clientIndex, 1);
+  clientIds.splice(clientIndex, 1);
+  clientsData.splice(clientIndex, 1);
 }
 
-function sendMsgToChannel(roomId, msg, exceptClientId) {
-  const room = rooms.find(r => r.id === roomId);
-  if (!room) return log(' * Room not found @sendMsgToChannel');
+function sendRoomMessage(roomId, msg, exceptClientId) {
+  const roomClients = getRoomClients(roomId);
 
-  const roomClientIds = room.activeClientIds;
-
-  roomClientIds.forEach(roomClientId => {
-    if (roomClientId !== exceptClientId) {
-      const clientIdIndex = getClientIdIndex(roomClientId);
-      if (clientIdIndex !== -1) {
-        sendMessage(sockets[clientIdIndex], msg);
-      } else {
-        log(' * Client not found in room @sendMsgToChannel');
-      }
+  for (let i = 0; i < roomClients.length; i++) {
+    const roomClient = roomClients[i];
+    if (roomClient === exceptClientId) {
+      continue;
     }
-  });
+
+    const clientIndex = getClientIndex(roomClient);
+    if (clientIndex !== -1) writeSocket(sockets[clientIndex], msg);
+    else return log(' * Client not found in room @sendRoomMessage');
+  }
 }
+
+// --------------
+// Message cases:
+// --------------
 
 function processMessage(_s, clientId, data) {
   log(' - @processMessage', data);
-
   switch (data.type) {
-    case 'JOIN_ROOM': {
-      const room = joinOrCreateRoom(clientId);
-      const isRoomFilledAndReady =
-        room.activeClientIds.length === roomClientsLimit;
-
-      clientsData[getClientIdIndex(clientId)].roomIsIn = room.id;
-
-      // TODO: Send only one message to both when the room is ready
-
-      sendMessage(_s, {
-        type: 'ROOM_JOINED',
-        room,
-        isRoomFilledAndReady,
-        playerIsColorInRoom: room.activeClientIds.length === 1 ? 'w' : 'b',
-      });
-
-      if (isRoomFilledAndReady) {
-        sendMsgToChannel(
-          room.id,
-          {
-            type: 'ROOM_READY',
-            room,
-            isRoomFilledAndReady,
-          },
-          clientId
-        );
-      }
+    case 'JOIN_ROOM':
+      JOIN_ROOM(_s, clientId);
       break;
-    }
-
-    case 'SIGNAL_MOVE': {
-      const clientIdIndex = getClientIdIndex(clientId);
-      const roomId = clientsData[clientIdIndex].roomIsIn;
-      sendMsgToChannel(
-        roomId,
-        {
-          type: 'OPONENT_MOVED',
-          moveData: data.moveData,
-        },
-        clientId
-      );
+    case 'SIGNAL_MOVE':
+      SIGNAL_MOVE(clientId, data.moveData);
       break;
-    }
-
-    case 'LEAVE_ROOM': {
+    case 'LEAVE_ROOM':
       break;
-    }
-
-    case 'ROOM_MESSAGE':
-      break;
-
     default:
       log(' * Invalid message type @processMessage');
       break;
   }
 }
 
+function JOIN_ROOM(_s, clientId) {
+  const room = joinOrCreateRoom(clientId);
+  const isRoomFilledAndReady = room.clients.length === roomClientsLimit;
+
+  clientsData[getClientIndex(clientId)].roomIsIn = room.id;
+
+  // TODO: Send only one message to both when the room is ready
+  writeSocket(_s, {
+    type: 'ROOM_JOINED',
+    room,
+    isRoomFilledAndReady,
+    playerIsColorInRoom: room.clients.length === 1 ? 'w' : 'b',
+  });
+
+  if (isRoomFilledAndReady) {
+    sendRoomMessage(
+      room.id,
+      {
+        type: 'ROOM_READY',
+        room,
+        isRoomFilledAndReady,
+      },
+      clientId
+    );
+  }
+}
+
+function SIGNAL_MOVE(clientId, moveData) {
+  const clientIndex = getClientIndex(clientId);
+  const roomIsIn = clientsData[clientIndex].roomIsIn;
+  sendRoomMessage(
+    roomIsIn,
+    {
+      type: 'OPONENT_MOVED',
+      moveData,
+    },
+    clientId
+  );
+}
+
 /**
  * @param {Socket} _s
+ * @param {Number} clientId
  * @returns {void}
  */
 function readSocket(_s, clientId) {
@@ -256,7 +263,7 @@ function readSocket(_s, clientId) {
  * @param {JSON} _msg
  * @returns {void}
  */
-function sendMessage(_s, _msg) {
+function writeSocket(_s, _msg) {
   const msg = JSON.stringify(_msg);
 
   const msgBuffer = Buffer.from(msg);
