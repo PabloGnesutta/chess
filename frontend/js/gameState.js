@@ -8,6 +8,7 @@ import {
   unselectCurrentSquare,
 } from './board.js';
 import { signalMove } from './ws/ws.js';
+import piecesLib from './createPiece.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -78,6 +79,8 @@ function resetState() {
   state.currentColor = 'w';
   state.opositeColor = 'b';
   state.selectedPiece = null;
+
+  piecesLib.resetPieceIdCount();
 }
 
 function _isStalemateByRepetition() {
@@ -111,7 +114,6 @@ function signalMoveMultiplayer(piece, move) {
 function makeRemoteMove(moveData) {
   const { pieceId, move } = moveData;
   const piece = pieces[state.currentColor].find(p => p.id === pieceId);
-  log('piece', piece);
 
   markLastMove([piece.row, piece.col], move.moveTo);
 

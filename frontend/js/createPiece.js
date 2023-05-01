@@ -5,6 +5,10 @@ import { board, pieces, movesHistory, players, state } from './gameState.js';
 
 let idCount = 0;
 
+function resetPieceIdCount() {
+  idCount = 0;
+}
+
 function moveObj(moveTo, captureAt) {
   const obj = { moveTo };
   if (captureAt) obj.captureAt = captureAt;
@@ -488,4 +492,5 @@ export default {
   pawn,
   queen,
   rook,
+  resetPieceIdCount
 };
