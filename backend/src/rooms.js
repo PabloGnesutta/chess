@@ -9,10 +9,10 @@ let idCount = 0;
 const roomIds = [];
 const rooms = [];
 
-const getRoomIdIndex = roomId => roomIds.findIndex(rId => rId === roomId);
+const getRoomIndex = roomId => roomIds.findIndex(rId => rId === roomId);
 
 const getRoom = roomId => {
-  const roomIndex = getRoomIdIndex(roomId);
+  const roomIndex = getRoomIndex(roomId);
   if (roomIndex !== -1) return rooms[roomIndex];
   else return null;
 };
@@ -75,5 +75,5 @@ module.exports = {
   createRoom,
   joinOrCreateRoom,
   leaveRoom,
-  getRoomIdIndex,
+  getRoomIndex,
 };

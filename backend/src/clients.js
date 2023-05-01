@@ -1,15 +1,14 @@
 'use strict';
 
+const { log } = require('./utils/utils');
 const {
   rooms,
   roomIds,
   roomClientsLimit,
   joinOrCreateRoom,
-  getRoomIdIndex,
-  getRoom,
+  getRoomIndex,
   getRoomClients,
 } = require('./rooms');
-const { log } = require('./utils/utils');
 
 const WS_MAX_RESPONSE_LENGTH = 65535;
 
@@ -38,17 +37,18 @@ function registerClient(_s) {
 
   _s.on('readable', () => readSocket(_s, clientId));
 
-  _s.on('close', () => deleteClient(_s, clientId));
+  _s.on('close', () => {
+    log('Socket closed');
+    deleteClient(_s, clientId);
+  });
 
   _s.on('end', () => log(' / socket end'));
   _s.on('error', () => log(' / socket error'));
-
   // _s.on('data', chunk => {});
 }
 
 function deleteClient(_s, clientId) {
-  log('socket closed @deleteClient');
-
+  log(' / @deleteClient');
   _s.destroy();
 
   const clientIndex = getClientIndex(clientId);
@@ -59,7 +59,7 @@ function deleteClient(_s, clientId) {
 
     if (!roomIsIn) break removeFromRoom;
 
-    const roomIndex = getRoomIdIndex(roomIsIn);
+    const roomIndex = getRoomIndex(roomIsIn);
 
     if (roomIndex === -1) {
       log(' * Could not find the room in which the client is @flishSocket');
@@ -112,26 +112,25 @@ function sendRoomMessage(roomId, msg, exceptClientId) {
   }
 }
 
-// --------------
-// Message cases:
-// --------------
+
 
 function processMessage(_s, clientId, data) {
   log(' - @processMessage', data);
   switch (data.type) {
     case 'JOIN_ROOM':
-      JOIN_ROOM(_s, clientId);
-      break;
+      return JOIN_ROOM(_s, clientId);
     case 'SIGNAL_MOVE':
-      SIGNAL_MOVE(clientId, data.moveData);
-      break;
+      return SIGNAL_MOVE(clientId, data.moveData);
     case 'LEAVE_ROOM':
-      break;
+      return LEAVE_ROOM(clientId, data);
     default:
-      log(' * Invalid message type @processMessage');
-      break;
+      return log(' * Invalid message type @processMessage');
   }
 }
+
+// --------------
+// Message cases:
+// --------------
 
 function JOIN_ROOM(_s, clientId) {
   const room = joinOrCreateRoom(clientId);
@@ -171,6 +170,10 @@ function SIGNAL_MOVE(clientId, moveData) {
     },
     clientId
   );
+}
+
+function LEAVE_ROOM(data) {
+  log(data, '@LEAVE_ROOM');
 }
 
 /**

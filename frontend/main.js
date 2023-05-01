@@ -6,9 +6,15 @@ import { connectWebSocket, joinRoom } from './js/ws/ws.js';
 import { singlePlayerBtn, multiPlayerBtn } from './js/ui/lobby-UI.js';
 import { initGame } from './js/initGame.js';
 
-await connectWebSocket();
-state.isMultiPlayer = true;
-joinRoom();
+
+try {
+  const connectionMessage = await connectWebSocket();
+  log(connectionMessage);
+  state.isMultiPlayer = true;
+  joinRoom();
+} catch (err) {
+  log('Error conecting to websocket', err);
+}
 
 // SINGLE PLAYER
 singlePlayerBtn.onclick = e => {
