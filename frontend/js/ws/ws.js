@@ -19,20 +19,38 @@ function connectWebSocket() {
 
     ws.onopen = e => {
       isWSOpen = true;
-      wsSend = obj => ws.send(JSON.stringify(obj));
+      wsSend = jsonPayload => ws.send(JSON.stringify(jsonPayload));
       resolve('Connection established');
     };
 
     ws.onerror = e => {
       flushSocket(ws, 'ERROR', e);
-      reject('Error connecting to websocket', e);
+      reject(e);
     };
 
-    ws.onclose = e => flushSocket(ws, 'CLOSE', e);
-
     ws.onmessage = e => processMessage(JSON.parse(e.data));
+
+    ws.onclose = e => flushSocket(ws, 'CLOSE', e);
   });
 }
+
+function flushSocket(ws, cause, event) {
+  log('Websocket flushed due to', cause, '-', event);
+  ws.onmessage = null;
+  ws.onerror = null;
+  ws.onclose = null;
+  ws.onopen = null;
+  send = null;
+  isWSOpen = false;
+  clientId = null;
+  activeRoomId = null;
+  clientIdElement.innerText = 'Offline';
+  roomIdElement.innerText = '';
+}
+
+// -----------------------------
+// Receive messages from server:
+// -----------------------------
 
 function processMessage(data) {
   log('Incoming message', data);
@@ -43,6 +61,8 @@ function processMessage(data) {
       return ROOM_JOINED(data);
     case 'ROOM_READY':
       return ROOM_READY(data);
+    case 'ROOM_LEFT':
+      return ROOM_LEFT(data);
     case 'OPONENT_MOVED':
       return OPONENT_MOVED(data);
     case 'OPONENT_ABANDONED':
@@ -52,14 +72,13 @@ function processMessage(data) {
   }
 }
 
-// --------------
-// Message cases:
-// --------------
 
 function CLIENT_REGISTERED(data) {
   clientId = data.clientId;
   clientIdElement.innerText = 'Online | Client ID: ' + clientId;
 }
+
+// TODO: Make room joined and room ready a single event
 
 function ROOM_JOINED(data) {
   activeRoomId = data.room.id;
@@ -85,30 +104,22 @@ function OPONENT_MOVED(data) {
   makeRemoteMove(data.moveData);
 }
 
-function OPONENT_ABANDONED(data) {
-  log(' * OPONENT ABANDONED, YOU WIN');
-  activeRoomId = false;
+function ROOM_LEFT() {
+  activeRoomId = null;
   resetState();
   document.getElementById('board').classList.add('display-none');
 }
-// WebSocket
 
-function flushSocket(ws, cause, event) {
-  log('Websocket flushed due to', cause, '-', event);
-  ws.onmessage = null;
-  ws.onerror = null;
-  ws.onclose = null;
-  ws.onopen = null;
-  send = null;
-  isWSOpen = false;
-  clientId = null;
+function OPONENT_ABANDONED() {
+  log(' * OPONENT ABANDONED, YOU WIN');
   activeRoomId = null;
-  clientIdElement.innerText = 'Offline';
-  roomIdElement.innerText = '';
+  resetState();
+  document.getElementById('board').classList.add('display-none');
 }
 
-// ----------
-// ROOM CHAT:
+// ------------------------
+// Send messages to server:
+// ------------------------
 
 function joinRoom() {
   if (activeRoomId)
@@ -118,9 +129,18 @@ function joinRoom() {
 }
 
 function leaveRoom() {
-  if (!activeRoomId) return log('Not currently in a room, cannot leave');
+  if (!activeRoomId) return warn('Not currently in a room, cannot leave');
 
   wsSend({ type: 'LEAVE_ROOM' });
 }
 
-export { connectWebSocket, joinRoom, wsSend };
+function signalMove(pieceId, move) {
+  wsSend({
+    type: 'SIGNAL_MOVE',
+    moveData: { pieceId, move, },
+  });
+}
+
+
+
+export { connectWebSocket, joinRoom, signalMove };

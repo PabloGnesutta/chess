@@ -21,7 +21,7 @@ const sockets = [];
 const getClientIndex = id => clientIds.findIndex(cId => cId === id);
 
 /**
- * Register new web socket client
+ * Register new web socket client and its metadata
  * @param {Socket} _s
  */
 function registerClient(_s) {
@@ -62,7 +62,7 @@ function deleteClient(_s, clientId) {
     const roomIndex = getRoomIndex(roomIsIn);
 
     if (roomIndex === -1) {
-      log(' * Could not find the room in which the client is @flishSocket');
+      log(' * Could not find room in which the client is @flishSocket');
       break removeFromRoom;
     }
 
@@ -71,18 +71,13 @@ function deleteClient(_s, clientId) {
     for (let i = 0; i < room.clients.length; i++) {
       const roomClient = room.clients[i];
       if (clientId === roomClient) {
-        writeSocket(_s, { type: 'ROOM_LEFT', roomId: roomIsIn });
+        writeSocket(_s, { type: 'ROOM_LEFT' });
       } else {
         const clientIndex = getClientIndex(roomClient);
         if (clientIndex !== -1) {
-          writeSocket(sockets[clientIndex], {
-            type: 'OPONENT_ABANDONED',
-            roomId: roomIsIn,
-          });
+          writeSocket(sockets[clientIndex], { type: 'OPONENT_ABANDONED' });
         } else {
-          log(
-            ' * Could not find client to send OPONENT_ABANDONED message @deleteClient'
-          );
+          log(' * Could not find client to send OPONENT_ABANDONED message');
         }
       }
     }
@@ -97,22 +92,9 @@ function deleteClient(_s, clientId) {
   clientsData.splice(clientIndex, 1);
 }
 
-function sendRoomMessage(roomId, msg, exceptClientId) {
-  const roomClients = getRoomClients(roomId);
-
-  for (let i = 0; i < roomClients.length; i++) {
-    const roomClient = roomClients[i];
-    if (roomClient === exceptClientId) {
-      continue;
-    }
-
-    const clientIndex = getClientIndex(roomClient);
-    if (clientIndex !== -1) writeSocket(sockets[clientIndex], msg);
-    else return log(' * Client not found in room @sendRoomMessage');
-  }
-}
-
-
+// -----------------------------
+// Process messages from client:
+// -----------------------------
 
 function processMessage(_s, clientId, data) {
   log(' - @processMessage', data);
@@ -127,10 +109,6 @@ function processMessage(_s, clientId, data) {
       return log(' * Invalid message type @processMessage');
   }
 }
-
-// --------------
-// Message cases:
-// --------------
 
 function JOIN_ROOM(_s, clientId) {
   const room = joinOrCreateRoom(clientId);
@@ -177,6 +155,30 @@ function LEAVE_ROOM(data) {
 }
 
 /**
+ * Send message to all clients in the room.
+ * If exceptClientId is provided, do not send to that client.
+ * @param {Number} roomId 
+ * @param {JSON} msg 
+ * @param {Number} exceptClientId 
+ * @returns {void}
+ */
+function sendRoomMessage(roomId, msg, exceptClientId) {
+  const roomClients = getRoomClients(roomId);
+
+  for (let i = 0; i < roomClients.length; i++) {
+    const roomClient = roomClients[i];
+    if (roomClient === exceptClientId) {
+      continue;
+    }
+
+    const clientIndex = getClientIndex(roomClient);
+    if (clientIndex !== -1) writeSocket(sockets[clientIndex], msg);
+    else return log(' * Client not found in room @sendRoomMessage');
+  }
+}
+
+/**
+ * Read Socket
  * @param {Socket} _s
  * @param {Number} clientId
  * @returns {void}
@@ -261,7 +263,7 @@ function readSocket(_s, clientId) {
 }
 
 /**
- *
+ * Write JSON to Socket
  * @param {Socket} _s
  * @param {JSON} _msg
  * @returns {void}

@@ -7,7 +7,7 @@ import {
   markLastMove,
   unselectCurrentSquare,
 } from './board.js';
-import { wsSend } from './ws/ws.js';
+import { signalMove } from './ws/ws.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -104,14 +104,8 @@ function makeLocalMove(piece, move) {
 }
 
 function signalMoveMultiplayer(piece, move) {
+  signalMove(piece.id, move);
   makeLocalMove(piece, move);
-  wsSend({
-    type: 'SIGNAL_MOVE',
-    moveData: {
-      pieceId: piece.id,
-      move,
-    },
-  });
 }
 
 function makeRemoteMove(moveData) {
