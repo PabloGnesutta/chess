@@ -112,36 +112,45 @@ function processMessage(_s, clientId, data) {
 
 function JOIN_ROOM(_s, clientId) {
   const room = joinOrCreateRoom(clientId);
-  const isRoomFilledAndReady = room.clients.length === roomClientsLimit;
 
-  clientsData[getClientIndex(clientId)].roomIsIn = room.id;
+  const clientData = clientsData[getClientIndex(clientId)];
 
-  // TODO: Send only one message to both when the room is ready
-  writeSocket(_s, {
-    type: 'ROOM_JOINED',
-    room,
-    isRoomFilledAndReady,
-    playerIsColorInRoom: room.clients.length === 1 ? 'w' : 'b',
-  });
+  clientData.roomIsIn = room.id;
+  clientData.playerColor = room.clients.length === 1 ? 'w' : 'b';
 
-  if (isRoomFilledAndReady) {
-    sendRoomMessage(
-      room.id,
-      {
-        type: 'ROOM_READY',
-        room,
-        isRoomFilledAndReady,
-      },
-      clientId
-    );
+  const waitingForOtherPlayer = room.clients.length < roomClientsLimit;
+
+  if (waitingForOtherPlayer)
+    return;
+
+  // Notify both players that the room is ready. Send them their colors
+
+  const roomClients = getRoomClients(room.id);
+
+  for (let i = 0; i < roomClients.length; i++) {
+    const roomClient = roomClients[i];
+    const clientIndex = getClientIndex(roomClient);
+
+    if (clientIndex !== -1) {
+      writeSocket(
+        sockets[clientIndex],
+        {
+          type: 'ROOM_READY',
+          room,
+          playerColor: clientsData[clientIndex].playerColor
+        }
+      );
+    } else {
+      log(` * Client ${roomClient} not found in room ${room.id} @JOIN_ROOM`);
+    }
   }
 }
 
 function SIGNAL_MOVE(clientId, moveData) {
   const clientIndex = getClientIndex(clientId);
-  const roomIsIn = clientsData[clientIndex].roomIsIn;
+  const roomId = clientsData[clientIndex].roomIsIn;
   sendRoomMessage(
-    roomIsIn,
+    roomId,
     {
       type: 'OPONENT_MOVED',
       moveData,
@@ -172,6 +181,7 @@ function sendRoomMessage(roomId, msg, exceptClientId) {
     }
 
     const clientIndex = getClientIndex(roomClient);
+
     if (clientIndex !== -1) writeSocket(sockets[clientIndex], msg);
     else return log(' * Client not found in room @sendRoomMessage');
   }

@@ -7,7 +7,7 @@ import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
 
 // STATE
-let wsSend = function () {};
+let wsSend = function () { };
 let isWSOpen = false;
 let clientId = null;
 let activeRoomId = null;
@@ -58,8 +58,6 @@ function processMessage(data) {
   switch (data.type) {
     case 'CLIENT_REGISTERED':
       return CLIENT_REGISTERED(data);
-    case 'ROOM_JOINED':
-      return ROOM_JOINED(data);
     case 'ROOM_READY':
       return ROOM_READY(data);
     case 'ROOM_LEFT':
@@ -71,35 +69,21 @@ function processMessage(data) {
     default:
       return log('Message type not supported');
   }
-}
+} 
 
 function CLIENT_REGISTERED(data) {
   clientId = data.clientId;
   clientIdElement.innerText = 'Online | Client ID: ' + clientId;
 }
 
-// TODO: Make room joined and room ready a single event
-
-function ROOM_JOINED(data) {
+function ROOM_READY(data) {
+  log(' * READY TO START GAME');
   activeRoomId = data.room.id;
   roomIdElement.innerText = 'On Room ' + activeRoomId;
-  state.playerIsColor = data.playerIsColorInRoom;
-  if (data.isRoomFilledAndReady) {
-    drawBoard(board, state.playerIsColor);
-    initGame();
-    closeModal();
-  } else {
-    log(' * WAITING FOR OTHER PLAYER');
-  }
-}
-
-function ROOM_READY(data) {
-  if (data.isRoomFilledAndReady) {
-    log(' * READY TO START GAME');
-    drawBoard(board, state.playerIsColor);
-    initGame();
-    closeModal();
-  }
+  state.playerIsColor = data.playerColor;
+  drawBoard(board, state.playerIsColor);
+  initGame();
+  closeModal();
 }
 
 function OPONENT_MOVED(data) {
