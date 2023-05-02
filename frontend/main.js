@@ -1,17 +1,22 @@
-"use strict";
+'use strict';
 
 import { _imgContainers, drawBoard } from './js/board.js';
 import { board, state } from './js/gameState.js';
 import { connectWebSocket, joinRoom } from './js/ws/ws.js';
-import { singlePlayerBtn, multiPlayerBtn } from './js/ui/lobby-UI.js';
+import { singlePlayerBtn, findGameBtn } from './js/ui/lobby-UI.js';
 import { initGame } from './js/initGame.js';
+import { showModal } from './js/ui/modal.js';
 
+function findGame() {
+  state.isMultiPlayer = true;
+  joinRoom();
+  showModal();
+}
 
 try {
   const connectionMessage = await connectWebSocket();
   log(connectionMessage);
-  state.isMultiPlayer = true;
-  joinRoom();
+  findGame();
 } catch (err) {
   log('Error conecting to websocket', err);
 }
@@ -24,10 +29,9 @@ singlePlayerBtn.onclick = e => {
 };
 
 // MULTI PLAYER
-multiPlayerBtn.onclick = async e => {
+findGameBtn.onclick = async e => {
   try {
-    state.isMultiPlayer = true;
-    joinRoom();
+    findGame();
   } catch (err) {
     warn('Error connecting to websocket', err);
   }

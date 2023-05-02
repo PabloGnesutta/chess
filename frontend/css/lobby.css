@@ -1,0 +1,8 @@
+.lobby-buttons {
+  margin-bottom: 1rem;
+}
+
+.connection-details {
+  display: flex;
+  gap: 1rem;
+}

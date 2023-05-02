@@ -7,13 +7,16 @@
 
     <title>Chess</title>
 
+    <link rel="stylesheet" href="css/common.css" />
     <link rel="stylesheet" href="css/utils.css" />
-    <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="css/modal.css" />
+    <link rel="stylesheet" href="css/header-footer.css" />
+    <link rel="stylesheet" href="css/lobby.css" />
     <link rel="stylesheet" href="css/board.css" />
     <link rel="stylesheet" href="css/squares.css" />
 
     <script src="js/globals.js"></script>
-    <script src="js/ui/header-UI.js" type="module"></script>
+    <script src="js/ui/footer-UI.js" type="module"></script>
     <script src="main.js" type="module" defer></script>
   </head>
 
@@ -26,12 +29,14 @@
 
       <br />
 
-      <div class="play-buttons">
+      <div class="lobby-buttons">
         <button id="single-player-btn">Single Player</button>
-        <button id="multi-player-btn">Multi Player</button>
+        <button id="find-game-btn">Find Game</button>
       </div>
 
-      <header id="header" class="">
+      <div id="board" class="board display-none"></div>
+
+      <footer id="footer" class="">
         <div class="inner">
           <button id="show-state">State</button>
           <button id="show-board">Board</button>
@@ -40,9 +45,17 @@
           <button id="show-board-history">Board History</button>
           <button id="flip-board">Flip Board</button>
         </div>
-      </header>
+      </footer>
 
-      <div id="board" class="board display-none"></div>
+      <div id="modal" class="display-none">
+        <div class="modal-buttons-container">
+          <span id="close-modal-btn"> &times; </span>
+        </div>
+        <div id="modal-content">
+          <h1>Looking for players</h1>
+          <p>Hang in there...</p>
+        </div>
+      </div>
     </div>
   </body>
 </html>

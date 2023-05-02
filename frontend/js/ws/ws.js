@@ -1,12 +1,13 @@
-"use strict";
+'use strict';
 
 import { drawBoard } from '../board.js';
 import { initGame } from '../initGame.js';
 import { board, makeRemoteMove, resetState, state } from '../gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
+import { closeModal } from '../ui/modal.js';
 
 // STATE
-let wsSend = function () { };
+let wsSend = function () {};
 let isWSOpen = false;
 let clientId = null;
 let activeRoomId = null;
@@ -72,7 +73,6 @@ function processMessage(data) {
   }
 }
 
-
 function CLIENT_REGISTERED(data) {
   clientId = data.clientId;
   clientIdElement.innerText = 'Online | Client ID: ' + clientId;
@@ -87,6 +87,7 @@ function ROOM_JOINED(data) {
   if (data.isRoomFilledAndReady) {
     drawBoard(board, state.playerIsColor);
     initGame();
+    closeModal();
   } else {
     log(' * WAITING FOR OTHER PLAYER');
   }
@@ -97,6 +98,7 @@ function ROOM_READY(data) {
     log(' * READY TO START GAME');
     drawBoard(board, state.playerIsColor);
     initGame();
+    closeModal();
   }
 }
 
@@ -137,10 +139,8 @@ function leaveRoom() {
 function signalMove(pieceId, move) {
   wsSend({
     type: 'SIGNAL_MOVE',
-    moveData: { pieceId, move, },
+    moveData: { pieceId, move },
   });
 }
-
-
 
 export { connectWebSocket, joinRoom, signalMove };
