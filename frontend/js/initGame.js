@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-import { _imgContainers, clearLastMoveMarks } from './board.js';
 import createPiece from './createPiece.js';
-import { board, pieces, resetState, startTurn } from './gameState.js';
+import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
+import { board, colorPieces, resetState, startTurn } from './gameState.js';
 
 let initialPieces;
 // initialPieces = [
@@ -50,7 +50,7 @@ initialPieces = [
   [P, 1, 7, 'b'],
 ];
 
-function initGame() {
+function initGame(playerColor) {
   document.getElementById('board').classList.remove('display-none');
 
   {
@@ -62,13 +62,16 @@ function initGame() {
   {
     // INIT STATE:
     for (let i = 0; i < initialPieces.length; i++) {
+      // Create pieces
       const [type, row, col, color] = initialPieces[i];
       const piece = createPiece[type](row, col, color);
-      pieces[color].push(piece);
-
+      colorPieces[color].push(piece);
+      // Put 'em in the board
       board.putPiece(piece);
-      _imgContainers[row][col].innerHTML = piece.img;
     }
+
+    drawBoard(playerColor);
+    drawPieces(colorPieces);
   }
 
   startTurn();

@@ -1,9 +1,9 @@
-"use strict";
+'use strict';
 
-import { board, pieces, state } from './gameState.js';
+import { board, colorPieces, state } from './gameState.js';
 import {
   copyBoard,
-  copyPieces,
+  copyColorPieces,
   isPlayerInCheckAtPosition,
 } from './utils/utils.js';
 
@@ -14,7 +14,7 @@ function _doesMovePutMeInCheck(piece, move) {
   const opositeColor = state.opositeColor;
 
   const boardCopy = copyBoard(board);
-  const piecesCopy = copyPieces(pieces);
+  const piecesCopy = copyColorPieces(colorPieces);
 
   boardCopy[piece.row][piece.col] = null;
 

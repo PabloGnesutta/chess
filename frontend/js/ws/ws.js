@@ -1,13 +1,12 @@
 'use strict';
 
-import { drawBoard } from '../board.js';
 import { initGame } from '../initGame.js';
-import { board, makeRemoteMove, resetState, state } from '../gameState.js';
+import { makeRemoteMove, resetState, state } from '../gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
 
 // STATE
-let wsSend = function () { };
+let wsSend = function () {};
 let isWSOpen = false;
 let clientId = null;
 let activeRoomId = null;
@@ -69,7 +68,7 @@ function processMessage(data) {
     default:
       return log('Message type not supported');
   }
-} 
+}
 
 function CLIENT_REGISTERED(data) {
   clientId = data.clientId;
@@ -81,8 +80,7 @@ function ROOM_READY(data) {
   activeRoomId = data.room.id;
   roomIdElement.innerText = 'On Room ' + activeRoomId;
   state.playerIsColor = data.playerColor;
-  drawBoard(board, state.playerIsColor);
-  initGame();
+  initGame(state.playerIsColor);
   closeModal();
 }
 

@@ -1,9 +1,10 @@
-"use strict";
+'use strict';
 
 import {
+  state,
+  board,
   makeLocalMove,
   signalMoveMultiplayer,
-  state,
 } from './gameState.js';
 
 const _squares = [
@@ -29,13 +30,41 @@ const _imgContainers = [
 ];
 
 var selectedSquare = null;
-var lastMoveCells = [
-  [0, 0],
-  [0, 0],
-];
 var movementMarkSquares = [];
+var lastMoveCells = [
+  [0, 0], // from
+  [0, 0], // to
+];
 
-function drawBoard(board, pov = 'w') {
+function initBoard() {
+  for (let row = 0; row <= _Z; row++) {
+    const _row = document.createElement('row');
+    _row.className = 'row';
+
+    for (let col = 0; col <= _Z; col++) {
+      const _square = document.createElement('div');
+      _square.className = 'square';
+      _square.setAttribute('row', row);
+      _square.setAttribute('col', col);
+      _square.addEventListener('mousedown', () => squareClick([row, col]));
+
+      const _imgContainer = document.createElement('div');
+      _imgContainer.classList.add('img-container');
+      _square.appendChild(_imgContainer);
+
+      _imgContainers[row][col] = _imgContainer;
+      _squares[row][col] = _square;
+
+      _row.appendChild(_square);
+      // const _rowCol = document.createElement('div');
+      // _rowCol.innerText = row + '_' + col;
+      // _rowCol.classList.add('row-col-indicator');
+      // _square.appendChild(_rowCol);
+    }
+  }
+}
+
+function drawBoard(pov = 'w') {
   const _board = document.getElementById('board');
   _board.innerHTML = null;
 
@@ -63,29 +92,9 @@ function drawBoard(board, pov = 'w') {
   for (let row = rowStart; rowEval(row); row += rowInc) {
     const _row = document.createElement('div');
     _row.className = 'row';
-
     for (let col = colStart; colEval(col); col += colInc) {
-      const _square = document.createElement('div');
-      _square.className = 'square';
-      _square.setAttribute('row', row);
-      _square.setAttribute('col', col);
-      _square.addEventListener('mousedown', () =>
-        squareClick(board, [row, col])
-      );
-
-      const _rowCol = document.createElement('div');
-      _rowCol.innerText = row + '_' + col;
-      _rowCol.classList.add('row-col-indicator');
-      _square.appendChild(_rowCol);
-
-      const _imgContainer = document.createElement('div');
-      _imgContainer.classList.add('img-container');
-      _square.appendChild(_imgContainer);
-
-      _squares[row][col] = _square;
-      _imgContainers[row][col] = _imgContainer;
+      const _square = _squares[row][col];
       _row.appendChild(_square);
-
       if (col === rankIndicatorAtCol) {
         const rankIndicator = document.createElement('div');
         rankIndicator.classList.add('rank-indicator');
@@ -99,8 +108,16 @@ function drawBoard(board, pov = 'w') {
         _square.appendChild(fileIndicator);
       }
     }
-
     _board.appendChild(_row);
+  }
+}
+
+function drawPieces(colorPieces) {
+  for (const color in colorPieces) {
+    const pieces = colorPieces[color];
+    pieces.forEach(piece => {
+      _imgContainers[piece.row][piece.col].innerHTML = piece.img;
+    });
   }
 }
 
@@ -156,7 +173,7 @@ function selectSquare([row, col]) {
   selectedSquare.classList.add('highlight');
 }
 
-function squareClick(board, [row, col]) {
+function squareClick([row, col]) {
   selectSquare([row, col]);
 
   const { selectedPiece, currentColor } = state;
@@ -176,10 +193,7 @@ function squareClick(board, [row, col]) {
         } else {
           makeLocalMove(selectedPiece, move);
         }
-        return;
       }
-
-      // Multiplayer
     }
   }
 
@@ -198,5 +212,7 @@ export {
   clearLastMoveMarks,
   markLastMove,
   displayMoves,
+  initBoard,
   drawBoard,
+  drawPieces,
 };

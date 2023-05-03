@@ -1,7 +1,7 @@
 "use strict";
 
 import { displayMoves, _imgContainers } from './board.js';
-import { board, pieces, movesHistory, players, state } from './gameState.js';
+import { board, colorPieces, movesHistory, players, state } from './gameState.js';
 
 let idCount = 0;
 
@@ -42,14 +42,14 @@ function displcePieceTo(piece, moveTo) {
 
 function promotePawnAt(pawn, [row, col]) {
   const { currentColor } = state;
-  const pieceIndex = pieces[currentColor].findIndex(
+  const pieceIndex = colorPieces[currentColor].findIndex(
     piece => piece.id === pawn.id
   );
-  pieces[currentColor].splice(pieceIndex, 1);
+  colorPieces[currentColor].splice(pieceIndex, 1);
   board[row][col] = null;
 
   const promotedPiece = queen(row, col, currentColor);
-  pieces[currentColor].push(promotedPiece);
+  colorPieces[currentColor].push(promotedPiece);
   board.putPiece(promotedPiece);
   _imgContainers[row][col].innerHTML = promotedPiece.img; // render
 }
@@ -66,11 +66,11 @@ function _doMove(piece, move) {
     // Remove captured piece from board
     const [rowCapt, colCapt] = captureAt;
     const captuerdBoardPiece = board[rowCapt][colCapt];
-    // Remove it from pieces
-    const pieceIndex = pieces[opositeColor].findIndex(
+    // Remove it from colorPieces
+    const pieceIndex = colorPieces[opositeColor].findIndex(
       piece => piece.id === captuerdBoardPiece.id
     );
-    const capturedPiece = pieces[opositeColor].splice(pieceIndex, 1);
+    const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
     // Add to player's captures
     players[currentColor].captures.push(capturedPiece);
     // en-passant

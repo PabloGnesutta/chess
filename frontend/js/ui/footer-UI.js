@@ -1,9 +1,9 @@
 'use strict';
 
-import { drawBoard } from '../board.js';
+import { drawBoard, drawPieces } from '../board.js';
 import {
   board,
-  pieces,
+  colorPieces,
   movesHistory,
   boardHistory,
   state,
@@ -21,14 +21,15 @@ showBoard.addEventListener('click', () => {
 
 const showPieces = document.getElementById('show-pieces');
 showPieces.addEventListener('click', () => {
-  log(pieces);
+  log(colorPieces);
 });
 
 let pov = 'w';
 const flipBoard = document.getElementById('flip-board');
 flipBoard.addEventListener('click', () => {
   pov = pov === 'w' ? 'b' : 'w';
-  drawBoard(board, pov);
+  drawBoard(pov);
+  drawPieces(colorPieces);
 });
 
 const showMovesHistory = document.getElementById('show-moves-history');

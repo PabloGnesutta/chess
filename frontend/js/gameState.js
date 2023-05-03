@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 import { computeLegalMoves } from './simulation.js';
 import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
@@ -13,7 +13,7 @@ import piecesLib from './createPiece.js';
 const movesHistory = [];
 const boardHistory = [];
 
-const pieces = {
+const colorPieces = {
   w: [],
   b: [],
 };
@@ -60,7 +60,7 @@ const state = {
 function resetState() {
   for (const color in players) {
     const player = players[color];
-    pieces[color].splice(0, pieces[color].length);
+    colorPieces[color].splice(0, colorPieces[color].length);
     player.isInCheck = false;
     player.movesHistory = [];
     player.captures = [];
@@ -113,7 +113,7 @@ function signalMoveMultiplayer(piece, move) {
 
 function makeRemoteMove(moveData) {
   const { pieceId, move } = moveData;
-  const piece = pieces[state.currentColor].find(p => p.id === pieceId);
+  const piece = colorPieces[state.currentColor].find(p => p.id === pieceId);
 
   markLastMove([piece.row, piece.col], move.moveTo);
 
@@ -140,7 +140,7 @@ function startTurn() {
   const { currentColor, opositeColor } = state;
 
   // Am I in check?
-  const imInCheck = isPlayerInCheckAtPosition(board, pieces[opositeColor]);
+  const imInCheck = isPlayerInCheckAtPosition(board, colorPieces[opositeColor]);
 
   if (imInCheck) {
     players[currentColor].isInCheck = true;
@@ -151,10 +151,10 @@ function startTurn() {
   // If no legal moves, then it's check (or stale) mate.
   let numLegalMoves = 0;
 
-  pieces[currentColor].forEach(piece => {
+  colorPieces[currentColor].forEach(piece => {
     piece.computeMoves(board);
     const legalMoves = computeLegalMoves(piece);
-    numLegalMoves += legalMoves;
+    numLegalMoves += legalMoves.length;
     piece.moves = legalMoves;
   });
 
@@ -182,7 +182,7 @@ function _passTurn() {
 export {
   board,
   boardHistory,
-  pieces,
+  colorPieces,
   movesHistory,
   players,
   state,

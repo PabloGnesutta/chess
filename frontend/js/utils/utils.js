@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 function copyBoard(board) {
   const copiedBoard = [];
@@ -12,12 +12,12 @@ function copyBoard(board) {
   return copiedBoard;
 }
 
-function copyPieces(pieces) {
+function copyColorPieces(colorPieces) {
   const copiedPieces = { w: [], b: [] };
-  pieces.w.forEach(piece => {
+  colorPieces.w.forEach(piece => {
     copiedPieces.w.push({ ...piece });
   });
-  pieces.b.forEach(piece => {
+  colorPieces.b.forEach(piece => {
     copiedPieces.b.push({ ...piece });
   });
   return copiedPieces;
@@ -52,4 +52,4 @@ function isPlayerInCheckAtPosition(board, oponentPieces) {
   return playerIsInCheck;
 }
 
-export { copyBoard, copyPieces, isPlayerInCheckAtPosition };
+export { copyBoard, copyColorPieces, isPlayerInCheckAtPosition };
