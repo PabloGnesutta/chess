@@ -7,6 +7,8 @@ import {
   signalMoveMultiplayer,
 } from './gameState.js';
 
+import pieceLib from './createPiece.js';
+
 const _squares = [
   new Array(8).fill(null),
   new Array(8).fill(null),
@@ -116,7 +118,8 @@ function drawPieces(colorPieces) {
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
     pieces.forEach(piece => {
-      _imgContainers[piece.row][piece.col].innerHTML = piece.img;
+      _imgContainers[piece.row][piece.col].innerHTML =
+        pieceLib.getPieceImage(piece);
     });
   }
 }
@@ -203,7 +206,7 @@ function squareClick([row, col]) {
   if (!piece) return;
 
   state.selectedPiece = piece;
-  piece.showMoves();
+  displayMoves(piece.moves);
 }
 
 export {
@@ -211,7 +214,6 @@ export {
   unselectCurrentSquare,
   clearLastMoveMarks,
   markLastMove,
-  displayMoves,
   initBoard,
   drawBoard,
   drawPieces,

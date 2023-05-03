@@ -1,5 +1,7 @@
 'use strict';
 
+import { computeMoves } from '../computePieceMovements.js';
+
 function copyBoard(board) {
   const copiedBoard = [];
   for (let row = 0; row < 8; row++) {
@@ -27,7 +29,7 @@ function isPlayerInCheckAtPosition(board, oponentPieces) {
   let playerIsInCheck = false;
   for (let p = 0; p < oponentPieces.length; p++) {
     const piece = oponentPieces[p];
-    piece.computeMoves(board);
+    computeMoves[piece.name](board, piece);
 
     const captures = [];
     const moves = piece.moves;

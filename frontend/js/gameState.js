@@ -9,6 +9,7 @@ import {
 } from './board.js';
 import { signalMove } from './ws/ws.js';
 import piecesLib from './createPiece.js';
+import { computeMoves } from './computePieceMovements.js';
 
 const movesHistory = [];
 const boardHistory = [];
@@ -152,7 +153,7 @@ function startTurn() {
   let numLegalMoves = 0;
 
   colorPieces[currentColor].forEach(piece => {
-    piece.computeMoves(board);
+    computeMoves[piece.name](board, piece);
     const legalMoves = computeLegalMoves(piece);
     numLegalMoves += legalMoves.length;
     piece.moves = legalMoves;
