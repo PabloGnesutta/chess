@@ -1,8 +1,12 @@
 {
   "scripts": {
-    "serve": "nodemon ./src/server.js"
+    "serve": "npx nodemon",
+    "build": "tsc"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "@types/node": "^18.16.3",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
   }
 }

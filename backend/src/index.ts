@@ -1,9 +1,9 @@
-'use strict';
+import crypto from 'crypto';
+import { createServer } from 'http';
+import { Duplex } from 'stream';
 
-const crypto = require('crypto');
-const { createServer } = require('http');
-const { log } = require('./utils/utils');
-const { registerClient } = require('./clients');
+import { log } from './utils/utils';
+import { registerClient } from './clients';
 
 // -------
 // SERVER:
@@ -20,7 +20,7 @@ server.listen(3000, () => log('listening on port', 3000));
 
 const WS_MAGIC_STRING = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 
-server.on('upgrade', (req, socket) => {
+server.on('upgrade', (req, socket: Duplex) => {
   if (req.headers['upgrade'] !== 'websocket') {
     return socket.end('HTTP/1.1 400 Bad Request\r\n');
   }

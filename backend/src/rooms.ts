@@ -1,28 +1,33 @@
-'use strict';
-
-const { log } = require('./utils/utils');
+import { log } from './utils/utils';
 
 const roomClientsLimit = 2;
 
 let idCount = 0;
 
-const roomIds = [];
-const rooms = [];
+type RoomType = {
+  id: number,
+  name: string,
+  createdBy: number,
+  clients: number[],
+}
 
-const getRoomIndex = roomId => roomIds.findIndex(rId => rId === roomId);
+const roomIds: number[] = [];
+const rooms: RoomType[] = [];
 
-const getRoom = roomId => {
+const getRoomIndex = (roomId: number) => roomIds.findIndex(rId => rId === roomId);
+
+const getRoom = (roomId: number) => {
   const roomIndex = getRoomIndex(roomId);
   if (roomIndex !== -1) return rooms[roomIndex];
   else return null;
 };
 
-const getRoomClients = roomId => {
+const getRoomClients = (roomId: number) => {
   const room = getRoom(roomId);
-  return room && room.clients;
+  return room && room.clients || [] ;
 };
 
-function createRoom(clientId) {
+function createRoom(clientId: number) {
   const roomId = ++idCount;
 
   const room = {
@@ -38,7 +43,7 @@ function createRoom(clientId) {
   return room;
 }
 
-function joinOrCreateRoom(clientId) {
+function joinOrCreateRoom(clientId: number) {
   let room = rooms.find(r => r.clients.length < roomClientsLimit);
 
   if (!room) {
@@ -50,7 +55,7 @@ function joinOrCreateRoom(clientId) {
   return room;
 }
 
-function leaveRoom(roomId, clientId) {
+function leaveRoom(roomId: number, clientId: number) {
   const room = getRoom(roomId);
   if (!room) {
     return log('Attepted to leave non existent room');
@@ -66,7 +71,7 @@ function leaveRoom(roomId, clientId) {
 
 // TODO: Encapsulate room-related functions in this file
 
-module.exports = {
+export {
   rooms,
   roomIds,
   roomClientsLimit,
