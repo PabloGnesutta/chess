@@ -2,12 +2,12 @@
 
 import { computeMoves } from '../computePieceMovements.js';
 
-function copyBoard(board) {
+function copyBoard(boardPieces) {
   const copiedBoard = [];
   for (let row = 0; row < 8; row++) {
     const tempRow = [];
     for (let col = 0; col < 8; col++) {
-      tempRow.push(board[row][col]);
+      tempRow.push(boardPieces[row][col]);
     }
     copiedBoard.push(tempRow);
   }
@@ -25,14 +25,23 @@ function copyColorPieces(colorPieces) {
   return copiedPieces;
 }
 
-function isPlayerInCheckAtPosition(board, oponentPieces) {
+/**
+ * Compute all movements and captures for oponent.
+ * If one of those captures targets the player's king, then it's check
+ * @param {BoardPieces} boardPieces 
+ * @param {Pieces} oponentPieces 
+ * @returns {boolean}
+ */
+function isPlayerInCheckAtPosition(boardPieces, oponentPieces) {
   let playerIsInCheck = false;
   for (let p = 0; p < oponentPieces.length; p++) {
-    const piece = oponentPieces[p];
-    computeMoves[piece.name](board, piece);
+    const oponentsPiece = oponentPieces[p];
+
+    // COMPUTE MOVES
+    computeMoves[oponentsPiece.name](boardPieces, oponentsPiece);
 
     const captures = [];
-    const moves = piece.moves;
+    const moves = oponentsPiece.moves;
     for (let m = 0; m < moves.length; m++) {
       const move = moves[m];
       if (move.captureAt) {
@@ -44,7 +53,7 @@ function isPlayerInCheckAtPosition(board, oponentPieces) {
 
     for (let c = 0; c < captures.length; c++) {
       const [row, col] = captures[c];
-      const target = board[row][col];
+      const target = boardPieces[row][col];
       if (target && target.name === K) {
         playerIsInCheck = true;
         break;

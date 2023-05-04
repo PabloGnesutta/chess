@@ -2,7 +2,7 @@
 
 import createPiece from './createPiece.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
-import { board, colorPieces, resetState, startTurn } from './gameState.js';
+import { boardPieces, colorPieces, resetState, startTurn } from './gameState.js';
 
 let initialPieces;
 // initialPieces = [
@@ -67,7 +67,7 @@ function initGame(playerColor) {
       const piece = createPiece[type](row, col, color);
       colorPieces[color].push(piece);
       // Put 'em in the board
-      board.putPiece(piece);
+      boardPieces.putPiece(piece);
     }
 
     drawBoard(playerColor);

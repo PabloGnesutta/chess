@@ -1,7 +1,7 @@
 'use strict';
 
 import { _imgContainers } from './board.js';
-import { board, colorPieces, players, state } from './gameState.js';
+import { boardPieces, colorPieces, players, state } from './gameState.js';
 
 let idCount = 0;
 
@@ -39,13 +39,13 @@ function displcePieceTo(piece, moveTo) {
   const [rowTo, colTo] = moveTo;
 
   // Remove piece from the board at current position
-  board[row][col] = null;
+  boardPieces[row][col] = null;
   _imgContainers[row][col].innerHTML = null; // render
 
   // Place piece on the board at new position
   piece.row = rowTo;
   piece.col = colTo;
-  board[rowTo][colTo] = piece;
+  boardPieces[rowTo][colTo] = piece;
   _imgContainers[rowTo][colTo].innerHTML = getPieceImage(piece); // render
   piece.hasntMoveYet = false;
 }
@@ -56,11 +56,11 @@ function promotePawnAt(pawn, [row, col]) {
     piece => piece.id === pawn.id
   );
   colorPieces[currentColor].splice(pieceIndex, 1);
-  board[row][col] = null;
+  boardPieces[row][col] = null;
 
   const promotedPiece = queen(row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
-  board.putPiece(promotedPiece);
+  boardPieces.putPiece(promotedPiece);
   _imgContainers[row][col].innerHTML = getPieceImage(promotedPiece); // render
 }
 
@@ -75,7 +75,7 @@ function _doMove(piece, move) {
   if (captureAt) {
     // Remove captured piece from board
     const [rowCapt, colCapt] = captureAt;
-    const captuerdBoardPiece = board[rowCapt][colCapt];
+    const captuerdBoardPiece = boardPieces[rowCapt][colCapt];
     // Remove it from colorPieces
     const pieceIndex = colorPieces[opositeColor].findIndex(
       piece => piece.id === captuerdBoardPiece.id
@@ -85,7 +85,7 @@ function _doMove(piece, move) {
     players[currentColor].captures.push(capturedPiece);
     // en-passant
     if (colTo !== colCapt || rowTo !== rowCapt) {
-      board[rowCapt][colCapt] = null;
+      boardPieces[rowCapt][colCapt] = null;
       _imgContainers[rowCapt][colCapt].innerHTML = null; // render
     }
   }
@@ -136,7 +136,7 @@ function _doCastle(piece, move) {
 
   // Move corresponding rook
   const [_row, _col] = rookFrom;
-  const rook = board[_row][_col];
+  const rook = boardPieces[_row][_col];
 
   if (!rook) return warn('Rook not found while castling');
 

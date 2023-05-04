@@ -1,4 +1,4 @@
-import { players, state } from './gameState.js';
+import { players, state, movesHistory} from './gameState.js';
 
 function moveObj(moveTo, captureAt) {
   const obj = { moveTo };
@@ -6,13 +6,13 @@ function moveObj(moveTo, captureAt) {
   return obj;
 }
 
-function bishopLikeMoves(board, piece) {
+function bishopLikeMoves(boardPieces, piece) {
   const moves = [];
   let { row, col } = piece;
 
   while (row < _Z && col < _Z) {
     const cell = [++row, ++col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -27,7 +27,7 @@ function bishopLikeMoves(board, piece) {
   col = piece.col;
   while (row > 0 && col > 0) {
     const cell = [--row, --col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -42,7 +42,7 @@ function bishopLikeMoves(board, piece) {
   col = piece.col;
   while (row < _Z && col > 0) {
     const cell = [++row, --col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -57,7 +57,7 @@ function bishopLikeMoves(board, piece) {
   col = piece.col;
   while (row > 0 && col < _Z) {
     const cell = [--row, ++col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -71,13 +71,13 @@ function bishopLikeMoves(board, piece) {
   return moves;
 }
 
-function rookLikeMoves(board, piece) {
+function rookLikeMoves(boardPieces, piece) {
   const moves = [];
   let { row, col } = piece;
 
   while (row < _Z) {
     const cell = [++row, col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -91,7 +91,7 @@ function rookLikeMoves(board, piece) {
   row = piece.row;
   while (row > 0) {
     const cell = [--row, col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -105,7 +105,7 @@ function rookLikeMoves(board, piece) {
   row = piece.row;
   while (col < _Z) {
     const cell = [row, ++col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -119,7 +119,7 @@ function rookLikeMoves(board, piece) {
   col = piece.col;
   while (col > 0) {
     const cell = [row, --col];
-    const boardPiece = board[cell[0]][cell[1]];
+    const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
         moves.push(moveObj(cell, cell));
@@ -133,13 +133,13 @@ function rookLikeMoves(board, piece) {
   return moves;
 }
 
-function specificMoves(board, potentialMoves, pieceColor) {
+function specificMoves(boardPieces, potentialMoves, pieceColor) {
   const moves = [];
 
   for (let i = 0; i < potentialMoves.length; i++) {
     const [row, col] = potentialMoves[i];
     if (row > _Z || row < 0 || col > _Z || col < 0) continue;
-    const boardPiece = board[row][col];
+    const boardPiece = boardPieces[row][col];
     if (boardPiece) {
       if (boardPiece.color !== pieceColor) {
         moves.push(moveObj([row, col], [row, col]));
@@ -152,7 +152,7 @@ function specificMoves(board, potentialMoves, pieceColor) {
   return moves;
 }
 
-function king(board, _piece) {
+function king(boardPieces, _piece) {
   const { row, col } = _piece;
   const potentialMoves = [
     [row + 1, col],
@@ -173,14 +173,14 @@ function king(board, _piece) {
     }
 
     rook1: {
-      const rook = board[row][0];
+      const rook = boardPieces[row][0];
       if (!rook || !rook.hasntMoveYet) {
         break rook1;
       }
 
       const castleSteps = [];
       for (var kCol = col - 1; kCol > rook.col; kCol--) {
-        const blockingPiece = board[row][kCol];
+        const blockingPiece = boardPieces[row][kCol];
         if (blockingPiece) {
           break rook1;
         }
@@ -189,21 +189,21 @@ function king(board, _piece) {
 
       castleMoves.push({
         moveTo: [row, col - 2],
-        steps: castleSteps,
+        castleSteps,
         rookFrom: [row, rook.col],
         rookTo: [row, col - 1],
       });
     }
 
     rook2: {
-      const rook = board[row][_Z];
+      const rook = boardPieces[row][_Z];
       if (!rook || !rook.hasntMoveYet) {
         break rook2;
       }
 
       const castleSteps = [];
       for (var kCol = col + 1; kCol < rook.col; kCol++) {
-        const blockingPiece = board[row][kCol];
+        const blockingPiece = boardPieces[row][kCol];
         if (blockingPiece) {
           break rook2;
         }
@@ -212,33 +212,33 @@ function king(board, _piece) {
 
       castleMoves.push({
         moveTo: [row, col + 2],
-        steps: castleSteps,
+        castleSteps,
         rookFrom: [row, rook.col],
         rookTo: [row, col + 1],
       });
     }
   }
 
-  const moves = specificMoves(board, potentialMoves, _piece.color);
+  const moves = specificMoves(boardPieces, potentialMoves, _piece.color);
 
   _piece.moves = moves.concat(castleMoves);
 }
 
-function queen(board, _piece) {
-  const bishopLike = bishopLikeMoves(board, _piece);
-  const rookLike = rookLikeMoves(board, _piece);
+function queen(boardPieces, _piece) {
+  const bishopLike = bishopLikeMoves(boardPieces, _piece);
+  const rookLike = rookLikeMoves(boardPieces, _piece);
   _piece.moves = bishopLike.concat(rookLike);
 }
 
-function rook(board, _piece) {
-  _piece.moves = rookLikeMoves(board, _piece);
+function rook(boardPieces, _piece) {
+  _piece.moves = rookLikeMoves(boardPieces, _piece);
 }
 
-function bishop(board, _piece) {
-  _piece.moves = bishopLikeMoves(board, _piece);
+function bishop(boardPieces, _piece) {
+  _piece.moves = bishopLikeMoves(boardPieces, _piece);
 }
 
-function knight(board, _piece) {
+function knight(boardPieces, _piece) {
   const { row, col } = _piece;
   const potentialMoves = [
     [row + 1, col + 2],
@@ -251,20 +251,20 @@ function knight(board, _piece) {
     [row + 2, col - 1],
   ];
 
-  _piece.moves = specificMoves(board, potentialMoves, _piece.color);
+  _piece.moves = specificMoves(boardPieces, potentialMoves, _piece.color);
 }
 
-function pawn(board, _piece) {
+function pawn(boardPieces, _piece) {
   const moves = [];
   const oneRankAhead = _piece.row + _piece.delta;
 
-  let blockingPiece = board[oneRankAhead][_piece.col];
+  let blockingPiece = boardPieces[oneRankAhead][_piece.col];
   if (!blockingPiece) {
     moves.push(moveObj([oneRankAhead, _piece.col]));
 
     if (_piece.row == _piece.startingRow) {
       const twoRanksAhead = _piece.row + _piece.delta * 2;
-      blockingPiece = board[twoRanksAhead][_piece.col];
+      blockingPiece = boardPieces[twoRanksAhead][_piece.col];
       if (!blockingPiece) {
         moves.push(moveObj([twoRanksAhead, _piece.col]));
       }
@@ -272,7 +272,7 @@ function pawn(board, _piece) {
   }
 
   const adjacentCol1 = _piece.col + 1;
-  let oponentPiece = board[oneRankAhead][adjacentCol1];
+  let oponentPiece = boardPieces[oneRankAhead][adjacentCol1];
   if (oponentPiece && oponentPiece.color !== _piece.color) {
     moves.push(
       moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1])
@@ -280,7 +280,7 @@ function pawn(board, _piece) {
   }
 
   const adjacentCol2 = _piece.col - 1;
-  oponentPiece = board[oneRankAhead][adjacentCol2];
+  oponentPiece = boardPieces[oneRankAhead][adjacentCol2];
   if (oponentPiece && oponentPiece.color !== _piece.color) {
     moves.push(
       moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2])

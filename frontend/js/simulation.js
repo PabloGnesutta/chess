@@ -1,6 +1,6 @@
 'use strict';
 
-import { board, colorPieces, state } from './gameState.js';
+import { boardPieces, colorPieces, state } from './gameState.js';
 import {
   copyBoard,
   copyColorPieces,
@@ -13,13 +13,15 @@ function _doesMovePutMeInCheck(piece, move) {
 
   const opositeColor = state.opositeColor;
 
-  const boardCopy = copyBoard(board);
+  const boardCopy = copyBoard(boardPieces);
   const piecesCopy = copyColorPieces(colorPieces);
+
+  // Simulate the move
 
   boardCopy[piece.row][piece.col] = null;
 
-  // Capture:
   if (captureAt) {
+    // Simulate the capture:
     const [_row, _col] = captureAt;
     const capturablePiece = boardCopy[_row][_col];
     const pieceIdx = piecesCopy[opositeColor].findIndex(
@@ -34,7 +36,7 @@ function _doesMovePutMeInCheck(piece, move) {
   piece.row = row;
   piece.col = col;
 
-  // Move puts me in check?
+  // Once the simulation is done, check if the resulting position puts player in check
   const oponentPieces = piecesCopy[opositeColor];
   const putsMeInCheck = isPlayerInCheckAtPosition(boardCopy, oponentPieces);
 
@@ -58,21 +60,23 @@ function computeLegalMoves(piece) {
 
   // King
   piece.moves.forEach(move => {
-    const castleSteps = move.steps;
+    const castleSteps = move.castleSteps;
     if (castleSteps) {
       // Castle
       let castleIsLegal = true;
+
       for (let s = 0; s < castleSteps.length; s++) {
-        const step = castleSteps[s];
+        const castleStep = castleSteps[s];
         const putsMeInCheck = _doesMovePutMeInCheck(
           { ...piece },
-          { moveTo: step }
+          { moveTo: castleStep }
         );
         if (putsMeInCheck) {
           castleIsLegal = false;
           break;
         }
       }
+
       if (castleIsLegal) {
         legalMoves.push(move);
       }

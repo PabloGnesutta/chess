@@ -19,7 +19,7 @@ const colorPieces = {
   b: [],
 };
 
-const board = [
+const boardPieces = [
   new Array(8).fill(null),
   new Array(8).fill(null),
   new Array(8).fill(null),
@@ -30,7 +30,7 @@ const board = [
   new Array(8).fill(null),
 ];
 
-board.putPiece = function (piece) {
+boardPieces.putPiece = function (piece) {
   this[piece.row][piece.col] = piece;
   return this;
 };
@@ -69,7 +69,7 @@ function resetState() {
 
   for (let row = 0; row <= _Z; row++) {
     for (let col = 0; col <= _Z; col++) {
-      board[row][col] = null;
+      boardPieces[row][col] = null;
       _imgContainers[row][col].innerHTML = null;
     }
   }
@@ -82,11 +82,6 @@ function resetState() {
   state.selectedPiece = null;
 
   piecesLib.resetPieceIdCount();
-}
-
-function _isStalemateByRepetition() {
-  // TODO
-  return false;
 }
 
 function makeLocalMove(piece, move) {
@@ -102,7 +97,6 @@ function makeLocalMove(piece, move) {
 
   unselectCurrentSquare();
 
-  // TODO: Delegate this to websocket
   piece.doMove(move);
   _passTurn();
 }
@@ -115,33 +109,16 @@ function signalMoveMultiplayer(piece, move) {
 function makeRemoteMove(moveData) {
   const { pieceId, move } = moveData;
   const piece = colorPieces[state.currentColor].find(p => p.id === pieceId);
-
-  markLastMove([piece.row, piece.col], move.moveTo);
-
-  const historyItem = {
-    piece: piece.name,
-    from: [piece.row, piece.col],
-    to: move.moveTo,
-  };
-  movesHistory.push({ color: state.currentColor, ...historyItem });
-  players[state.currentColor].movesHistory.push({ historyItem });
-
-  unselectCurrentSquare();
-
-  // TODO: Delegate this to websocket
-  piece.doMove(move);
-  _passTurn();
+  makeLocalMove(piece, move);
 }
 
 function startTurn() {
-  boardHistory.push(copyBoard(board));
+  const { currentColor, opositeColor } = state;
 
   // TODO: stalemate by repetition
 
-  const { currentColor, opositeColor } = state;
-
   // Am I in check?
-  const imInCheck = isPlayerInCheckAtPosition(board, colorPieces[opositeColor]);
+  const imInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
   if (imInCheck) {
     players[currentColor].isInCheck = true;
@@ -149,14 +126,14 @@ function startTurn() {
   }
 
   // Compute all legal moves for current player.
-  // If no legal moves, then it's check (or stale) mate.
+  // If no legal moves, then it's check mate or stale mate.
   let numLegalMoves = 0;
 
   colorPieces[currentColor].forEach(piece => {
-    computeMoves[piece.name](board, piece);
+    computeMoves[piece.name](boardPieces, piece);
     const legalMoves = computeLegalMoves(piece);
-    numLegalMoves += legalMoves.length;
     piece.moves = legalMoves;
+    numLegalMoves += legalMoves.length;
   });
 
   if (!numLegalMoves) {
@@ -181,7 +158,7 @@ function _passTurn() {
 }
 
 export {
-  board,
+  boardPieces,
   boardHistory,
   colorPieces,
   movesHistory,

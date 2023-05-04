@@ -2,7 +2,7 @@
 
 import { drawBoard, drawPieces } from '../board.js';
 import {
-  board,
+  boardPieces,
   colorPieces,
   movesHistory,
   boardHistory,
@@ -16,7 +16,7 @@ showState.addEventListener('click', () => {
 
 const showBoard = document.getElementById('show-board');
 showBoard.addEventListener('click', () => {
-  log(board);
+  log(boardPieces);
 });
 
 const showPieces = document.getElementById('show-pieces');

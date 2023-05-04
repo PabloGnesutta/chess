@@ -2,7 +2,7 @@
 
 import {
   state,
-  board,
+  boardPieces,
   makeLocalMove,
   signalMoveMultiplayer,
 } from './gameState.js';
@@ -202,7 +202,7 @@ function squareClick([row, col]) {
 
   state.selectedPiece = null;
 
-  const piece = board[row][col];
+  const piece = boardPieces[row][col];
   if (!piece) return;
 
   state.selectedPiece = piece;
