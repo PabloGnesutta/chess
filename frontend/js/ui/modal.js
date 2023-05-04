@@ -1,6 +1,6 @@
 const modal = document.getElementById('modal');
 const closeModalBtn = document.getElementById('close-modal-btn');
-const modalContent = document.getElementById('modal-content');
+// const modalContent = document.getElementById('modal-content');
 
 closeModalBtn.onclick = e => closeModal();
 

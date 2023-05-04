@@ -1,15 +1,15 @@
 'use strict';
 
 import { computeLegalMoves } from './simulation.js';
-import { copyBoard, isPlayerInCheckAtPosition } from './utils/utils.js';
+import { isPlayerInCheckAtPosition } from './utils/utils.js';
+import piecesLib from './createPiece.js';
 import {
   _imgContainers,
   markLastMove,
   unselectCurrentSquare,
 } from './board.js';
-import { signalMove } from './ws/ws.js';
-import piecesLib from './createPiece.js';
 import { computeMoves } from './computePieceMovements.js';
+import { signalMove } from './ws/ws.js';
 
 const movesHistory = [];
 const boardHistory = [];

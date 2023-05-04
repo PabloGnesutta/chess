@@ -1,6 +1,6 @@
 'use strict';
 
-import { _imgContainers, drawBoard, initBoard } from './js/board.js';
+import { _imgContainers, initBoard } from './js/board.js';
 import { state } from './js/gameState.js';
 import { connectWebSocket, joinRoom } from './js/ws/ws.js';
 import { singlePlayerBtn, findGameBtn } from './js/ui/lobby-UI.js';
