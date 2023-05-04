@@ -19,21 +19,21 @@ const colorPieces = {
   b: [],
 };
 
-const boardPieces = [
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-  new Array(8).fill(null),
-];
-
-boardPieces.putPiece = function (piece) {
-  this[piece.row][piece.col] = piece;
-  return this;
+const boardPieces = {
+  0: {},
+  1: {},
+  2: {},
+  3: {},
+  4: {},
+  5: {},
+  6: {},
+  7: {},
+  putPiece(piece) {
+    this[piece.row][piece.col] = piece;
+    return this;
+  }
 };
+
 
 const players = {
   w: {
@@ -68,8 +68,8 @@ function resetState() {
   }
 
   for (let row = 0; row <= _Z; row++) {
+    boardPieces[row] = {};
     for (let col = 0; col <= _Z; col++) {
-      boardPieces[row][col] = null;
       _imgContainers[row][col].innerHTML = null;
     }
   }
@@ -101,16 +101,17 @@ function makeLocalMove(piece, move) {
   _passTurn();
 }
 
-function signalMoveMultiplayer(piece, move) {
-  signalMove(piece.id, move);
-  makeLocalMove(piece, move);
-}
-
 function makeRemoteMove(moveData) {
   const { pieceId, move } = moveData;
   const piece = colorPieces[state.currentColor].find(p => p.id === pieceId);
   makeLocalMove(piece, move);
 }
+
+function signalMoveMultiplayer(piece, move) {
+  signalMove(piece.id, move);
+  makeLocalMove(piece, move);
+}
+
 
 function startTurn() {
   const { currentColor, opositeColor } = state;

@@ -38,5 +38,5 @@ try {
 
 initBoard();
 
-// singlePlayerBtn.click();
-findGameBtn.click();
+singlePlayerBtn.click();
+// findGameBtn.click();

@@ -39,7 +39,7 @@ function displcePieceTo(piece, moveTo) {
   const [rowTo, colTo] = moveTo;
 
   // Remove piece from the board at current position
-  boardPieces[row][col] = null;
+  delete boardPieces[row][col];
   _imgContainers[row][col].innerHTML = null; // render
 
   // Place piece on the board at new position
@@ -56,7 +56,7 @@ function promotePawnAt(pawn, [row, col]) {
     piece => piece.id === pawn.id
   );
   colorPieces[currentColor].splice(pieceIndex, 1);
-  boardPieces[row][col] = null;
+  delete boardPieces[row][col];
 
   const promotedPiece = queen(row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
@@ -85,7 +85,7 @@ function _doMove(piece, move) {
     players[currentColor].captures.push(capturedPiece);
     // en-passant
     if (colTo !== colCapt || rowTo !== rowCapt) {
-      boardPieces[rowCapt][colCapt] = null;
+      delete boardPieces[rowCapt][colCapt];
       _imgContainers[rowCapt][colCapt].innerHTML = null; // render
     }
   }
