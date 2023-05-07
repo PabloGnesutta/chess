@@ -1,13 +1,13 @@
 'use strict';
 
-import { drawBoard, drawPieces } from '../board.js';
+import { drawBoard, drawPieces } from '../engine/board.js';
 import {
   boardPieces,
   colorPieces,
   movesHistory,
   boardHistory,
   state,
-} from '../gameState.js';
+} from '../engine/gameState.js';
 
 const showState = document.getElementById('show-state');
 showState.addEventListener('click', () => {

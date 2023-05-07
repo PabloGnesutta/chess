@@ -1,7 +1,7 @@
 'use strict';
 
-import { initGame } from '../initGame.js';
-import { makeRemoteMove, resetState, state } from '../gameState.js';
+import { initGame } from '../engine/initGame.js';
+import { makeRemoteMove, resetState, state } from '../engine/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
 

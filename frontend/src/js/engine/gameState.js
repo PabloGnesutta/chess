@@ -1,7 +1,7 @@
 'use strict';
 
 import { computeLegalMoves } from './simulation.js';
-import { isPlayerInCheckAtPosition } from './utils/utils.js';
+import { isPlayerInCheckAtPosition } from '../utils/utils.js';
 import piecesLib from './createPiece.js';
 import {
   _imgContainers,
@@ -9,7 +9,7 @@ import {
   unselectCurrentSquare,
 } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
-import { signalMove } from './ws/ws.js';
+import { signalMove } from '../ws/ws.js';
 
 const movesHistory = [];
 const boardHistory = [];

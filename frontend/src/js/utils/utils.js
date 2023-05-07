@@ -1,6 +1,6 @@
 'use strict';
 
-import { computeMoves } from '../computePieceMovements.js';
+import { computeMoves } from '../engine/computePieceMovements.js';
 
 function copyBoard(boardPieces) {
   const copiedBoard = [];

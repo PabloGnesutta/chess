@@ -5,7 +5,7 @@ import {
   copyBoard,
   copyColorPieces,
   isPlayerInCheckAtPosition,
-} from './utils/utils.js';
+} from '../utils/utils.js';
 
 function _doesMovePutMeInCheck(piece, move) {
   const { moveTo, captureAt } = move;
