@@ -7,7 +7,7 @@ import {
   signalMoveMultiplayer,
 } from './gameState.js';
 
-import pieceLib from './createPiece.js';
+import pieceLib, { MoveType } from './createPiece.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -31,8 +31,8 @@ const _imgContainers = [
   new Array(8).fill(null),
 ];
 
-var selectedSquare = null;
-var movementMarkSquares = [];
+var selectedSquare: HTMLElement|null = null;
+var movementMarkSquares: HTMLElement[] = [];
 var lastMoveCells = [
   [0, 0], // from
   [0, 0], // to
@@ -46,8 +46,8 @@ function initBoard() {
     for (let col = 0; col <= _Z; col++) {
       const _square = document.createElement('div');
       _square.className = 'square';
-      _square.setAttribute('row', row);
-      _square.setAttribute('col', col);
+      _square.setAttribute('row', row.toString());
+      _square.setAttribute('col', col.toString());
       _square.addEventListener('mousedown', () => squareClick([row, col]));
 
       const _imgContainer = document.createElement('div');
@@ -68,23 +68,23 @@ function initBoard() {
 
 function drawBoard(pov = 'w') {
   const _board = document.getElementById('board');
-  _board.innerHTML = null;
+  _board.innerHTML = '';
 
   let rowStart = 0;
-  let rowEval = row => row <= _Z;
+  let rowEval = (row: number) => row <= _Z;
   let rowInc = 1;
 
   let colStart = 0;
-  let colEval = col => col <= _Z;
+  let colEval = (col: number) => col <= _Z;
   let colInc = 1;
 
   if (pov === 'b') {
     rowStart = _Z;
-    rowEval = row => row >= 0;
+    rowEval = (row: number) => row >= 0;
     rowInc = -1;
 
     colStart = _Z;
-    colEval = col => col >= 0;
+    colEval = (col: number) => col >= 0;
     colInc = -1;
   }
 
@@ -100,7 +100,7 @@ function drawBoard(pov = 'w') {
       if (col === rankIndicatorAtCol) {
         const rankIndicator = document.createElement('div');
         rankIndicator.classList.add('rank-indicator');
-        rankIndicator.innerText = ROW_MAP[row];
+        rankIndicator.innerText = ROW_MAP[row].toString();
         _square.appendChild(rankIndicator);
       }
       if (row === fileIndicatorAtRow) {
@@ -152,7 +152,7 @@ function clearMoves() {
   movementMarkSquares = [];
 }
 
-function displayMoves(moves) {
+function displayMoves(moves: MoveType[]) {
   clearMoves();
   moves.forEach(move => {
     const [row, col] = move.moveTo;
@@ -170,13 +170,13 @@ function unselectCurrentSquare() {
   selectedSquare = null;
 }
 
-function selectSquare([row, col]) {
+function selectSquare([row, col]: [number, number]) {
   unselectCurrentSquare();
   selectedSquare = _squares[row][col];
   selectedSquare.classList.add('highlight');
 }
 
-function squareClick([row, col]) {
+function squareClick([row, col]: [number, number]) {
   selectSquare([row, col]);
 
   const { selectedPiece, currentColor } = state;

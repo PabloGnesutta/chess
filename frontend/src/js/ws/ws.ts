@@ -9,7 +9,7 @@ import { closeModal } from '../ui/modal.js';
 let wsSend = function () {};
 let isWSOpen = false;
 let clientId = null;
-let activeRoomId = null;
+let activeRoomId: number = 0;
 
 function connectWebSocket() {
   return new Promise((resolve, reject) => {
@@ -34,16 +34,16 @@ function connectWebSocket() {
   });
 }
 
-function flushSocket(ws, cause, event) {
+function flushSocket(ws: WebSocket, cause: string, event: Event) {
   log('Websocket flushed due to', cause, '-', event);
   ws.onmessage = null;
   ws.onerror = null;
   ws.onclose = null;
   ws.onopen = null;
-  send = null;
+  wsSend = null;
   isWSOpen = false;
   clientId = null;
-  activeRoomId = null;
+  activeRoomId = 0;
   clientIdElement.innerText = 'Offline';
   roomIdElement.innerText = '';
 }
@@ -52,7 +52,7 @@ function flushSocket(ws, cause, event) {
 // Receive messages from server:
 // -----------------------------
 
-function processMessage(data) {
+function processMessage(data: any): void {
   log('Incoming message', data);
   switch (data.type) {
     case 'CLIENT_REGISTERED':
@@ -70,7 +70,7 @@ function processMessage(data) {
   }
 }
 
-function CLIENT_REGISTERED(data) {
+function CLIENT_REGISTERED(data: any): void {
   clientId = data.clientId;
   clientIdElement.innerText = 'Online | Client ID: ' + clientId;
 }
@@ -89,14 +89,14 @@ function OPONENT_MOVED(data) {
 }
 
 function ROOM_LEFT() {
-  activeRoomId = null;
+  activeRoomId = 0;
   resetState();
   document.getElementById('board').classList.add('display-none');
 }
 
 function OPONENT_ABANDONED() {
   log(' * OPONENT ABANDONED, YOU WIN');
-  activeRoomId = null;
+  activeRoomId = 0;
   resetState();
   document.getElementById('board').classList.add('display-none');
 }

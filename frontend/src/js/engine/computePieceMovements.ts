@@ -1,17 +1,20 @@
-import { players, state, movesHistory} from './gameState.js';
+import { ColorType, Piece } from './createPiece';
+import { players, state, movesHistory, CellType, BoardPiecesType} from './gameState.js';
 
-function moveObj(moveTo, captureAt) {
-  const obj = { moveTo };
+function moveObj(moveTo: CellType, captureAt?: CellType) {
+  const obj: {moveTo: CellType, captureAt?: CellType} = { 
+    moveTo
+  };
   if (captureAt) obj.captureAt = captureAt;
   return obj;
 }
 
-function bishopLikeMoves(boardPieces, piece) {
+function bishopLikeMoves(boardPieces: BoardPiecesType, piece: Piece) {
   const moves = [];
   let { row, col } = piece;
 
   while (row < _Z && col < _Z) {
-    const cell = [++row, ++col];
+    const cell: CellType = [++row, ++col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -26,7 +29,7 @@ function bishopLikeMoves(boardPieces, piece) {
   row = piece.row;
   col = piece.col;
   while (row > 0 && col > 0) {
-    const cell = [--row, --col];
+    const cell: CellType = [--row, --col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -41,7 +44,7 @@ function bishopLikeMoves(boardPieces, piece) {
   row = piece.row;
   col = piece.col;
   while (row < _Z && col > 0) {
-    const cell = [++row, --col];
+    const cell: CellType = [++row, --col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -56,7 +59,7 @@ function bishopLikeMoves(boardPieces, piece) {
   row = piece.row;
   col = piece.col;
   while (row > 0 && col < _Z) {
-    const cell = [--row, ++col];
+    const cell: CellType = [--row, ++col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -71,12 +74,12 @@ function bishopLikeMoves(boardPieces, piece) {
   return moves;
 }
 
-function rookLikeMoves(boardPieces, piece) {
+function rookLikeMoves(boardPieces: BoardPiecesType, piece: Piece) {
   const moves = [];
   let { row, col } = piece;
 
   while (row < _Z) {
-    const cell = [++row, col];
+    const cell: CellType = [++row, col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -90,7 +93,7 @@ function rookLikeMoves(boardPieces, piece) {
 
   row = piece.row;
   while (row > 0) {
-    const cell = [--row, col];
+    const cell: CellType = [--row, col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -104,7 +107,7 @@ function rookLikeMoves(boardPieces, piece) {
 
   row = piece.row;
   while (col < _Z) {
-    const cell = [row, ++col];
+    const cell: CellType = [row, ++col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -118,7 +121,7 @@ function rookLikeMoves(boardPieces, piece) {
 
   col = piece.col;
   while (col > 0) {
-    const cell = [row, --col];
+    const cell: CellType = [row, --col];
     const boardPiece = boardPieces[cell[0]][cell[1]];
     if (boardPiece) {
       if (boardPiece.color !== piece.color) {
@@ -133,7 +136,7 @@ function rookLikeMoves(boardPieces, piece) {
   return moves;
 }
 
-function specificMoves(boardPieces, potentialMoves, pieceColor) {
+function specificMoves(boardPieces: BoardPiecesType, potentialMoves: CellType[], pieceColor: ColorType) {
   const moves = [];
 
   for (let i = 0; i < potentialMoves.length; i++) {
@@ -152,7 +155,7 @@ function specificMoves(boardPieces, potentialMoves, pieceColor) {
   return moves;
 }
 
-function king(boardPieces, _piece) {
+function king(boardPieces: BoardPiecesType, _piece: Piece) {
   const { row, col } = _piece;
   const potentialMoves = [
     [row + 1, col],
@@ -224,21 +227,21 @@ function king(boardPieces, _piece) {
   _piece.moves = moves.concat(castleMoves);
 }
 
-function queen(boardPieces, _piece) {
+function queen(boardPieces: BoardPiecesType, _piece: Piece) {
   const bishopLike = bishopLikeMoves(boardPieces, _piece);
   const rookLike = rookLikeMoves(boardPieces, _piece);
   _piece.moves = bishopLike.concat(rookLike);
 }
 
-function rook(boardPieces, _piece) {
+function rook(boardPieces: BoardPiecesType, _piece: Piece) {
   _piece.moves = rookLikeMoves(boardPieces, _piece);
 }
 
-function bishop(boardPieces, _piece) {
+function bishop(boardPieces: BoardPiecesType, _piece: Piece) {
   _piece.moves = bishopLikeMoves(boardPieces, _piece);
 }
 
-function knight(boardPieces, _piece) {
+function knight(boardPieces: BoardPiecesType, _piece: Piece) {
   const { row, col } = _piece;
   const potentialMoves = [
     [row + 1, col + 2],
@@ -254,7 +257,7 @@ function knight(boardPieces, _piece) {
   _piece.moves = specificMoves(boardPieces, potentialMoves, _piece.color);
 }
 
-function pawn(boardPieces, _piece) {
+function pawn(boardPieces: BoardPiecesType, _piece: Piece) {
   const moves = [];
   const oneRankAhead = _piece.row + _piece.delta;
 
@@ -317,7 +320,11 @@ function pawn(boardPieces, _piece) {
   _piece.moves = moves;
 }
 
-const computeMoves = {
+type ComputeMovesType = {
+  [key: string]: Function
+}
+
+const computeMoves: ComputeMovesType = {
   king,
   queen,
   rook,

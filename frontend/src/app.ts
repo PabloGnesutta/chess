@@ -7,34 +7,29 @@ import { singlePlayerBtn, findGameBtn } from './js/ui/lobby-UI.js';
 import { initGame } from './js/engine/initGame.js';
 import { showModal } from './js/ui/modal.js';
 
-function findGame() {
+function findGame(): void {
   state.isMultiPlayer = true;
   joinRoom();
   showModal();
 }
 
 // SINGLE PLAYER
-singlePlayerBtn.onclick = e => {
-  state.isMultiplayer = false;
+singlePlayerBtn.onclick = () => {
+  state.isMultiPlayer = false;
   // TODO: Disable if it's currently in a multiplayer game
   initGame('w');
 };
 
 // MULTI PLAYER
-findGameBtn.onclick = async e => {
+findGameBtn.onclick = async () => {
   try {
+    const connectionMessage = await connectWebSocket();
+    log(connectionMessage);
     findGame();
   } catch (err) {
     warn('Error connecting to websocket', err);
   }
 };
-
-try {
-  const connectionMessage = await connectWebSocket();
-  log(connectionMessage);
-} catch (err) {
-  log('Error conecting to websocket', err);
-}
 
 initBoard();
 

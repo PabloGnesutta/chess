@@ -5,7 +5,6 @@ import {
   boardPieces,
   colorPieces,
   movesHistory,
-  boardHistory,
   state,
 } from '../engine/gameState.js';
 
@@ -35,9 +34,4 @@ flipBoard.addEventListener('click', () => {
 const showMovesHistory = document.getElementById('show-moves-history');
 showMovesHistory.addEventListener('click', () => {
   log(movesHistory);
-});
-
-const showBoardHistory = document.getElementById('show-board-history');
-showBoardHistory.addEventListener('click', () => {
-  log(boardHistory);
 });

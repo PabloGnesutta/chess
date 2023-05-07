@@ -5,7 +5,25 @@ import { boardPieces, colorPieces, players, state } from './gameState.js';
 
 let idCount = 0;
 
-function piece(name, row, col, color) {
+export type ColorType = 'w'|'b';
+
+export type Piece = {
+  id: number,
+  name: string,
+  row: number,
+  col: number,
+  color: ColorType,
+  moves: any[],
+  hasntMoveYet: boolean,
+  doMove: any,
+  delta?: number,
+  startingRow?: number,
+  enPassantRow?: number,
+}
+
+export type MoveType = any;
+
+function piece(name: string, row: number, col: number, color: string): Piece {
   return {
     id: ++idCount,
     name,
@@ -15,7 +33,7 @@ function piece(name, row, col, color) {
     moves: [],
     hasntMoveYet: true,
 
-    doMove(move) {
+    doMove(move: any) {
       _doMove(this, move);
     },
   };
@@ -25,7 +43,7 @@ function resetPieceIdCount() {
   idCount = 0;
 }
 
-function getPieceImage(piece) {
+function getPieceImage(piece: Piece) {
   const colorCode = piece.color === 'w' ? 'l' : 'd';
   let pieceCode = piece.name[0];
   if (piece.name === 'knight') pieceCode = 'n';
@@ -34,7 +52,7 @@ function getPieceImage(piece) {
   return `<img src=${filePath} class="piece ${piece.name} ${piece.color}"></img>`;
 }
 
-function displcePieceTo(piece, moveTo) {
+function displcePieceTo(piece: Piece, moveTo: any) {
   const { row, col } = piece;
   const [rowTo, colTo] = moveTo;
 
@@ -50,7 +68,7 @@ function displcePieceTo(piece, moveTo) {
   piece.hasntMoveYet = false;
 }
 
-function promotePawnAt(pawn, [row, col]) {
+function promotePawnAt(pawn: Piece, [row, col]) {
   const { currentColor } = state;
   const pieceIndex = colorPieces[currentColor].findIndex(
     piece => piece.id === pawn.id
@@ -64,7 +82,7 @@ function promotePawnAt(pawn, [row, col]) {
   _imgContainers[row][col].innerHTML = getPieceImage(promotedPiece); // render
 }
 
-function _doMove(piece, move) {
+function _doMove(piece: Piece, move: MoveType) {
   const { currentColor, opositeColor } = state;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -96,7 +114,7 @@ function _doMove(piece, move) {
   }
 }
 
-function pawn(row, col, color) {
+function pawn(row: number, col: number, color: string): Piece {
   return {
     ...piece(P, row, col, color),
     delta: color === 'w' ? -1 : 1,
@@ -105,31 +123,31 @@ function pawn(row, col, color) {
   };
 }
 
-function knight(row, col, color) {
+function knight(row:number, col:number, color:string): Piece {
   return {
     ...piece(N, row, col, color),
   };
 }
 
-function bishop(row, col, color) {
+function bishop(row:number, col:number, color:string): Piece {
   return {
     ...piece(B, row, col, color),
   };
 }
 
-function rook(row, col, color) {
+function rook(row:number, col:number, color:string): Piece {
   return {
     ...piece(R, row, col, color),
   };
 }
 
-function queen(row, col, color) {
+function queen(row:number, col:number, color:string): Piece {
   return {
     ...piece(Q, row, col, color),
   };
 }
 
-function _doCastle(piece, move) {
+function _doCastle(piece: Piece, move: MoveType) {
   const { moveTo, rookFrom, rookTo } = move;
 
   displcePieceTo(piece, moveTo);
@@ -143,12 +161,12 @@ function _doCastle(piece, move) {
   displcePieceTo(rook, rookTo);
 }
 
-function king(row, col, color) {
+function king(row:number, col:number, color:string): Piece {
   return {
     ...piece(K, row, col, color),
 
     // Overwrite inherited doMove method
-    doMove(move) {
+    doMove(move: MoveType) {
       if (move.rookFrom) {
         _doCastle(this, move);
       } else {
