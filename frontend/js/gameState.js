@@ -55,7 +55,7 @@ const state = {
   opositeColor: 'b',
   selectedPiece: null,
   isMultiPlayer: false,
-  playerIsColor: null,
+  playerColor: null,
 };
 
 function resetState() {

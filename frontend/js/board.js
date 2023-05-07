@@ -190,7 +190,7 @@ function squareClick([row, col]) {
 
       if (move) {
         if (state.isMultiPlayer) {
-          if (state.playerIsColor === currentColor) {
+          if (state.playerColor === currentColor) {
             signalMoveMultiplayer(selectedPiece, move);
           }
         } else {

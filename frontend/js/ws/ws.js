@@ -77,10 +77,10 @@ function CLIENT_REGISTERED(data) {
 
 function ROOM_READY(data) {
   log(' * READY TO START GAME');
-  activeRoomId = data.room.id;
+  activeRoomId = data.roomId;
   roomIdElement.innerText = 'On Room ' + activeRoomId;
-  state.playerIsColor = data.playerColor;
-  initGame(state.playerIsColor);
+  state.playerColor = data.playerColor;
+  initGame(state.playerColor);
   closeModal();
 }
 
@@ -110,12 +110,6 @@ function joinRoom() {
     return warn('Leave the current room before joining another one');
 
   wsSend({ type: 'JOIN_ROOM' });
-}
-
-function leaveRoom() {
-  if (!activeRoomId) return warn('Not currently in a room, cannot leave');
-
-  wsSend({ type: 'LEAVE_ROOM' });
 }
 
 function signalMove(pieceId, move) {

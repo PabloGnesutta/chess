@@ -2,50 +2,51 @@ import { Duplex } from 'stream';
 
 import { log } from'./utils/utils';
 import {
-  rooms,
-  roomIds,
-  roomClientsLimit,
   joinOrCreateRoom,
-  getRoomIndex,
-  getRoomClients,
+  RoomType,
+  removeClientAndDestroyRoom,
 } from'./rooms';
+import { type } from 'os';
 
-const WS_MAX_RESPONSE_LENGTH = 65535;
 
-let idCount = 0;
-
-type ClientData = {
-  roomIsIn: number | null,
-  playerColor: string | null,
+export type Client = {
+  id: number,
+  activeRoom: RoomType | null,
+  playerColor: string, // coold be a bit, black/white
+  _s: Duplex,
 }
 
-const clientIds: number[] = [];
-const clientsData: ClientData[] = [];
-const sockets: Duplex[] = [];
+type Clients = { [key: number]: Client }
 
-const getClientIndex = (id: number) => clientIds.findIndex(cId => cId === id);
+const clients: Clients = {}
+
+type PayloadType = any;
+
+let idCount = 0;
 
 /**
  * Register new web socket client and its metadata
  * @param {Socket} _s
  */
-function registerClient(_s: Duplex) {
+function registerClient(_s: Duplex): void {
   const clientId = ++idCount;
 
-  sockets.push(_s);
-  clientIds.push(clientId);
-  clientsData.push({
-    roomIsIn: null,
-    playerColor: null
-  });
+  clients[clientId] = {
+    id: clientId,
+    _s,
+    activeRoom: null,
+    playerColor: '',
+  }
+
+  const client = clients[clientId]
+
 
   writeSocket(_s, { type: 'CLIENT_REGISTERED', clientId });
 
-  _s.on('readable', () => readSocket(_s, clientId));
+  _s.on('readable', () => readSocket(client));
 
   _s.on('close', () => {
-    log('Socket closed');
-    deleteClient(_s, clientId);
+    log('Socket closed'), deleteClient(client);
   });
 
   _s.on('end', () => log(' / socket end'));
@@ -53,156 +54,96 @@ function registerClient(_s: Duplex) {
   // _s.on('data', chunk => {});
 }
 
-function deleteClient(_s: Duplex, clientId: number) {
+function deleteClient(client: Client): void {
   log(' / @deleteClient');
-  _s.destroy();
+  
+  client._s.destroy();
 
-  const clientIndex = getClientIndex(clientId);
+  removeClientAndDestroyRoom(client);
 
-  removeFromRoom: {
-    // Remove client from room and the room itself
-    const roomIsIn = clientsData[clientIndex].roomIsIn;
-
-    if (!roomIsIn) break removeFromRoom;
-
-    const roomIndex = getRoomIndex(roomIsIn);
-
-    if (roomIndex === -1) {
-      log(' * Could not find room in which the client is @flishSocket');
-      break removeFromRoom;
-    }
-
-    const room = rooms[roomIndex];
-
-    for (let i = 0; i < room.clients.length; i++) {
-      const roomClient = room.clients[i];
-      if (clientId === roomClient) {
-        writeSocket(_s, { type: 'ROOM_LEFT' });
-      } else {
-        const clientIndex = getClientIndex(roomClient);
-        if (clientIndex !== -1) {
-          writeSocket(sockets[clientIndex], { type: 'OPONENT_ABANDONED' });
-        } else {
-          log(' * Could not find client to send OPONENT_ABANDONED message');
-        }
-      }
-    }
-
-    // Delete Room (move to rooms.js)
-    rooms.splice(roomIndex, 1);
-    roomIds.splice(roomIndex, 1);
-  }
-
-  sockets.splice(clientIndex, 1);
-  clientIds.splice(clientIndex, 1);
-  clientsData.splice(clientIndex, 1);
+  delete clients[client.id];
 }
 
 // -----------------------------
 // Process messages from client:
 // -----------------------------
 
-function processMessage(_s: Duplex, clientId: number, data: any) {
-  log(' - @processMessage', data);
-  switch (data.type) {
-    case 'JOIN_ROOM':
-      return JOIN_ROOM(_s, clientId);
-    case 'SIGNAL_MOVE':
-      return SIGNAL_MOVE(clientId, data.moveData);
-    case 'LEAVE_ROOM':
-      return LEAVE_ROOM(clientId);
-    default:
-      return log(' * Invalid message type @processMessage');
-  }
-}
-
-function JOIN_ROOM(_s: Duplex, clientId: number) {
-  const room = joinOrCreateRoom(clientId);
-
-  const clientData = clientsData[getClientIndex(clientId)];
-
-  clientData.roomIsIn = room.id;
-  clientData.playerColor = room.clients.length === 1 ? 'w' : 'b';
-
-  const waitingForOtherPlayer = room.clients.length < roomClientsLimit;
-
-  if (waitingForOtherPlayer)
-    return;
-
-  // Notify both players that the room is ready. Send them their colors
-
-  const roomClients = getRoomClients(room.id);
-
-  for (let i = 0; i < roomClients.length; i++) {
-    const roomClient = roomClients[i];
-    const clientIndex = getClientIndex(roomClient);
-
-    if (clientIndex !== -1) {
-      writeSocket(
-        sockets[clientIndex],
-        {
-          type: 'ROOM_READY',
-          room,
-          playerColor: clientsData[clientIndex].playerColor
-        }
-      );
-    } else {
-      log(` * Client ${roomClient} not found in room ${room.id} @JOIN_ROOM`);
+function processIncommingMessage(client: Client, data: any): void {
+  log('processIncommingMessage', data);
+  try {
+    switch (data.type) {
+      case 'JOIN_ROOM':
+        return JOIN_ROOM(client);
+      case 'SIGNAL_MOVE':
+        return SIGNAL_MOVE(client, data.moveData);
+      default:
+        return log('---Invalid message type @processIncommingMessage');
     }
+  } catch (err) {
+    log('error @processIncommingMessage', err);
   }
 }
 
-function SIGNAL_MOVE(clientId: number, moveData: any) {
-  const clientIndex = getClientIndex(clientId);
-  const roomId = clientsData[clientIndex].roomIsIn;
-  if (!roomId) {
+function JOIN_ROOM(client: Client): void {
+  joinOrCreateRoom(client);
+}
+
+function SIGNAL_MOVE(client: Client, moveData: any): void {
+  const room = client.activeRoom;
+  if (!room) {
     return log('client room not found @SIGNAL_MOVE');
   }
   sendRoomMessage(
-    roomId,
+    room,
     {
       type: 'OPONENT_MOVED',
       moveData,
     },
-    clientId
+    client.id
   );
-}
-
-function LEAVE_ROOM(data: any) {
-  log(data, '@LEAVE_ROOM');
 }
 
 /**
  * Send message to all clients in the room.
  * If exceptClientId is provided, do not send to that client.
- * @param {number} roomId 
+ * @param {RoomType} room 
  * @param {JSON} msg 
  * @param {number} exceptClientId 
  * @returns {void}
  */
-function sendRoomMessage(roomId: number, msg: any, exceptClientId?: number) {
-  const roomClients = getRoomClients(roomId);
+function sendRoomMessage(room: RoomType, payload: PayloadType, exceptClientId?: number): void {
+  const roomClients = room.clients;
 
-  for (let i = 0; i < roomClients.length; i++) {
-    const roomClient = roomClients[i];
-    if (roomClient === exceptClientId) {
-      continue;
+  for (const roomClient of roomClients) {
+    if (roomClient.id !== exceptClientId) {
+      writeSocket(roomClient._s, payload);
     }
-
-    const clientIndex = getClientIndex(roomClient);
-
-    if (clientIndex !== -1) writeSocket(sockets[clientIndex], msg);
-    else return log(' * Client not found in room @sendRoomMessage');
   }
 }
 
+function parseJSON(unmaskedData: Buffer, client: Client): void {
+  try {
+    const jsonData = JSON.parse(unmaskedData as unknown as string);
+    processIncommingMessage(client, jsonData);
+  } catch (error) {
+    return log('---Invalid JSON:', unmaskedData);
+  }
+}
+
+
+const WS_MAX_RESPONSE_LENGTH = 65535;
+
 /**
- * Read Socket
- * @param {Socket} _s
+ * Read Socket. 
+ * Does not account for messages that span múltiple frames
+ * Nor frames out of phase with the buffer
+ * @param {Duplex} _s
  * @param {number} clientId
  * @returns {void}
  */
-function readSocket(_s: Duplex, clientId: number) {
+function readSocket(client: Client): void {
+  const _s = client._s;
+
   const [b1] = _s.read(1);
 
   // if first bit=1, this is the final frame of the current message
@@ -220,12 +161,7 @@ function readSocket(_s: Duplex, clientId: number) {
     case 0x1:
       // log(' - Text frame');
       break;
-    case 0x2:
-      log(' - Binary frame: not supported');
-      _s.destroy();
-      return;
     case 0x8:
-      log(' - Connection closed');
       _s.destroy();
       return;
     default:
@@ -236,7 +172,6 @@ function readSocket(_s: Duplex, clientId: number) {
 
   
   const [b2] = _s.read(1);
-  
   // if first bit=1, message is masked
   if (!((b2 & 0x80) === 0x80)) {
     log(' * Message not masked!');
@@ -245,7 +180,6 @@ function readSocket(_s: Duplex, clientId: number) {
 
   // 7 bits
   let payloadLen = b2 & 0x7f; // 0x7f=01111111
-
   if (payloadLen > 125) {
     if (payloadLen === 126) {
       // 16 bits
@@ -261,18 +195,13 @@ function readSocket(_s: Duplex, clientId: number) {
 
   const maskKey = _s.read(4);
   const maskedData = _s.read(payloadLen);
-
   const unmaskedData = Buffer.allocUnsafe(payloadLen);
   for (let i = 0; i <= maskedData.length; i++) {
     unmaskedData[i] = maskedData[i] ^ maskKey[i % 4];
   }
 
-  try {
-    const jsonData = JSON.parse(unmaskedData as unknown as string);
-    processMessage(_s, clientId, jsonData);
-  } catch (error) {
-    return log(' * Invalid JSON:', unmaskedData);
-  }
+  // Parse to JSON and route message to action
+  parseJSON(unmaskedData, client);
 
   // Excess data. Should never reach here.
   let b = _s.read(1);
@@ -284,14 +213,19 @@ function readSocket(_s: Duplex, clientId: number) {
 
 /**
  * Write JSON to Socket
- * @param {Socket} _s
+ * @param {Duplex} _s
  * @param {JSON} _msg
  * @returns {void}
  */
-function writeSocket(_s: Duplex, _msg: any) {
-  const msg = JSON.stringify(_msg);
+function writeSocket(_s: Duplex, payload: PayloadType): void {
+  let msgString: string;
+  try {
+    msgString = JSON.stringify(payload);
+  } catch (err) {
+    return log('---error stringigying JSON ', {payload, err}, '@writeSocket');
+  }
 
-  const msgBuffer = Buffer.from(msg);
+  const msgBuffer = Buffer.from(msgString);
   const msgByteLength = msgBuffer.byteLength;
 
   let headerBuffer;
@@ -323,4 +257,4 @@ function writeSocket(_s: Duplex, _msg: any) {
   _s.write(Buffer.concat([headerBuffer, msgBuffer]));
 }
 
-export {registerClient}
+export {registerClient, writeSocket}
