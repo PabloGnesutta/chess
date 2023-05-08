@@ -158,9 +158,6 @@ function startTurn(): void {
 
   // TODO: stalemate by repetition
 
-  log('original', boardPieces)
-  log('copy', copyBoard(boardPieces))
-
   // Am I in check?
   const imInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
@@ -177,6 +174,7 @@ function startTurn(): void {
     computeMoves[piece.name](boardPieces, piece);
     const legalMoves = computeLegalMoves(piece);
     piece.moves = legalMoves;
+    // log('legalmoves', piece)
     numLegalMoves += legalMoves.length;
   });
 

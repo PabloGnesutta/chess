@@ -10,11 +10,11 @@ let initialPieces: [PieceName, number, number, ColorType][];
 initialPieces = [
   [K, 7, 4, 'w'],
   [R, 7, 0, 'w'],
-  [R, 7, 7, 'w'],
-  [P, 1, 1, 'w'],
+  // [R, 7, 7, 'w'],
+  // [P, 1, 1, 'w'],
   [K, 0, 3, 'b'],
-  [N, 3, 4, 'b'],
-  [P, 1, 2, 'b'],
+  // [N, 3, 4, 'b'],
+  // [P, 1, 2, 'b'],
 ];
 // initialPieces = [
 //   [K, 7, 4, 'w'],
