@@ -1,5 +1,16 @@
-import { ColorType, Piece } from './createPiece';
+import { ColorType, King, Pawn, Piece } from './createPiece';
 import { players, state, movesHistory, CellType, BoardPiecesType} from './gameState.js';
+
+export type MoveType = {
+  moveTo: CellType, 
+  captureAt?: CellType
+}
+
+export type KingMoveType = MoveType & {
+  rookFrom?: CellType,
+  rookTo?: CellType,
+  castleSteps?: CellType[]
+}
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
   const obj: {moveTo: CellType, captureAt?: CellType} = { 
@@ -155,9 +166,9 @@ function specificMoves(boardPieces: BoardPiecesType, potentialMoves: CellType[],
   return moves;
 }
 
-function king(boardPieces: BoardPiecesType, _piece: Piece) {
+function king(boardPieces: BoardPiecesType, _piece: King) {
   const { row, col } = _piece;
-  const potentialMoves = [
+  const potentialMoves: CellType[] = [
     [row + 1, col],
     [row - 1, col],
     [row + 1, col + 1],
@@ -168,7 +179,7 @@ function king(boardPieces: BoardPiecesType, _piece: Piece) {
     [row, col - 1],
   ];
 
-  const castleMoves = [];
+  const castleMoves: KingMoveType[] = [];
 
   castle: {
     if (!_piece.hasntMoveYet || players[state.currentColor].isInCheck) {
@@ -181,7 +192,7 @@ function king(boardPieces: BoardPiecesType, _piece: Piece) {
         break rook1;
       }
 
-      const castleSteps = [];
+      const castleSteps: CellType[] = [];
       for (var kCol = col - 1; kCol > rook.col; kCol--) {
         const blockingPiece = boardPieces[row][kCol];
         if (blockingPiece) {
@@ -204,7 +215,7 @@ function king(boardPieces: BoardPiecesType, _piece: Piece) {
         break rook2;
       }
 
-      const castleSteps = [];
+      const castleSteps: CellType[] = [];
       for (var kCol = col + 1; kCol < rook.col; kCol++) {
         const blockingPiece = boardPieces[row][kCol];
         if (blockingPiece) {
@@ -222,7 +233,7 @@ function king(boardPieces: BoardPiecesType, _piece: Piece) {
     }
   }
 
-  const moves = specificMoves(boardPieces, potentialMoves, _piece.color);
+  const moves: KingMoveType[] = specificMoves(boardPieces, potentialMoves, _piece.color);
 
   _piece.moves = moves.concat(castleMoves);
 }
@@ -243,7 +254,7 @@ function bishop(boardPieces: BoardPiecesType, _piece: Piece) {
 
 function knight(boardPieces: BoardPiecesType, _piece: Piece) {
   const { row, col } = _piece;
-  const potentialMoves = [
+  const potentialMoves: CellType[] = [
     [row + 1, col + 2],
     [row + 2, col + 1],
     [row - 1, col - 2],
@@ -257,7 +268,7 @@ function knight(boardPieces: BoardPiecesType, _piece: Piece) {
   _piece.moves = specificMoves(boardPieces, potentialMoves, _piece.color);
 }
 
-function pawn(boardPieces: BoardPiecesType, _piece: Piece) {
+function pawn(boardPieces: BoardPiecesType, _piece: Pawn) {
   const moves = [];
   const oneRankAhead = _piece.row + _piece.delta;
 

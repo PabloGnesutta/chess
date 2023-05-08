@@ -1,7 +1,8 @@
 'use strict';
 
 import { _imgContainers } from './board.js';
-import { boardPieces, colorPieces, players, state } from './gameState.js';
+import { KingMoveType, MoveType } from './computePieceMovements.js';
+import { CellType, boardPieces, colorPieces, players, putPieceOnBoard, state } from './gameState.js';
 
 let idCount = 0;
 
@@ -13,17 +14,21 @@ export type Piece = {
   row: number,
   col: number,
   color: ColorType,
-  moves: any[],
+  moves: MoveType[],
   hasntMoveYet: boolean,
   doMove: any,
-  delta?: number,
-  startingRow?: number,
-  enPassantRow?: number,
+}
+export type King = Piece & {
+  moves: KingMoveType[]
+}
+export type Pawn = Piece & {
+  delta: number,
+  startingRow: number,
+  enPassantRow: number,
 }
 
-export type MoveType = any;
 
-function piece(name: string, row: number, col: number, color: string): Piece {
+function piece(name: string, row: number, col: number, color: ColorType): Piece|King|Pawn {
   return {
     id: ++idCount,
     name,
@@ -33,7 +38,7 @@ function piece(name: string, row: number, col: number, color: string): Piece {
     moves: [],
     hasntMoveYet: true,
 
-    doMove(move: any) {
+    doMove(move: MoveType) {
       _doMove(this, move);
     },
   };
@@ -68,7 +73,7 @@ function displcePieceTo(piece: Piece, moveTo: any) {
   piece.hasntMoveYet = false;
 }
 
-function promotePawnAt(pawn: Piece, [row, col]) {
+function promotePawnAt(pawn: Pawn, [row, col]: CellType) {
   const { currentColor } = state;
   const pieceIndex = colorPieces[currentColor].findIndex(
     piece => piece.id === pawn.id
@@ -78,7 +83,7 @@ function promotePawnAt(pawn: Piece, [row, col]) {
 
   const promotedPiece = queen(row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
-  boardPieces.putPiece(promotedPiece);
+  putPieceOnBoard(promotedPiece, boardPieces)
   _imgContainers[row][col].innerHTML = getPieceImage(promotedPiece); // render
 }
 
@@ -98,7 +103,7 @@ function _doMove(piece: Piece, move: MoveType) {
     const pieceIndex = colorPieces[opositeColor].findIndex(
       piece => piece.id === captuerdBoardPiece.id
     );
-    const capturedPiece = colorPieces[opositeColor].splice(pieceIndex, 1);
+    const [capturedPiece] = colorPieces[opositeColor].splice(pieceIndex, 1);
     // Add to player's captures
     players[currentColor].captures.push(capturedPiece);
     // en-passant
@@ -110,11 +115,11 @@ function _doMove(piece: Piece, move: MoveType) {
 
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {
-    promotePawnAt(piece, [rowTo, colTo]);
+    promotePawnAt(piece as Pawn, [rowTo, colTo]);
   }
 }
 
-function pawn(row: number, col: number, color: string): Piece {
+function pawn(row: number, col: number, color: ColorType): Pawn {
   return {
     ...piece(P, row, col, color),
     delta: color === 'w' ? -1 : 1,
@@ -123,50 +128,52 @@ function pawn(row: number, col: number, color: string): Piece {
   };
 }
 
-function knight(row:number, col:number, color:string): Piece {
+function knight(row: number, col: number, color: ColorType): Piece {
   return {
     ...piece(N, row, col, color),
   };
 }
 
-function bishop(row:number, col:number, color:string): Piece {
+function bishop(row: number, col: number, color: ColorType): Piece {
   return {
     ...piece(B, row, col, color),
   };
 }
 
-function rook(row:number, col:number, color:string): Piece {
+function rook(row: number, col: number, color: ColorType): Piece {
   return {
     ...piece(R, row, col, color),
   };
 }
 
-function queen(row:number, col:number, color:string): Piece {
+function queen(row: number, col: number, color: ColorType): Piece {
   return {
     ...piece(Q, row, col, color),
   };
 }
 
-function _doCastle(piece: Piece, move: MoveType) {
+function _doCastle(piece: King, move: KingMoveType) {
   const { moveTo, rookFrom, rookTo } = move;
 
   displcePieceTo(piece, moveTo);
 
+  if (!rookFrom) return warn('rookFrom not provided');
   // Move corresponding rook
   const [_row, _col] = rookFrom;
   const rook = boardPieces[_row][_col];
 
   if (!rook) return warn('Rook not found while castling');
 
-  displcePieceTo(rook, rookTo);
+  displcePieceTo(rook as Piece, rookTo);
 }
 
-function king(row:number, col:number, color:string): Piece {
+function king(row: number, col: number, color: ColorType): King {
+  const pieceBlueprint = piece(K, row, col, color) as King;
   return {
-    ...piece(K, row, col, color),
+    ...pieceBlueprint,
 
     // Overwrite inherited doMove method
-    doMove(move: MoveType) {
+    doMove(move: KingMoveType) {
       if (move.rookFrom) {
         _doCastle(this, move);
       } else {

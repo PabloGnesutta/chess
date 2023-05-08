@@ -9,29 +9,29 @@ import {
 } from '../engine/gameState.js';
 
 const showState = document.getElementById('show-state');
-showState.addEventListener('click', () => {
+showState!.addEventListener('click', () => {
   log(state);
 });
 
 const showBoard = document.getElementById('show-board');
-showBoard.addEventListener('click', () => {
+showBoard!.addEventListener('click', () => {
   log(boardPieces);
 });
 
 const showPieces = document.getElementById('show-pieces');
-showPieces.addEventListener('click', () => {
+showPieces!.addEventListener('click', () => {
   log(colorPieces);
 });
 
 let pov = 'w';
 const flipBoard = document.getElementById('flip-board');
-flipBoard.addEventListener('click', () => {
+flipBoard!.addEventListener('click', () => {
   pov = pov === 'w' ? 'b' : 'w';
   drawBoard(pov);
   drawPieces(colorPieces);
 });
 
 const showMovesHistory = document.getElementById('show-moves-history');
-showMovesHistory.addEventListener('click', () => {
+showMovesHistory!.addEventListener('click', () => {
   log(movesHistory);
 });

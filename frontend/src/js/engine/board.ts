@@ -5,9 +5,12 @@ import {
   boardPieces,
   makeLocalMove,
   signalMoveMultiplayer,
+  ColorPiecesType,
+  CellType,
 } from './gameState.js';
 
-import pieceLib, { MoveType } from './createPiece.js';
+import pieceLib from './createPiece.js';
+import { MoveType } from './computePieceMovements.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -68,7 +71,7 @@ function initBoard() {
 
 function drawBoard(pov = 'w') {
   const _board = document.getElementById('board');
-  _board.innerHTML = '';
+  _board!.innerHTML = '';
 
   let rowStart = 0;
   let rowEval = (row: number) => row <= _Z;
@@ -110,11 +113,11 @@ function drawBoard(pov = 'w') {
         _square.appendChild(fileIndicator);
       }
     }
-    _board.appendChild(_row);
+    _board!.appendChild(_row);
   }
 }
 
-function drawPieces(colorPieces) {
+function drawPieces(colorPieces: ColorPiecesType) {
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
     pieces.forEach(piece => {
@@ -131,7 +134,7 @@ function clearLastMoveMarks() {
   _imgContainers[_row][_col].classList.remove('last-move-to');
 }
 
-function markLastMove(from, to) {
+function markLastMove(from: CellType, to: CellType) {
   clearLastMoveMarks();
   const [row, col] = from;
   const fromSquare = _imgContainers[row][col];
@@ -173,7 +176,7 @@ function unselectCurrentSquare() {
 function selectSquare([row, col]: [number, number]) {
   unselectCurrentSquare();
   selectedSquare = _squares[row][col];
-  selectedSquare.classList.add('highlight');
+  selectedSquare!.classList.add('highlight');
 }
 
 function squareClick([row, col]: [number, number]) {

@@ -14,14 +14,14 @@ function findGame(): void {
 }
 
 // SINGLE PLAYER
-singlePlayerBtn.onclick = () => {
+singlePlayerBtn!.onclick = () => {
   state.isMultiPlayer = false;
   // TODO: Disable if it's currently in a multiplayer game
   initGame('w');
 };
 
 // MULTI PLAYER
-findGameBtn.onclick = async () => {
+findGameBtn!.onclick = async () => {
   try {
     const connectionMessage = await connectWebSocket();
     log(connectionMessage);
@@ -34,4 +34,4 @@ findGameBtn.onclick = async () => {
 initBoard();
 
 // singlePlayerBtn.click();
-findGameBtn.click();
+findGameBtn!.click();

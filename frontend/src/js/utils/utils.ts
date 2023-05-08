@@ -1,21 +1,22 @@
 'use strict';
 
 import { computeMoves } from '../engine/computePieceMovements.js';
+import { Piece } from '../engine/createPiece.js';
+import { BoardPiecesType, ColorPiecesType } from '../engine/gameState.js';
 
-function copyBoard(boardPieces) {
-  const copiedBoard = [];
+function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {
+  const copiedBoard: BoardPiecesType = [];
   for (let row = 0; row < 8; row++) {
-    const tempRow = [];
+    copiedBoard[row] = {};
     for (let col = 0; col < 8; col++) {
-      tempRow.push(boardPieces[row][col]);
+      copiedBoard[row][col] = boardPieces[row][col]
     }
-    copiedBoard.push(tempRow);
   }
   return copiedBoard;
 }
 
-function copyColorPieces(colorPieces) {
-  const copiedPieces = { w: [], b: [] };
+function copyColorPieces(colorPieces: ColorPiecesType): ColorPiecesType {
+  const copiedPieces: ColorPiecesType = { w: [], b: [] };
   colorPieces.w.forEach(piece => {
     copiedPieces.w.push({ ...piece });
   });
@@ -32,7 +33,7 @@ function copyColorPieces(colorPieces) {
  * @param {Pieces} oponentPieces 
  * @returns {boolean}
  */
-function isPlayerInCheckAtPosition(boardPieces, oponentPieces) {
+function isPlayerInCheckAtPosition(boardPieces: BoardPiecesType, oponentPieces: Piece[]) {
   let playerIsInCheck = false;
   for (let p = 0; p < oponentPieces.length; p++) {
     const oponentsPiece = oponentPieces[p];

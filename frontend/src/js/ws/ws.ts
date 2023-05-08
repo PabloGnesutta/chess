@@ -4,9 +4,10 @@ import { initGame } from '../engine/initGame.js';
 import { makeRemoteMove, resetState, state } from '../engine/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
+import { ColorType } from '../engine/createPiece.js';
 
 // STATE
-let wsSend = function () {};
+let wsSend = function (jsonPayload: any): void {};
 let isWSOpen = false;
 let clientId = null;
 let activeRoomId: number = 0;
@@ -40,12 +41,12 @@ function flushSocket(ws: WebSocket, cause: string, event: Event) {
   ws.onerror = null;
   ws.onclose = null;
   ws.onopen = null;
-  wsSend = null;
+  wsSend = function (jsonPayload: any): void {};
   isWSOpen = false;
   clientId = null;
   activeRoomId = 0;
-  clientIdElement.innerText = 'Offline';
-  roomIdElement.innerText = '';
+  clientIdElement!.innerText = 'Offline';
+  roomIdElement!.innerText = '';
 }
 
 // -----------------------------
@@ -60,11 +61,11 @@ function processMessage(data: any): void {
     case 'ROOM_READY':
       return ROOM_READY(data);
     case 'ROOM_LEFT':
-      return ROOM_LEFT(data);
+      return ROOM_LEFT();
     case 'OPONENT_MOVED':
       return OPONENT_MOVED(data);
     case 'OPONENT_ABANDONED':
-      return OPONENT_ABANDONED(data);
+      return OPONENT_ABANDONED();
     default:
       return log('Message type not supported');
   }
@@ -72,33 +73,47 @@ function processMessage(data: any): void {
 
 function CLIENT_REGISTERED(data: any): void {
   clientId = data.clientId;
-  clientIdElement.innerText = 'Online | Client ID: ' + clientId;
+  clientIdElement!.innerText = 'Online | Client ID: ' + clientId;
 }
 
-function ROOM_READY(data) {
+// todo: add to backend
+type RoomReady = {
+  roomId: number,
+  playerColor: ColorType
+}
+
+function ROOM_READY(data: RoomReady) {
   log(' * READY TO START GAME');
   activeRoomId = data.roomId;
-  roomIdElement.innerText = 'On Room ' + activeRoomId;
+  roomIdElement!.innerText = 'On Room ' + activeRoomId;
   state.playerColor = data.playerColor;
   initGame(state.playerColor);
   closeModal();
 }
 
-function OPONENT_MOVED(data) {
+// todo: add to backend
+export type MoveData = {
+  pieceId: number,
+  move: any
+}
+type OponentMoved = {
+  moveData: MoveData
+}
+function OPONENT_MOVED(data: OponentMoved) {
   makeRemoteMove(data.moveData);
 }
 
 function ROOM_LEFT() {
   activeRoomId = 0;
   resetState();
-  document.getElementById('board').classList.add('display-none');
+  document.getElementById('board')?.classList.add('display-none');
 }
 
 function OPONENT_ABANDONED() {
   log(' * OPONENT ABANDONED, YOU WIN');
   activeRoomId = 0;
   resetState();
-  document.getElementById('board').classList.add('display-none');
+  document.getElementById('board')?.classList.add('display-none');
 }
 
 // ------------------------
@@ -112,7 +127,7 @@ function joinRoom() {
   wsSend({ type: 'JOIN_ROOM' });
 }
 
-function signalMove(pieceId, move) {
+function signalMove(pieceId: number, move: any) {
   wsSend({
     type: 'SIGNAL_MOVE',
     moveData: { pieceId, move },

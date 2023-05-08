@@ -4,7 +4,9 @@ import createPiece, { ColorType } from './createPiece.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
 import { boardPieces, colorPieces, putPieceOnBoard, resetState, startTurn } from './gameState.js';
 
-let initialPieces: [string, number, number, string][];
+type PieceName = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
+
+let initialPieces: [PieceName, number, number, ColorType][];
 // initialPieces = [
 //   [K, 7, 4, 'w'],
 //   [R, 7, 0, 'w'],
@@ -51,7 +53,7 @@ initialPieces = [
 ];
 
 function initGame(playerColor: ColorType) {
-  document.getElementById('board').classList.remove('display-none');
+  document.getElementById('board')?.classList.remove('display-none');
 
   {
     // RESET STATE:

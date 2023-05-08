@@ -6,8 +6,10 @@ import {
   copyColorPieces,
   isPlayerInCheckAtPosition,
 } from '../utils/utils.js';
+import { Pawn, King, Piece } from './createPiece.js';
+import { KingMoveType, MoveType } from './computePieceMovements.js';
 
-function _doesMovePutMeInCheck(piece, move) {
+function _doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
   const { moveTo, captureAt } = move;
   const [row, col] = moveTo;
 
@@ -17,11 +19,12 @@ function _doesMovePutMeInCheck(piece, move) {
   const piecesCopy = copyColorPieces(colorPieces);
 
   // Simulate the move
-
-  boardCopy[piece.row][piece.col] = null;
+  // Remove piece from the board at current position
+  delete boardCopy[row][col];
 
   if (captureAt) {
     // Simulate the capture:
+    // todo: this is broken
     const [_row, _col] = captureAt;
     const capturablePiece = boardCopy[_row][_col];
     const pieceIdx = piecesCopy[opositeColor].findIndex(
@@ -31,6 +34,7 @@ function _doesMovePutMeInCheck(piece, move) {
     piecesCopy[opositeColor].splice(pieceIdx, 1);
   }
 
+  // Place piece on the board at new position
   boardCopy[row][col] = piece;
 
   piece.row = row;
@@ -43,8 +47,8 @@ function _doesMovePutMeInCheck(piece, move) {
   return putsMeInCheck;
 }
 
-function computeLegalMoves(piece) {
-  const legalMoves = [];
+function computeLegalMoves(piece: Piece): MoveType[] {
+  const legalMoves: MoveType[] = [];
 
   // Anyting but King
   if (piece.name !== K) {
@@ -59,7 +63,7 @@ function computeLegalMoves(piece) {
   }
 
   // King
-  piece.moves.forEach(move => {
+  piece.moves.forEach((move: KingMoveType) => {
     const castleSteps = move.castleSteps;
     if (castleSteps) {
       // Castle
