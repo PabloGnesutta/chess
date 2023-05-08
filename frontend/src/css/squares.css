@@ -71,7 +71,7 @@
 
 /* rows and cols, not ranks and files */
 .row-col-indicator {
-  display: none;
+  /* display: none; */
   position: absolute;
   bottom: 0;
   left: 0;
@@ -84,6 +84,8 @@
   position: absolute;
   color: black;
   font-size: 12px;
+  /* uncomment for debug: */
+  display: none; 
 }
 .rank-indicator {
   top: 4px;

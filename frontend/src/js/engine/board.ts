@@ -61,10 +61,12 @@ function initBoard() {
       _squares[row][col] = _square;
 
       _row.appendChild(_square);
-      // const _rowCol = document.createElement('div');
-      // _rowCol.innerText = row + '_' + col;
-      // _rowCol.classList.add('row-col-indicator');
-      // _square.appendChild(_rowCol);
+
+      // debug
+      const _rowCol = document.createElement('div');
+      _rowCol.innerText = row + '_' + col;
+      _rowCol.classList.add('row-col-indicator');
+      _square.appendChild(_rowCol);
     }
   }
 }

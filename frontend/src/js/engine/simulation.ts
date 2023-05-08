@@ -9,9 +9,11 @@ import {
 import { Pawn, King, Piece } from './createPiece.js';
 import { KingMoveType, MoveType } from './computePieceMovements.js';
 
+
+// TODO: The whole move simulation is practically identical in _doMove()
 function _doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
   const { moveTo, captureAt } = move;
-  const [row, col] = moveTo;
+  const [rowTo, colTo] = moveTo;
 
   const opositeColor = state.opositeColor;
 
@@ -20,25 +22,30 @@ function _doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
 
   // Simulate the move
   // Remove piece from the board at current position
-  delete boardCopy[row][col];
-
+  
   if (captureAt) {
     // Simulate the capture:
     // todo: this is broken
-    const [_row, _col] = captureAt;
-    const capturablePiece = boardCopy[_row][_col];
-    const pieceIdx = piecesCopy[opositeColor].findIndex(
-      p => p.id === capturablePiece.id
+    const [captureRow, captureCol] = captureAt;
+    const captueredBoardPiece = boardCopy[captureRow][captureCol];
+    // Remove it from colorPieces
+    const colorPieceIndex = piecesCopy[opositeColor].findIndex(
+      p => p.id === captueredBoardPiece.id
     );
 
-    piecesCopy[opositeColor].splice(pieceIdx, 1);
+    piecesCopy[opositeColor].splice(colorPieceIndex, 1);
+      
+    // en-passant
+    if (colTo !== captureCol || rowTo !== captureRow) {
+      delete boardCopy[captureRow][captureCol];
+    }
   }
 
   // Place piece on the board at new position
-  boardCopy[row][col] = piece;
+  boardCopy[rowTo][colTo] = piece;
 
-  piece.row = row;
-  piece.col = col;
+  piece.row = rowTo;
+  piece.col = colTo;
 
   // Once the simulation is done, check if the resulting position puts player in check
   const oponentPieces = piecesCopy[opositeColor];

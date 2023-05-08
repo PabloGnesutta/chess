@@ -97,21 +97,32 @@ function _doMove(piece: Piece, move: MoveType) {
   // Capture:
   if (captureAt) {
     // Remove captured piece from board
-    const [rowCapt, colCapt] = captureAt;
-    const captuerdBoardPiece = boardPieces[rowCapt][colCapt];
+    const [captureRow, captureCol] = captureAt;
+    const captueredBoardPiece = boardPieces[captureRow][captureCol];
     // Remove it from colorPieces
-    const pieceIndex = colorPieces[opositeColor].findIndex(
-      piece => piece.id === captuerdBoardPiece.id
+    const colorPieceIndex = colorPieces[opositeColor].findIndex(
+      piece => piece.id === captueredBoardPiece.id
     );
-    const [capturedPiece] = colorPieces[opositeColor].splice(pieceIndex, 1);
-    // Add to player's captures
-    players[currentColor].captures.push(capturedPiece);
+
+    const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
+
+    {
+      // Add to player's captures
+      players[currentColor].captures.push(capturedColorPiece);
+    }
+
     // en-passant
-    if (colTo !== colCapt || rowTo !== rowCapt) {
-      delete boardPieces[rowCapt][colCapt];
-      _imgContainers[rowCapt][colCapt].innerHTML = null; // render
+    if (colTo !== captureCol || rowTo !== captureRow) {
+      delete boardPieces[captureRow][captureCol];
+      _imgContainers[captureRow][captureCol].innerHTML = null; // render
     }
   }
+
+  // Place piece on the board at new position
+  boardPieces[rowTo][colTo] = piece;
+
+  piece.row = rowTo;
+  piece.col = colTo;
 
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {

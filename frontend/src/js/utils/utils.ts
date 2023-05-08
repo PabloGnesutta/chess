@@ -9,7 +9,10 @@ function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {
   for (let row = 0; row < 8; row++) {
     copiedBoard[row] = {};
     for (let col = 0; col < 8; col++) {
-      copiedBoard[row][col] = boardPieces[row][col]
+      const boardPiece = boardPieces[row][col]
+      if (boardPiece) {
+        copiedBoard[row][col] = boardPieces[row][col]
+      }
     }
   }
   return copiedBoard;

@@ -1,7 +1,7 @@
 'use strict';
 
 import { computeLegalMoves } from './simulation.js';
-import { isPlayerInCheckAtPosition } from '../utils/utils.js';
+import { copyBoard, isPlayerInCheckAtPosition } from '../utils/utils.js';
 import piecesLib, { ColorType, Piece } from './createPiece.js';
 import {
   _imgContainers,
@@ -157,6 +157,9 @@ function startTurn(): void {
   const { currentColor, opositeColor } = state;
 
   // TODO: stalemate by repetition
+
+  log('original', boardPieces)
+  log('copy', copyBoard(boardPieces))
 
   // Am I in check?
   const imInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
