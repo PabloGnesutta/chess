@@ -3,12 +3,11 @@
 import {
   copyBoard,
   copyColorPieces,
+  invertColor,
   isPlayerInCheckAtPosition,
-} from './utils.js';
-import { updateBoardAndPieceWithMove } from './piecesLib.js';
-import { BoardPiecesType, ColorPiecesType, KingMoveType, MatchState, MoveType, Piece } from '../types.js';
-import { invertColor } from '../../../utils/utils.js';
-
+} from './utils';
+import { updateBoardAndPieceWithMove } from './piecesLib';
+import { BoardPiecesType, ColorPiecesType, KingMoveType, MatchState, MoveType, Piece } from '../types';
 
 // TODO: The move simulation is practically identical in _doMove()
 function doesMovePutMeInCheck(

@@ -1,8 +1,7 @@
-import { log } from "../../../utils/utils.js";
-import { initialPieces } from "../constants.js";
-import { putPieceOnBoard } from "../engine/gameState.js";
-import { createPiece } from "../engine/piecesLib.js";
-import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, PlayersType } from "../types.js";
+import { initialPieces } from "../constants";
+import { putPieceOnBoard } from "../engine/gameState";
+import { createPiece } from "../engine/piecesLib";
+import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, PlayersType } from "../types";
 
 const colors: ColorType[] = ['w', 'b']; 
 
@@ -26,7 +25,7 @@ function newMatch(clientIds: number[]): MatchState {
     // Create players state
     const clientId = clientIds[c]
     players[clientId] = {
-      color: colors[c],
+      playerColor: colors[c],
       isInCheck: false,
     }
   }

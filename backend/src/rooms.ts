@@ -1,5 +1,5 @@
-import { newMatch } from './chess/game/match/match';
-import { MatchState } from './chess/game/types';
+import { newMatch } from './chess/match/match';
+import { MatchState } from './chess/types';
 import { Client, writeSocket } from './clients';
 import { log } from './utils/utils';
 

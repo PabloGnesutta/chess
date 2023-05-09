@@ -1,11 +1,11 @@
 'use strict';
 
-import { invertColor, log } from '../../../utils/utils.js';
-import { BoardPiecesType, CellType, ColorPiecesType, HistoryItemType, MatchState, MoveType, Piece, PlayersType } from '../types.js';
-import { filterLegalMoves } from './filterLegalMoves.js';
-import { isPlayerInCheckAtPosition } from './utils.js';
-import { doCastle, doMove } from './piecesLib.js';
-import { computeMoves } from './computePieceMovements.js';
+import { BoardPiecesType, CellType, ColorPiecesType, HistoryItemType, MatchState, MoveType, Piece, PlayersType } from '../types';
+import { filterLegalMoves } from './filterLegalMoves';
+import { invertColor, isPlayerInCheckAtPosition } from './utils';
+import { doCastle, doMove } from './piecesLib';
+import { computeMoves } from './computePieceMovements';
+import { log } from '../../utils/utils';
 
 const movesHistory: HistoryItemType[] = [];
 

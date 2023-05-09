@@ -1,9 +1,10 @@
 'use strict';
 
-import { invertColor, log } from '../../../utils/utils.js';
-import { BoardPiecesType, CellType, ColorPiecesType, ColorType, King, KingMoveType, MatchState, MoveType, Pawn, Piece, PieceNameType, PlayersType } from '../types.js';
-import { K, Q, R, B, N, P, _Z } from '../constants.js'
-import { putPieceOnBoard } from './gameState.js';
+import { BoardPiecesType, CellType, ColorPiecesType, ColorType, King, KingMoveType, MatchState, MoveType, Pawn, Piece, PieceNameType, PlayersType } from '../types';
+import { K, Q, R, B, N, P, _Z } from '../constants'
+import { putPieceOnBoard } from './gameState';
+import { invertColor } from './utils';
+import { log } from 'console';
 
 let idCount = 0;
 

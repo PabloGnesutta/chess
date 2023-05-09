@@ -1,8 +1,10 @@
 'use strict';
 
-import { K } from '../constants.js';
-import { computeMoves } from '../engine/computePieceMovements.js';
-import { BoardPiecesType, ColorPiecesType, Piece } from '../types.js';
+import { K } from '../constants';
+import { computeMoves } from '../engine/computePieceMovements';
+import { BoardPiecesType, ColorPiecesType, ColorType, Piece } from '../types';
+
+const invertColor = (currentColor: ColorType) => currentColor === 'w' ? 'b' : 'w';
 
 function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {
   const copiedBoard: BoardPiecesType = [];
@@ -62,4 +64,4 @@ function isPlayerInCheckAtPosition(boardPieces: BoardPiecesType, oponentPieces: 
   return playerIsInCheck;
 }
 
-export { copyBoard, copyColorPieces, isPlayerInCheckAtPosition };
+export { copyBoard, copyColorPieces, invertColor, isPlayerInCheckAtPosition };

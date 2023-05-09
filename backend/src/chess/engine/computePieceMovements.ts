@@ -1,5 +1,5 @@
-import { BoardPiecesType, CellType, ColorType, HistoryItemType, King, KingMoveType, MoveType, Pawn, Piece, PlayerState, PlayersType } from '../types.js';
-import { P, _Z } from '../constants.js';
+import { BoardPiecesType, CellType, ColorType, HistoryItemType, King, KingMoveType, MoveType, Pawn, Piece, PlayerState, PlayersType } from '../types';
+import { P, _Z } from '../constants';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
   const obj: {moveTo: CellType, captureAt?: CellType} = { 
