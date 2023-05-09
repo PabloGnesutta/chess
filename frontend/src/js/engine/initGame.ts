@@ -1,6 +1,6 @@
 'use strict';
 
-import createPiece, { ColorType } from './createPiece.js';
+import { createPiece, ColorType } from './piecesLib.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
 import { boardPieces, colorPieces, putPieceOnBoard, resetState, startTurn } from './gameState.js';
 

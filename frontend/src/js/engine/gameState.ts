@@ -2,13 +2,13 @@
 
 import { filterLegalMoves } from './filterLegalMoves.js';
 import { isPlayerInCheckAtPosition } from '../utils/utils.js';
-import piecesLib, { ColorType, Piece } from './createPiece.js';
+import { resetPieceIdCount, ColorType, Piece, doCastle, doMove, MoveType } from './piecesLib.js';
 import {
   _imgContainers,
   markLastMove,
   unselectCurrentSquare,
 } from './board.js';
-import { MoveType, computeMoves } from './computePieceMovements.js';
+import { computeMoves } from './computePieceMovements.js';
 import { MoveData, signalMove } from '../ws/ws.js';
 
 export type CellType = [number, number];
@@ -117,7 +117,7 @@ function resetState(): void {
   state.opositeColor = 'b';
   state.selectedPiece = null;
 
-  piecesLib.resetPieceIdCount();
+  resetPieceIdCount();
 }
 
 function makeLocalMove(piece: Piece, move: MoveType): void {
@@ -134,8 +134,13 @@ function makeLocalMove(piece: Piece, move: MoveType): void {
 
   unselectCurrentSquare();
 
-  piece.doMove(move);
-  _passTurn();
+  if (move.castleSteps) {
+    doCastle(piece, move)
+  } else {
+    doMove(piece, move)
+  }
+
+  passTurn();
 }
 
 
@@ -193,7 +198,7 @@ function startTurn(): void {
   }
 }
 
-function _passTurn(): void {
+function passTurn(): void {
   players[state.currentColor].isInCheck = false;
   state.selectedPiece = null;
   state.currentColor = state.currentColor === 'w' ? 'b' : 'w';

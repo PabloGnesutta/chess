@@ -1,3 +1,5 @@
+import { initialPieces } from "./constants";
+
 const colors = ['w', 'b']
 
 type PlayerState = {
@@ -7,16 +9,15 @@ type PlayerState = {
 type Players = { [key: number]: PlayerState }
 
 function newGame(clientIds: number[]) {
-  let players: Players = {};
-  for (let i=0; i<clientIds.length; i++){
-    const clientId = clientIds[i]
-    players[clientId] = {
-      color: colors[i],
-
-    }
+  // INIT STATE:
+  for (let i = 0; i < initialPieces.length; i++) {
+    // Create pieces
+    const [type, row, col, color] = initialPieces[i];
+    const piece = createPiece[type](row, col, color);
+    colorPieces[color].push(piece);
+    // Put 'em in the board
+    putPieceOnBoard(piece, boardPieces)
   }
-
-  const board = []
 }
 
 export { newGame }

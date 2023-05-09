@@ -1,7 +1,7 @@
 'use strict';
 
 import { computeMoves } from '../engine/computePieceMovements.js';
-import { Piece } from '../engine/createPiece.js';
+import { Piece } from '../engine/piecesLib.js';
 import { BoardPiecesType, ColorPiecesType } from '../engine/gameState.js';
 
 function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {

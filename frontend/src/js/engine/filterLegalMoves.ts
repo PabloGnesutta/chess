@@ -6,11 +6,10 @@ import {
   copyColorPieces,
   isPlayerInCheckAtPosition,
 } from '../utils/utils.js';
-import { Piece, updateBoardAndPieceWithMove } from './createPiece.js';
-import { KingMoveType, MoveType } from './computePieceMovements.js';
+import { KingMoveType, MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
 
 
-// TODO: The whole move simulation is practically identical in _doMove()
+// TODO: The move simulation is practically identical in _doMove()
 function doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
   const { opositeColor } = state;
   const { moveTo, captureAt } = move;

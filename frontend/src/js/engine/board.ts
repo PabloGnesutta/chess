@@ -9,8 +9,7 @@ import {
   CellType,
 } from './gameState.js';
 
-import pieceLib from './createPiece.js';
-import { MoveType } from './computePieceMovements.js';
+import { MoveType, getPieceImage } from './piecesLib.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -124,7 +123,7 @@ function drawPieces(colorPieces: ColorPiecesType) {
     const pieces = colorPieces[color];
     pieces.forEach(piece => {
       _imgContainers[piece.row][piece.col].innerHTML =
-        pieceLib.getPieceImage(piece);
+        getPieceImage(piece);
     });
   }
 }
