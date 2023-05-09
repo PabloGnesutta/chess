@@ -1,3 +1,5 @@
+import { ColorType, PieceNameType } from "./types";
+
 const P = 'pawn';
 const K = 'king';
 const Q = 'queen';
@@ -7,7 +9,9 @@ const B = 'bishop';
 
 const _Z = 7;
 
-const initialPieces = [
+let initialPieces: [PieceNameType, number, number, ColorType][];
+
+initialPieces = [
   [K, 7, 4, 'w'],
   [Q, 7, 3, 'w'],
   [R, 7, 0, 'w'],

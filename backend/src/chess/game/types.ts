@@ -1,19 +1,28 @@
-export type CellType = [number, number];
+export type PieceNameType = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
 
 export type ColorType = 'w' | 'b';
 
-export type MoveType = any;
-export type KingMoveType = MoveType & any;
+export type CellType = [number, number];
+
+export type MoveType = {
+  moveTo: CellType, 
+  captureAt?: CellType
+  castleSteps?: CellType[]
+}
+
+export type KingMoveType = MoveType & {
+  rookFrom?: CellType,
+  rookTo?: CellType,
+}
 
 export type Piece = {
   id: number,
-  name: string,
+  name: PieceNameType,
   row: number,
   col: number,
   color: ColorType,
   moves: MoveType[],
   hasntMoveYet: boolean,
-  doMove: any,
 }
 
 export type King = Piece & {
@@ -31,22 +40,32 @@ export type ColorPiecesType = {
 }
 
 export type BoardPiecesType = { 
-  // row
   [key: number]: { 
-    // col
     [key: number]: Piece
   } 
 }
 
-export type PlayersType = { 
-  // id
-  [key: string]: {
-    color: ColorType,
-    isInCheck: boolean,
-  } 
+export type HistoryItemType = {
+  piece: PieceNameType,
+  from: CellType,
+  to: CellType,
+  color: string,
+};
+
+export type PlayerState = {
+  color: ColorType,
+  isInCheck: boolean, // for castling validation
 }
 
-export type State = {
+export type PlayersType = { 
+  // id
+  [key: string]: PlayerState
+}
+
+export type MatchState = {
+  colorPieces: ColorPiecesType, 
+  boardPieces: BoardPiecesType, 
+  players: PlayersType,
+  movesHistory: HistoryItemType[],
   currentColor: ColorType,
-  opositeColor: ColorType,
 }
