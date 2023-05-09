@@ -1,3 +1,5 @@
+import { newMatch } from './chess/game/match/match';
+import { MatchState } from './chess/game/types';
 import { Client, writeSocket } from './clients';
 import { log } from './utils/utils';
 
@@ -8,6 +10,7 @@ export type RoomType = {
   name: string,
   createdBy?: number,
   clients: Client[],
+  match?: MatchState,
 }
 
 const roomIds: number[] = [];
@@ -50,13 +53,15 @@ function joinOrCreateRoom(client: Client): void {
 
   if (room.clients.length === 2) {
     // Room is ready, notify clients
+    const match: MatchState = newMatch(room.clients.map(c=>c.id));
+    room.match = match;
     for (const roomClient of room.clients) {
       writeSocket(
         roomClient._s,
         {
           type: 'ROOM_READY',
           roomId: room.id,
-          playerColor: roomClient.playerColor
+          playerColor: match.players[roomClient.id].playerColor
         }
       );
     }

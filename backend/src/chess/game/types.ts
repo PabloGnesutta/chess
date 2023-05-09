@@ -53,7 +53,7 @@ export type HistoryItemType = {
 };
 
 export type PlayerState = {
-  color: ColorType,
+  playerColor: ColorType,
   isInCheck: boolean, // for castling validation
 }
 

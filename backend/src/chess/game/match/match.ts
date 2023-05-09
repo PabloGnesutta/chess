@@ -6,8 +6,8 @@ import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, PlayersType } 
 
 const colors: ColorType[] = ['w', 'b']; 
 
-function newGame(clientIds: number[]): MatchState {
-  if (clientIds.length !== 2) throw new Error('clientIds should be 2 @newGame');
+function newMatch(clientIds: number[]): MatchState {
+  if (clientIds.length !== 2) throw new Error('clientIds should be 2 @newMatch');
 
   const players: PlayersType = {}
   const colorPieces: ColorPiecesType = { w: [], b: [] };
@@ -40,4 +40,4 @@ function newGame(clientIds: number[]): MatchState {
   }
 }
 
-export { newGame }
+export { newMatch }
