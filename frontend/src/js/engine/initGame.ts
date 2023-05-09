@@ -2,11 +2,9 @@
 
 import { createPiece } from './piecesLib.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
-import { ColorType, boardPieces, colorPieces, putPieceOnBoard, resetState, startTurn } from './gameState.js';
+import { ColorType, boardPieces, colorPieces, PieceNameType, putPieceOnBoard, resetState, startTurn } from './gameState.js';
 
-type PieceName = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
-
-let initialPieces: [PieceName, number, number, ColorType][];
+let initialPieces: [PieceNameType, number, number, ColorType][];
 initialPieces = [
   [K, 7, 4, 'w'],
   [R, 7, 0, 'w'],

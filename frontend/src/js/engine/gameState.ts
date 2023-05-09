@@ -12,11 +12,12 @@ import { computeMoves } from './computePieceMovements.js';
 import { MoveData, signalMove } from '../ws/ws.js';
 
 export type ColorType = 'w'| 'b'
+export type PieceNameType = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
 
 export type CellType = [number, number];
 
 type HistoryItemType = {
-  piece: string, //pieceName
+  piece: PieceNameType,
   from: CellType,
   to: CellType,
   color: string,

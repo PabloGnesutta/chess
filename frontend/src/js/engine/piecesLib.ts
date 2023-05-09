@@ -1,7 +1,7 @@
 'use strict';
 
 import { _imgContainers } from './board.js';
-import { BoardPiecesType, CellType, ColorType, boardPieces, colorPieces, players, putPieceOnBoard, state } from './gameState.js';
+import { BoardPiecesType, CellType, ColorType, PieceNameType, boardPieces, colorPieces, players, putPieceOnBoard, state } from './gameState.js';
 
 export type MoveType = {
   moveTo: CellType, 
@@ -15,7 +15,7 @@ export type KingMoveType = MoveType & {
 
 export type Piece = {
   id: number,
-  name: string,
+  name: PieceNameType,
   row: number,
   col: number,
   color: ColorType,
@@ -37,7 +37,7 @@ function resetPieceIdCount() {
   idCount = 0;
 }
 
-function newPiece(name: string, row: number, col: number, color: ColorType): Piece|King|Pawn {
+function newPiece(name: PieceNameType, row: number, col: number, color: ColorType): Piece|King|Pawn {
   return {
     id: ++idCount,
     name,
@@ -181,7 +181,7 @@ function pawn(row: number, col: number, color: ColorType): Pawn {
 function getPieceImage(piece: Piece): string {
   const colorCode = piece.color === 'w' ? 'l' : 'd';
   let pieceCode = piece.name[0];
-  if (piece.name === 'knight') pieceCode = 'n';
+  if (piece.name === N) pieceCode = 'n';
   const fileName = 'Chess_' + pieceCode + colorCode + 't45.svg';
   const filePath = `./svg/${fileName}`;
   return `<img src=${filePath} class="piece ${piece.name} ${piece.color}"></img>`;
