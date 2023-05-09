@@ -33,5 +33,5 @@ findGameBtn!.onclick = async () => {
 
 initBoard();
 
-singlePlayerBtn!.click();
-// findGameBtn!.click();
+// singlePlayerBtn!.click();
+findGameBtn!.click();

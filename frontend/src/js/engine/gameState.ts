@@ -2,7 +2,7 @@
 
 import { filterLegalMoves } from './filterLegalMoves.js';
 import { isPlayerInCheckAtPosition } from '../utils/utils.js';
-import { resetPieceIdCount, Piece, doCastle, doMove, MoveType } from './piecesLib.js';
+import { Piece, doCastle, doMove, MoveType } from './piecesLib.js';
 import {
   _imgContainers,
   markLastMove,
@@ -119,8 +119,6 @@ function resetState(): void {
   state.currentColor = 'w';
   state.opositeColor = 'b';
   state.selectedPiece = null;
-
-  resetPieceIdCount();
 }
 
 function makeLocalMove(piece: Piece, move: MoveType): void {

@@ -52,9 +52,12 @@ function joinOrCreateRoom(client: Client): void {
   room.clients.push(client);
 
   if (room.clients.length === 2) {
-    // Room is ready, notify clients
+    // Room is ready. Create match & notify clients
+
     const match: MatchState = newMatch(room.clients.map(c=>c.id));
+
     room.match = match;
+log(match)
     for (const roomClient of room.clients) {
       writeSocket(
         roomClient._s,

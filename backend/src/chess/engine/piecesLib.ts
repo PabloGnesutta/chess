@@ -6,15 +6,9 @@ import { putPieceOnBoard } from './gameState';
 import { invertColor } from './utils';
 import { log } from 'console';
 
-let idCount = 0;
-
-function resetPieceIdCount() {
-  idCount = 0;
-}
-
-function newPiece(name: PieceNameType, row: number, col: number, color: ColorType): Piece|King|Pawn {
+function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece|King|Pawn {
   return {
-    id: ++idCount,
+    id,
     name,
     row,
     col,
@@ -119,45 +113,45 @@ function promotePawnAt(
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 
-  const promotedPiece = queen(row, col, currentColor);
+  const promotedPiece = queen(pawn.id, row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
   putPieceOnBoard(promotedPiece, boardPieces)
 }
 
-function king(row: number, col: number, color: ColorType): King {
-  const pieceBlueprint = newPiece(K, row, col, color) as King;
+function king(id: number, row: number, col: number, color: ColorType): King {
+  const pieceBlueprint = newPiece(id, K, row, col, color) as King;
   return {
     ...pieceBlueprint,
   };
 }
 
-function queen(row: number, col: number, color: ColorType): Piece {
+function queen(id: number, row: number, col: number, color: ColorType): Piece {
   return {
-    ...newPiece(Q, row, col, color),
+    ...newPiece(id, Q, row, col, color),
   };
 }
 
-function rook(row: number, col: number, color: ColorType): Piece {
+function rook(id: number, row: number, col: number, color: ColorType): Piece {
   return {
-    ...newPiece(R, row, col, color),
+    ...newPiece(id, R, row, col, color),
   };
 }
 
-function bishop(row: number, col: number, color: ColorType): Piece {
+function bishop(id: number, row: number, col: number, color: ColorType): Piece {
   return {
-    ...newPiece(B, row, col, color),
+    ...newPiece(id, B, row, col, color),
   };
 }
 
-function knight(row: number, col: number, color: ColorType): Piece {
+function knight(id: number, row: number, col: number, color: ColorType): Piece {
   return {
-    ...newPiece(N, row, col, color),
+    ...newPiece(id, N, row, col, color),
   };
 }
 
-function pawn(row: number, col: number, color: ColorType): Pawn {
+function pawn(id: number, row: number, col: number, color: ColorType): Pawn {
   return {
-    ...newPiece(P, row, col, color),
+    ...newPiece(id, P, row, col, color),
     delta: color === 'w' ? -1 : 1,
     startingRow: color === 'w' ? 6 : 1,
     enPassantRow: color === 'w' ? 3 : 4,
@@ -177,6 +171,5 @@ export {
   createPiece,
   doMove,
   doCastle,
-  resetPieceIdCount,
   updateBoardAndPieceWithMove,
 }

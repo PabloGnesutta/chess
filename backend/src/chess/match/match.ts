@@ -14,8 +14,8 @@ function newMatch(clientIds: number[]): MatchState {
 
   for (let i = 0; i < initialPieces.length; i++) {
     // Create pieces
-    const [type, row, col, color] = initialPieces[i];
-    const piece = createPiece[type](row, col, color);
+    const [id, type, row, col, color] = initialPieces[i];
+    const piece = createPiece[type](id, row, col, color);
     colorPieces[color].push(piece);
     // Put 'em in the board
     putPieceOnBoard(piece, boardPieces)
