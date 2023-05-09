@@ -1,9 +1,7 @@
 'use strict';
 
 import { _imgContainers } from './board.js';
-import { BoardPiecesType, CellType, boardPieces, colorPieces, players, putPieceOnBoard, state } from './gameState.js';
-
-export type ColorType = 'w'|'b';
+import { BoardPiecesType, CellType, ColorType, boardPieces, colorPieces, players, putPieceOnBoard, state } from './gameState.js';
 
 export type MoveType = {
   moveTo: CellType, 

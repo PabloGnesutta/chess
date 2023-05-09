@@ -1,8 +1,8 @@
 'use strict';
 
-import { createPiece, ColorType } from './piecesLib.js';
+import { createPiece } from './piecesLib.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
-import { boardPieces, colorPieces, putPieceOnBoard, resetState, startTurn } from './gameState.js';
+import { ColorType, boardPieces, colorPieces, putPieceOnBoard, resetState, startTurn } from './gameState.js';
 
 type PieceName = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
 

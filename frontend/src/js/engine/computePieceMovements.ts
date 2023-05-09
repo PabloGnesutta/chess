@@ -1,5 +1,5 @@
-import { ColorType, King, KingMoveType, MoveType, Pawn, Piece } from './piecesLib.js';
-import { players, state, movesHistory, CellType, BoardPiecesType} from './gameState.js';
+import { King, KingMoveType, MoveType, Pawn, Piece } from './piecesLib.js';
+import { ColorType, players, state, movesHistory, CellType, BoardPiecesType} from './gameState.js';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
   const obj: {moveTo: CellType, captureAt?: CellType} = { 

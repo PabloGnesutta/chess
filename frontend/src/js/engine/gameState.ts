@@ -2,7 +2,7 @@
 
 import { filterLegalMoves } from './filterLegalMoves.js';
 import { isPlayerInCheckAtPosition } from '../utils/utils.js';
-import { resetPieceIdCount, ColorType, Piece, doCastle, doMove, MoveType } from './piecesLib.js';
+import { resetPieceIdCount, Piece, doCastle, doMove, MoveType } from './piecesLib.js';
 import {
   _imgContainers,
   markLastMove,
@@ -10,6 +10,8 @@ import {
 } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
 import { MoveData, signalMove } from '../ws/ws.js';
+
+export type ColorType = 'w'| 'b'
 
 export type CellType = [number, number];
 
