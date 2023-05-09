@@ -48,7 +48,7 @@ function resetPieceIdCount() {
   idCount = 0;
 }
 
-function getPieceImage(piece: Piece) {
+function getPieceImage(piece: Piece): string {
   const colorCode = piece.color === 'w' ? 'l' : 'd';
   let pieceCode = piece.name[0];
   if (piece.name === 'knight') pieceCode = 'n';
@@ -81,7 +81,7 @@ function updateBoardAndPieceWithMove(
   }
 }
 
-function _doMove(piece: Piece, move: MoveType) {
+function _doMove(piece: Piece, move: MoveType): void {
   const { currentColor, opositeColor } = state;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -116,7 +116,7 @@ function _doMove(piece: Piece, move: MoveType) {
   }
 }
 
-function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: CellType) {
+function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: CellType): void {
   const { currentColor } = state;
   const pieceIndex = colorPieces[currentColor].findIndex(
     piece => piece.id === pawn.id
@@ -163,7 +163,7 @@ function queen(row: number, col: number, color: ColorType): Piece {
   };
 }
 
-function _doCastle(piece: King, move: KingMoveType) {
+function _doCastle(piece: King, move: KingMoveType): void {
   const { moveTo, rookFrom, rookTo } = move;
 
   updateBoardAndPieceWithMove(boardPieces, piece, moveTo);

@@ -11,7 +11,7 @@ import { KingMoveType, MoveType } from './computePieceMovements.js';
 
 
 // TODO: The whole move simulation is practically identical in _doMove()
-function _doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
+function doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
   const { opositeColor } = state;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -48,14 +48,13 @@ function _doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
   return putsMeInCheck;
 }
 
-function computeLegalMoves(piece: Piece): MoveType[] {
+function filterLegalMoves(piece: Piece): MoveType[] {
   const legalMoves: MoveType[] = [];
 
   // Anyting but King
   if (piece.name !== K) {
     piece.moves.forEach(move => {
-      const putsMeInCheck = _doesMovePutMeInCheck({ ...piece }, move);
-      if (!putsMeInCheck) {
+      if (!doesMovePutMeInCheck({ ...piece }, move)) {
         legalMoves.push(move);
       }
     });
@@ -67,16 +66,11 @@ function computeLegalMoves(piece: Piece): MoveType[] {
   piece.moves.forEach((move: KingMoveType) => {
     const castleSteps = move.castleSteps;
     if (castleSteps) {
-      // Castle
       let castleIsLegal = true;
 
       for (let s = 0; s < castleSteps.length; s++) {
         const castleStep = castleSteps[s];
-        const putsMeInCheck = _doesMovePutMeInCheck(
-          { ...piece },
-          { moveTo: castleStep }
-        );
-        if (putsMeInCheck) {
+        if (doesMovePutMeInCheck({ ...piece }, { moveTo: castleStep })) {
           castleIsLegal = false;
           break;
         }
@@ -86,8 +80,7 @@ function computeLegalMoves(piece: Piece): MoveType[] {
         legalMoves.push(move);
       }
     } else {
-      const putsMeInCheck = _doesMovePutMeInCheck({ ...piece }, move);
-      if (!putsMeInCheck) {
+      if (!doesMovePutMeInCheck({ ...piece }, move)) {
         legalMoves.push(move);
       }
     }
@@ -96,4 +89,4 @@ function computeLegalMoves(piece: Piece): MoveType[] {
   return legalMoves;
 }
 
-export { computeLegalMoves };
+export { filterLegalMoves };

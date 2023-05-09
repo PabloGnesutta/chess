@@ -1,7 +1,7 @@
 'use strict';
 
-import { computeLegalMoves } from './simulation.js';
-import { copyBoard, isPlayerInCheckAtPosition } from '../utils/utils.js';
+import { filterLegalMoves } from './filterLegalMoves.js';
+import { isPlayerInCheckAtPosition } from '../utils/utils.js';
 import piecesLib, { ColorType, Piece } from './createPiece.js';
 import {
   _imgContainers,
@@ -51,10 +51,12 @@ export type State = {
 }
 
 const movesHistory: HistoryItemType[] = [];
+
 const colorPieces: ColorPiecesType = {
   w: [],
   b: [],
 };
+
 const boardPieces: BoardPiecesType = {
   0: {},
   1: {},
@@ -66,7 +68,7 @@ const boardPieces: BoardPiecesType = {
   7: {},
 };
 
-function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType) {
+function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
 }
 
@@ -167,14 +169,14 @@ function startTurn(): void {
   }
 
   // Compute all legal moves for current player.
+  // (Moves that don't put the player in check)
   // If no legal moves, then it's check mate or stale mate.
   let numLegalMoves = 0;
 
   colorPieces[currentColor].forEach(piece => {
     computeMoves[piece.name](boardPieces, piece);
-    const legalMoves = computeLegalMoves(piece);
+    const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;
-    // log('legalmoves', piece)
     numLegalMoves += legalMoves.length;
   });
 

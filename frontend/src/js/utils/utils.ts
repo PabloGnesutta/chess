@@ -30,8 +30,10 @@ function copyColorPieces(colorPieces: ColorPiecesType): ColorPiecesType {
 }
 
 /**
- * Compute all movements and captures for oponent.
- * If one of those captures targets the player's king, then it's check
+ * For each oponent's piece
+ * compute all it's movements.
+ * If one of those is a capture agains player's king, then it's check.
+ * Once a check is found, break the loop and return.
  * @param {BoardPieces} boardPieces 
  * @param {Pieces} oponentPieces 
  * @returns {boolean}
@@ -41,26 +43,19 @@ function isPlayerInCheckAtPosition(boardPieces: BoardPiecesType, oponentPieces: 
   for (let p = 0; p < oponentPieces.length; p++) {
     const oponentsPiece = oponentPieces[p];
 
-    // COMPUTE MOVES
+    // Compute oponent moves one piece at a time
     computeMoves[oponentsPiece.name](boardPieces, oponentsPiece);
 
-    const captures = [];
     const moves = oponentsPiece.moves;
     for (let m = 0; m < moves.length; m++) {
-      const move = moves[m];
-      if (move.captureAt) {
-        captures.push([move.captureAt[0], move.captureAt[1]]);
-      }
-    }
-
-    if (!captures.length) continue;
-
-    for (let c = 0; c < captures.length; c++) {
-      const [row, col] = captures[c];
-      const target = boardPieces[row][col];
-      if (target && target.name === K) {
-        playerIsInCheck = true;
-        break;
+      const { captureAt } = moves[m];
+      if (captureAt) {
+        // If the move is a capture, check if the capture is player's king
+        const target = boardPieces[captureAt[0]][captureAt[1]];
+        if (target && target.name === K) {
+          playerIsInCheck = true;
+          break;
+        }
       }
     }
   }
