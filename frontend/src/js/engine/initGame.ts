@@ -58,7 +58,7 @@ function initGame(playerColor: ColorType) {
       const [id, type, row, col, color] = initialPieces[i];
       const piece = createPiece[type](id, row, col, color);
       colorPieces[color].push(piece);
-      // Put 'em in the board
+      // Put 'em on the board
       putPieceOnBoard(piece, boardPieces)
     }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 import { initGame } from '../engine/initGame.js';
-import { ColorType, makeRemoteMove, resetState, state } from '../engine/gameState.js';
+import { CellType, ColorType, makeRemoteMove, resetState, state } from '../engine/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
 
@@ -126,11 +126,11 @@ function joinRoom() {
   wsSend({ type: 'JOIN_ROOM' });
 }
 
-function signalMove(pieceId: number, move: any) {
+function signalMoveToServer(from: CellType, to: CellType) {
   wsSend({
     type: 'SIGNAL_MOVE',
-    moveData: { pieceId, move },
+    data: { from, to },
   });
 }
 
-export { connectWebSocket, joinRoom, signalMove };
+export { connectWebSocket, joinRoom, signalMoveToServer };

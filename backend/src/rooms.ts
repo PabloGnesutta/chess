@@ -47,27 +47,32 @@ function joinOrCreateRoom(client: Client): void {
   }
 
   client.activeRoom = room;
-  client.playerColor = room.clients.length ? 'w' : 'b';
-
+  
   room.clients.push(client);
-
+  
   if (room.clients.length === 2) {
     // Room is ready. Create match & notify clients
-
+    
     const match: MatchState = newMatch(room.clients.map(c=>c.id));
-
+    
     room.match = match;
-log(match)
+
     for (const roomClient of room.clients) {
+      const playerColor = match.players[roomClient.id].playerColor
+      log(' --- playercolor', playerColor);
+      log(' --- client', roomClient.id, roomClient.playerColor)
+      roomClient.playerColor = playerColor;
       writeSocket(
         roomClient._s,
         {
           type: 'ROOM_READY',
           roomId: room.id,
-          playerColor: match.players[roomClient.id].playerColor
+          playerColor
         }
       );
     }
+
+    // log(match)
   }
 }
 

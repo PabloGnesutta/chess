@@ -1,7 +1,10 @@
+import { Client } from "../../clients";
+import { log } from "../../utils/utils";
 import { initialPieces } from "../constants";
+import { computeMoves } from "../engine/computePieceMovements";
 import { putPieceOnBoard } from "../engine/gameState";
 import { createPiece } from "../engine/piecesLib";
-import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, PlayersType } from "../types";
+import { BoardPiecesType, CellType, ColorPiecesType, ColorType, MatchState, PlayersType } from "../types";
 
 const colors: ColorType[] = ['w', 'b']; 
 
@@ -17,11 +20,11 @@ function newMatch(clientIds: number[]): MatchState {
     const [id, type, row, col, color] = initialPieces[i];
     const piece = createPiece[type](id, row, col, color);
     colorPieces[color].push(piece);
-    // Put 'em in the board
+    // Put 'em on the board
     putPieceOnBoard(piece, boardPieces)
   }
 
-  for (let c = 0; c < clientIds.length; c++) {
+  for (let c = 0; c <= clientIds.length; c++) {
     // Create players state
     const clientId = clientIds[c]
     players[clientId] = {
@@ -39,4 +42,33 @@ function newMatch(clientIds: number[]): MatchState {
   }
 }
 
-export { newMatch }
+function validateMove(
+  match: MatchState,
+  client: Client, 
+  [rowFrom, colFrom]: CellType,
+  [rowTo, colTo]: CellType
+): any {
+  const { boardPieces, colorPieces, players, currentColor} = match;
+
+  if (client.playerColor !== currentColor) throw new Error(`Not player ${client.id}'s turn`);
+
+  const piece = boardPieces[rowFrom][colFrom];
+
+  if (!piece) throw new Error(`Piece not found at [${rowFrom},${colFrom}]`);
+  if (piece.color !== currentColor) 
+    throw new Error(`Piece ${piece.id} (${piece.color}) doesn't belong to client ${client.id} (${client.playerColor})`);
+
+  computeMoves[piece.name](boardPieces, piece);
+  log(piece);
+
+  // see if signaled move exists in piece.moves
+
+  // validate move is legal
+
+  return {
+    from: [rowFrom, colFrom],
+    to: [rowTo, colTo]
+  }
+}
+
+export { newMatch, validateMove }

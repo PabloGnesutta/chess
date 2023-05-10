@@ -9,7 +9,7 @@ import {
   unselectCurrentSquare,
 } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
-import { MoveData, signalMove } from '../ws/ws.js';
+import { MoveData, signalMoveToServer } from '../ws/ws.js';
 
 export type ColorType = 'w'| 'b'
 export type PieceNameType = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
@@ -156,7 +156,7 @@ function makeRemoteMove(moveData: MoveData): void {
 }
 
 function signalMoveMultiplayer(piece: Piece, move: MoveType): void {
-  signalMove(piece.id, move);
+  signalMoveToServer([piece.row, piece.col], move.moveTo);
   makeLocalMove(piece, move);
 }
 

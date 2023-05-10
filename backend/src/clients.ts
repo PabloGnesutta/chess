@@ -6,7 +6,8 @@ import {
   RoomType,
   removeClientAndDestroyRoom,
 } from'./rooms';
-import { type } from 'os';
+import { CellType } from './chess/types';
+import { validateMove } from './chess/match/match';
 
 
 export type Client = {
@@ -68,14 +69,19 @@ function deleteClient(client: Client): void {
 // Process messages from client:
 // -----------------------------
 
-function processIncommingMessage(client: Client, data: any): void {
-  log('processIncommingMessage', data);
+type WSMessage = {
+  type: string,
+  data?: any
+}
+
+function processIncommingMessage(client: Client, msg: WSMessage): void {
+  log('processIncommingMessage', msg);
   try {
-    switch (data.type) {
+    switch (msg.type) {
       case 'JOIN_ROOM':
         return JOIN_ROOM(client);
       case 'SIGNAL_MOVE':
-        return SIGNAL_MOVE(client, data.moveData);
+        return receiveMoveFromClient(client, msg.data);
       default:
         return log('---Invalid message type @processIncommingMessage');
     }
@@ -85,13 +91,24 @@ function processIncommingMessage(client: Client, data: any): void {
 }
 
 function JOIN_ROOM(client: Client): void {
+  // Mutates the client (playerColor and activeRoom)
   joinOrCreateRoom(client);
 }
 
-function SIGNAL_MOVE(client: Client, moveData: any): void {
+type MoveData = {
+  from: CellType,
+  to: CellType,
+}
+
+function receiveMoveFromClient(client: Client, moveData: MoveData): void {
   const room = client.activeRoom;
-  if (!room) {
-    return log('client room not found @SIGNAL_MOVE');
+  if (!room) return log('---client room not found @receiveMoveFromClient');
+  const match = room.match;
+  if (!match) return log('---Room has no match @receiveMoveFromClient');
+  try {
+    validateMove(match, client, moveData.from, moveData.to);
+  } catch (error) {
+    log(error, '@receiveMoveFromClient');
   }
   sendRoomMessage(
     room,
