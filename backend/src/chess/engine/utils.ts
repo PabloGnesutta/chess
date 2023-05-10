@@ -2,18 +2,18 @@
 
 import { K } from '../constants';
 import { computeMoves } from '../engine/computePieceMovements';
-import { BoardPiecesType, ColorPiecesType, ColorType, Piece } from '../types';
+import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, Piece } from '../types';
 
-const invertColor = (currentColor: ColorType) => currentColor === 'w' ? 'b' : 'w';
+const invertColor = (currentColor: ColorType) => (currentColor === 'w' ? 'b' : 'w');
 
 function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {
   const copiedBoard: BoardPiecesType = [];
   for (let row = 0; row < 8; row++) {
     copiedBoard[row] = {};
     for (let col = 0; col < 8; col++) {
-      const boardPiece = boardPieces[row][col]
+      const boardPiece = boardPieces[row][col];
       if (boardPiece) {
-        copiedBoard[row][col] = boardPieces[row][col]
+        copiedBoard[row][col] = boardPieces[row][col];
       }
     }
   }
@@ -32,21 +32,25 @@ function copyColorPieces(colorPieces: ColorPiecesType): ColorPiecesType {
 }
 
 /**
- * For each oponent's piece
- * compute all it's movements.
- * If one of those is a capture agains player's king, then it's check.
+ * For each oponent's piece COMPUTE all it's movements.
+ * If one of those is a capture of player's king, then it's check.
  * Once a check is found, break the loop and return.
- * @param {BoardPieces} boardPieces 
- * @param {Pieces} oponentPieces 
+ * @param {BoardPieces} boardPieces
+ * @param {Pieces} oponentPieces
  * @returns {boolean}
  */
-function isPlayerInCheckAtPosition(boardPieces: BoardPiecesType, oponentPieces: Piece[]) {
+function isPlayerInCheckAtPosition(
+  boardPieces: BoardPiecesType,
+  oponentPieces: Piece[],
+  { currentColor, movesHistory, players }: MatchState,
+) {
   let playerIsInCheck = false;
+
   for (let p = 0; p < oponentPieces.length; p++) {
     const oponentsPiece = oponentPieces[p];
 
     // Compute oponent moves one piece at a time
-    computeMoves[oponentsPiece.name](boardPieces, oponentsPiece);
+    computeMoves[oponentsPiece.name](boardPieces, oponentsPiece, { movesHistory, isInCheck: players[currentColor].isInCheck });
 
     const moves = oponentsPiece.moves;
     for (let m = 0; m < moves.length; m++) {

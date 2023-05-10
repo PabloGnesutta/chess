@@ -41,14 +41,11 @@ function updateBoardAndPieceWithMove(
 }
 
 function doMove(
-  boardPieces: BoardPiecesType,
-  colorPieces: ColorPiecesType,
-  players: PlayersType,
   state: MatchState,
   piece: Piece,
   move: MoveType
 ): void {
-  const { currentColor } = state;
+  const { boardPieces, colorPieces, currentColor } = state;
   const opositeColor = invertColor(currentColor);
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -78,7 +75,7 @@ function doMove(
 
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {
-    promotePawnAt(boardPieces, colorPieces, state, piece as Pawn, [rowTo, colTo]);
+    promotePawnAt(state, piece as Pawn, [rowTo, colTo]);
   }
 }
 
@@ -100,13 +97,11 @@ function doCastle(
 }
 
 function promotePawnAt(
-  boardPieces: BoardPiecesType,
-  colorPieces: ColorPiecesType,
   state: MatchState,
   pawn: Pawn,
   [row, col]: CellType
 ): void {
-  const { currentColor } = state;
+  const { boardPieces, colorPieces, currentColor } = state;
   const pieceIndex = colorPieces[currentColor].findIndex(
     piece => piece.id === pawn.id
   );

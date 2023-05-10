@@ -1,27 +1,25 @@
 import { Duplex } from 'stream';
 
-import { log } from'./utils/utils';
-import {
-  joinOrCreateRoom,
-  RoomType,
-  removeClientAndDestroyRoom,
-} from'./rooms';
-import { CellType } from './chess/types';
+import { log } from './utils/utils';
+import { joinOrCreateRoom, RoomType, removeClientAndDestroyRoom } from './rooms';
+import { CellType, MoveType } from './chess/types';
 import { validateMove } from './chess/match/match';
 
-
 export type Client = {
-  id: number,
-  activeRoom: RoomType | null,
-  playerColor: string, // coold be a bit, black/white
-  _s: Duplex,
-}
+  id: number;
+  activeRoom: RoomType | null;
+  playerColor: string; // coold be a bit, black/white
+  _s: Duplex;
+};
 
-type Clients = { [key: number]: Client }
+type Clients = { [key: number]: Client };
 
-const clients: Clients = {}
+const clients: Clients = {};
 
-type PayloadType = any;
+type WSPayloadType = {
+  type: string;
+  data: any;
+};
 
 let idCount = 0;
 
@@ -37,12 +35,11 @@ function registerClient(_s: Duplex): void {
     _s,
     activeRoom: null,
     playerColor: '',
-  }
+  };
 
-  const client = clients[clientId]
+  const client = clients[clientId];
 
-
-  writeSocket(_s, { type: 'CLIENT_REGISTERED', clientId });
+  writeSocket(_s, { type: 'CLIENT_REGISTERED', data: { clientId } });
 
   _s.on('readable', () => readSocket(client));
 
@@ -57,7 +54,7 @@ function registerClient(_s: Duplex): void {
 
 function deleteClient(client: Client): void {
   log(' / @deleteClient');
-  
+
   client._s.destroy();
 
   removeClientAndDestroyRoom(client);
@@ -70,9 +67,9 @@ function deleteClient(client: Client): void {
 // -----------------------------
 
 type WSMessage = {
-  type: string,
-  data?: any
-}
+  type: string;
+  data?: any;
+};
 
 function processIncommingMessage(client: Client, msg: WSMessage): void {
   log('processIncommingMessage', msg);
@@ -96,17 +93,19 @@ function JOIN_ROOM(client: Client): void {
 }
 
 type MoveData = {
-  from: CellType,
-  to: CellType,
-}
+  from: CellType;
+  to: CellType;
+};
 
-function receiveMoveFromClient(client: Client, moveData: MoveData): void {
+function receiveMoveFromClient(client: Client, incommingMoveData: MoveData): void {
   const room = client.activeRoom;
   if (!room) return log('---client room not found @receiveMoveFromClient');
   const match = room.match;
   if (!match) return log('---Room has no match @receiveMoveFromClient');
+  let retugningMoveData: { pieceId: number; move: MoveType } | null = null;
   try {
-    validateMove(match, client, moveData.from, moveData.to);
+    retugningMoveData = validateMove(match, client, incommingMoveData.from, incommingMoveData.to);
+    // TODO: Make local move, pass turn, etc.
   } catch (error) {
     log(error, '@receiveMoveFromClient');
   }
@@ -114,7 +113,7 @@ function receiveMoveFromClient(client: Client, moveData: MoveData): void {
     room,
     {
       type: 'OPONENT_MOVED',
-      moveData,
+      data: retugningMoveData,
     },
     client.id
   );
@@ -123,15 +122,16 @@ function receiveMoveFromClient(client: Client, moveData: MoveData): void {
 /**
  * Send message to all clients in the room.
  * If exceptClientId is provided, do not send to that client.
- * @param {RoomType} room 
- * @param {JSON} msg 
- * @param {number} exceptClientId 
+ * @param {RoomType} room
+ * @param {JSON} msg
+ * @param {number} exceptClientId
  * @returns {void}
  */
-function sendRoomMessage(room: RoomType, payload: PayloadType, exceptClientId?: number): void {
+function sendRoomMessage(room: RoomType, payload: WSPayloadType, exceptClientId?: number): void {
   const roomClients = room.clients;
 
-  for (const roomClient of roomClients) {
+  for (const clientId in roomClients) {
+    const roomClient = roomClients[clientId];
     if (roomClient.id !== exceptClientId) {
       writeSocket(roomClient._s, payload);
     }
@@ -147,11 +147,10 @@ function parseJSON(unmaskedData: Buffer, client: Client): void {
   }
 }
 
-
 const WS_MAX_RESPONSE_LENGTH = 65535;
 
 /**
- * Read Socket. 
+ * Read Socket.
  * Does not account for messages that span múltiple frames
  * Nor frames out of phase with the buffer
  * @param {Duplex} _s
@@ -187,7 +186,6 @@ function readSocket(client: Client): void {
       return;
   }
 
-  
   const [b2] = _s.read(1);
   // if first bit=1, message is masked
   if (!((b2 & 0x80) === 0x80)) {
@@ -234,12 +232,12 @@ function readSocket(client: Client): void {
  * @param {JSON} _msg
  * @returns {void}
  */
-function writeSocket(_s: Duplex, payload: PayloadType): void {
+function writeSocket(_s: Duplex, payload: WSPayloadType): void {
   let msgString: string;
   try {
     msgString = JSON.stringify(payload);
   } catch (err) {
-    return log('---error stringigying JSON ', {payload, err}, '@writeSocket');
+    return log('---error stringigying JSON ', { payload, err }, '@writeSocket');
   }
 
   const msgBuffer = Buffer.from(msgString);
@@ -274,4 +272,4 @@ function writeSocket(_s: Duplex, payload: PayloadType): void {
   _s.write(Buffer.concat([headerBuffer, msgBuffer]));
 }
 
-export {registerClient, writeSocket}
+export { registerClient, writeSocket };

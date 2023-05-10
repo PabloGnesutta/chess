@@ -4,9 +4,15 @@ import { initGame } from '../engine/initGame.js';
 import { CellType, ColorType, makeRemoteMove, resetState, state } from '../engine/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
+import { MoveType } from '../engine/piecesLib';
+
+type WSMessage = {
+  type: string;
+  data: any;
+};
 
 // STATE
-let wsSend = function (jsonPayload: any): void {};
+let wsSend = function (payload: WSMessage): void {};
 let isWSOpen = false;
 let clientId = null;
 let activeRoomId: number = 0;
@@ -19,7 +25,7 @@ function connectWebSocket() {
 
     ws.onopen = e => {
       isWSOpen = true;
-      wsSend = jsonPayload => ws.send(JSON.stringify(jsonPayload));
+      wsSend = (payload: WSMessage) => ws.send(JSON.stringify(payload));
       resolve('Connection established');
     };
 
@@ -40,7 +46,7 @@ function flushSocket(ws: WebSocket, cause: string, event: Event) {
   ws.onerror = null;
   ws.onclose = null;
   ws.onopen = null;
-  wsSend = function (jsonPayload: any): void {};
+  wsSend = function (payload: WSMessage): void {};
   isWSOpen = false;
   clientId = null;
   activeRoomId = 0;
@@ -52,17 +58,17 @@ function flushSocket(ws: WebSocket, cause: string, event: Event) {
 // Receive messages from server:
 // -----------------------------
 
-function processMessage(data: any): void {
-  log('Incoming message', data);
-  switch (data.type) {
+function processMessage(msg: WSMessage): void {
+  log('Incoming message', msg);
+  switch (msg.type) {
     case 'CLIENT_REGISTERED':
-      return CLIENT_REGISTERED(data);
+      return CLIENT_REGISTERED(msg.data);
     case 'ROOM_READY':
-      return ROOM_READY(data);
+      return ROOM_READY(msg.data);
     case 'ROOM_LEFT':
       return ROOM_LEFT();
     case 'OPONENT_MOVED':
-      return OPONENT_MOVED(data);
+      return OPONENT_MOVED(msg.data);
     case 'OPONENT_ABANDONED':
       return OPONENT_ABANDONED();
     default:
@@ -77,9 +83,9 @@ function CLIENT_REGISTERED(data: any): void {
 
 // todo: add to backend
 type RoomReady = {
-  roomId: number,
-  playerColor: ColorType
-}
+  roomId: number;
+  playerColor: ColorType;
+};
 
 function ROOM_READY(data: RoomReady) {
   log(' * READY TO START GAME');
@@ -92,14 +98,12 @@ function ROOM_READY(data: RoomReady) {
 
 // todo: add to backend
 export type MoveData = {
-  pieceId: number,
-  move: any
-}
-type OponentMoved = {
-  moveData: MoveData
-}
-function OPONENT_MOVED(data: OponentMoved) {
-  makeRemoteMove(data.moveData);
+  pieceId: number;
+  move: MoveType;
+};
+
+function OPONENT_MOVED(data: MoveData) {
+  makeRemoteMove(data);
 }
 
 function ROOM_LEFT() {
@@ -120,10 +124,9 @@ function OPONENT_ABANDONED() {
 // ------------------------
 
 function joinRoom() {
-  if (activeRoomId)
-    return warn('Leave the current room before joining another one');
+  if (activeRoomId) return warn('Leave the current room before joining another one');
 
-  wsSend({ type: 'JOIN_ROOM' });
+  wsSend({ type: 'JOIN_ROOM', data: {} });
 }
 
 function signalMoveToServer(from: CellType, to: CellType) {

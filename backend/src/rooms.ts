@@ -3,34 +3,38 @@ import { MatchState } from './chess/types';
 import { Client, writeSocket } from './clients';
 import { log } from './utils/utils';
 
-let idCount = 0;
+let roomIdCount = 0;
 
 export type RoomType = {
-  id: number,
-  name: string,
-  createdBy?: number,
-  clients: Client[],
-  match?: MatchState,
-}
+  id: number;
+  name: string;
+  createdBy?: number;
+  clients: { [key: number]: Client };
+  numActiveClients: number;
+  match?: MatchState;
+};
 
 const roomIds: number[] = [];
 const rooms: RoomType[] = [];
 
-function getRoomIndex(roomId: number) {return roomIds.findIndex(rId => rId === roomId)};
+function getRoomIndex(roomId: number) {
+  return roomIds.findIndex(rId => rId === roomId);
+}
 
 function getRoom(roomId: number): RoomType | null {
   const roomIndex = getRoomIndex(roomId);
   if (roomIndex !== -1) return rooms[roomIndex];
   else return null;
-};
+}
 
 function createRoom(): RoomType {
-  const roomId = ++idCount;
+  const roomId = ++roomIdCount;
 
-  const room = {
+  const room: RoomType = {
     id: roomId,
     name: 'room_' + Date.now(),
     clients: [],
+    numActiveClients: 0,
   };
 
   rooms.push(room);
@@ -40,56 +44,57 @@ function createRoom(): RoomType {
 }
 
 function joinOrCreateRoom(client: Client): void {
-  var room = rooms.find(r => r.clients.length < 2);
+  var room = rooms.find(r => r.numActiveClients < 2);
 
   if (!room) {
     room = createRoom();
   }
 
+  room.clients[client.id] = client;
+  room.numActiveClients++;
+
   client.activeRoom = room;
-  
-  room.clients.push(client);
-  
-  if (room.clients.length === 2) {
+
+  if (room.numActiveClients === 2) {
     // Room is ready. Create match & notify clients
-    
-    const match: MatchState = newMatch(room.clients.map(c=>c.id));
-    
-    room.match = match;
 
-    for (const roomClient of room.clients) {
-      const playerColor = match.players[roomClient.id].playerColor
-      log(' --- playercolor', playerColor);
-      log(' --- client', roomClient.id, roomClient.playerColor)
-      roomClient.playerColor = playerColor;
-      writeSocket(
-        roomClient._s,
-        {
-          type: 'ROOM_READY',
-          roomId: room.id,
-          playerColor
-        }
-      );
+    const clientIds: number[] = [];
+    for (const clientId in room.clients) {
+      clientIds.push(parseInt(clientId));
     }
+    const match: MatchState = newMatch(clientIds);
 
-    // log(match)
+    room.match = match;
+    // log('match', match);
+
+    // log('room', room);
+
+    for (const color in match.players) {
+      const player = match.players[color];
+      const client = room.clients[player.clientId];
+      client.playerColor = color;
+      writeSocket(client._s, {
+        type: 'ROOM_READY',
+        data: {
+          roomId: room.id,
+          playerColor: color,
+        },
+      });
+    }
   }
 }
 
-function  removeClientAndDestroyRoom(client: Client): void {
+function removeClientAndDestroyRoom(client: Client): void {
   const room = client.activeRoom;
   if (!room) return;
   // send OPONENT_ABANDONED message to the other player (if any)
-  for (const roomClient of room.clients) {
+  for (const clientId in room.clients) {
+    const roomClient = room.clients[clientId];
+
     if (roomClient.id !== client.id) {
-      writeSocket(roomClient._s, { type: 'OPONENT_ABANDONED' });
+      writeSocket(roomClient._s, { type: 'OPONENT_ABANDONED', data: {} });
     }
   }
 }
 
-export {
-  getRoom,
-  createRoom,
-  joinOrCreateRoom,
-  removeClientAndDestroyRoom,
-};
+export { getRoom, createRoom, joinOrCreateRoom, removeClientAndDestroyRoom };
