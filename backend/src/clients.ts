@@ -4,6 +4,7 @@ import { log } from './utils/utils';
 import { joinOrCreateRoom, RoomType, removeClientAndDestroyRoom } from './rooms';
 import { CellType, MoveType } from './chess/types';
 import { validateMove } from './chess/match/match';
+import { makeLocalMove } from './chess/engine/gameState';
 
 export type Client = {
   id: number;
@@ -72,7 +73,7 @@ type WSMessage = {
 };
 
 function processIncommingMessage(client: Client, msg: WSMessage): void {
-  log('processIncommingMessage', msg);
+  log('Incomming message', msg);
   try {
     switch (msg.type) {
       case 'JOIN_ROOM':
@@ -100,23 +101,34 @@ type MoveData = {
 function receiveMoveFromClient(client: Client, incommingMoveData: MoveData): void {
   const room = client.activeRoom;
   if (!room) return log('---client room not found @receiveMoveFromClient');
-  const match = room.match;
-  if (!match) return log('---Room has no match @receiveMoveFromClient');
-  let retugningMoveData: { pieceId: number; move: MoveType } | null = null;
+
+  const state = room.match;
+  if (!state) return log('---Room has no match @receiveMoveFromClient');
+
   try {
-    retugningMoveData = validateMove(match, client, incommingMoveData.from, incommingMoveData.to);
-    // TODO: Make local move, pass turn, etc.
-  } catch (error) {
-    log(error, '@receiveMoveFromClient');
+    const { piece, move } = validateMove(state, client, incommingMoveData.from, incommingMoveData.to);
+
+    makeLocalMove(state, piece, move);
+
+    sendRoomMessage(
+      room,
+      {
+        type: 'OPONENT_MOVED',
+        data: {
+          move,
+          pieceId: piece.id,
+        },
+      },
+      client.id
+    );
+  } catch (err) {
+    log({ err, state, incommingMoveData }, '@receiveMoveFromClient');
+
+    sendRoomMessage(room, {
+      type: 'MOVE_ERROR',
+      data: { errMsg: 'Error processing move', err },
+    });
   }
-  sendRoomMessage(
-    room,
-    {
-      type: 'OPONENT_MOVED',
-      data: retugningMoveData,
-    },
-    client.id
-  );
 }
 
 /**

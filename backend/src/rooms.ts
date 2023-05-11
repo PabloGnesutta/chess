@@ -18,7 +18,7 @@ const roomIds: number[] = [];
 const rooms: RoomType[] = [];
 
 function getRoomIndex(roomId: number) {
-  return roomIds.findIndex(rId => rId === roomId);
+  return roomIds.findIndex((rId) => rId === roomId);
 }
 
 function getRoom(roomId: number): RoomType | null {
@@ -44,7 +44,7 @@ function createRoom(): RoomType {
 }
 
 function joinOrCreateRoom(client: Client): void {
-  var room = rooms.find(r => r.numActiveClients < 2);
+  var room = rooms.find((r) => r.numActiveClients < 2);
 
   if (!room) {
     room = createRoom();
@@ -65,9 +65,6 @@ function joinOrCreateRoom(client: Client): void {
     const match: MatchState = newMatch(clientIds);
 
     room.match = match;
-    // log('match', match);
-
-    // log('room', room);
 
     for (const color in match.players) {
       const player = match.players[color];

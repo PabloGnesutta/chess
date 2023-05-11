@@ -2,10 +2,19 @@ import { Client } from '../../clients';
 import { log } from '../../utils/utils';
 import { initialPieces } from '../constants';
 import { computeMoves } from '../engine/computePieceMovements';
-import { filterLegalMoves } from '../engine/filterLegalMoves';
+import { computePieceLegalMoves } from '../engine/filterLegalMoves';
 import { putPieceOnBoard } from '../engine/gameState';
 import { createPiece } from '../engine/piecesLib';
-import { BoardPiecesType, CellType, ColorPiecesType, ColorType, MatchState, MoveType, PlayersType } from '../types';
+import {
+  BoardPiecesType,
+  CellType,
+  ColorPiecesType,
+  ColorType,
+  MatchState,
+  MoveType,
+  Piece,
+  PlayersType,
+} from '../types';
 
 const colors: ColorType[] = ['w', 'b'];
 
@@ -53,10 +62,17 @@ function newMatch(clientIds: number[]): MatchState {
   };
 }
 
-function validateMove(state: MatchState, client: Client, [rowFrom, colFrom]: CellType, [rowTo, colTo]: CellType): any {
+type ValidateMove = {
+  piece: Piece;
+  move: MoveType;
+};
+
+function validateMove(state: MatchState, client: Client, moveFrom: CellType, to: CellType): ValidateMove {
   const { boardPieces, currentColor, movesHistory, players } = state;
 
   if (client.playerColor !== currentColor) throw new Error(`Not player ${client.id}'s turn`);
+
+  const [rowFrom, colFrom] = moveFrom; // unnecesary allocation
 
   const piece = boardPieces[rowFrom][colFrom];
 
@@ -67,33 +83,33 @@ function validateMove(state: MatchState, client: Client, [rowFrom, colFrom]: Cel
 
   computeMoves[piece.name](boardPieces, piece, { movesHistory, isInCheck: players[currentColor].isInCheck });
 
-  // Validate if movement is valid (is a pattern in which the piece moves)
+  // Validate if move is valid (is a pattern in which the piece moves)
+  const [rowTo, colTo] = to;
+
   var moves = piece.moves;
   var movesLen = moves.length;
 
-  var movementIsValid = false;
+  var moveIsValid = false;
   for (let i = 0; i < movesLen; i++) {
     const move = moves[i];
     if (move.moveTo[0] === rowTo && move.moveTo[1] === colTo) {
-      movementIsValid = true;
+      moveIsValid = true;
       break;
     }
   }
 
-  if (!movementIsValid) {
-    throw new Error(`Movement is not valid: ${piece} [${rowTo}, ${colTo}]`);
-  }
+  if (!moveIsValid) throw new Error(`Move is not valid: ${piece} [${rowTo}, ${colTo}]`);
 
-  // Validate if moovement is legal (doesn't put the player in check)
+  var pieceMove: MoveType | null = null; // return value
 
-  var pieceMove: MoveType | null = null;
+  // Validate if move is legal (doesn't put the player in check)
 
-  const legalMoves = filterLegalMoves(state, piece);
-  moves = legalMoves;
-  movesLen = moves.length;
+  const legalMoves = computePieceLegalMoves(state, piece);
+
+  movesLen = legalMoves.length;
 
   for (let i = 0; i < movesLen; i++) {
-    const move = moves[i];
+    const move = legalMoves[i];
     if (move.moveTo[0] === rowTo && move.moveTo[1] === colTo) {
       pieceMove = move;
       break;
@@ -101,11 +117,11 @@ function validateMove(state: MatchState, client: Client, [rowFrom, colFrom]: Cel
   }
 
   if (!pieceMove) {
-    throw new Error(`Movement is not legal: ${piece} [${rowTo}, ${colTo}]`);
+    throw new Error(`Move is not legal: ${piece} [${rowTo}, ${colTo}]`);
   }
 
   return {
-    pieceId: piece.id,
+    piece,
     move: pieceMove,
   };
 }

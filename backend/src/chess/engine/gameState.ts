@@ -1,8 +1,8 @@
 'use strict';
 
 import { BoardPiecesType, CellType, HistoryItemType, MatchState, MoveType, Piece } from '../types';
-import { filterLegalMoves } from './filterLegalMoves';
-import { invertColor, isPlayerInCheckAtPosition } from './utils';
+import { computePieceLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves';
+import { invertColor } from './utils';
 import { doCastle, doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
 import { log } from '../../utils/utils';
@@ -13,14 +13,15 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
 }
 
-function makeLocalMove(state: MatchState, piece: Piece, move: MoveType, clientId: number): void {
+function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): void {
   const historyItem = {
     piece: piece.name,
     from: [piece.row, piece.col] as CellType,
     to: move.moveTo,
     color: state.currentColor,
   };
-  movesHistory.push({ ...historyItem });
+
+  movesHistory.push(historyItem);
 
   if (move.castleSteps) {
     doCastle(state.boardPieces, piece, move);
@@ -28,61 +29,59 @@ function makeLocalMove(state: MatchState, piece: Piece, move: MoveType, clientId
     doMove(state, piece, move);
   }
 
-  passTurn(state, clientId);
+  passTurn(state);
 }
 
-type MoveData = {
-  pieceId: number;
-  move: any;
-};
-
-function makeRemoteMove(state: MatchState, moveData: MoveData, clientId: number): void {
-  const { pieceId, move } = moveData;
-  const piece = state.colorPieces[state.currentColor].find(p => p.id === pieceId);
-  if (piece) {
-    makeLocalMove(state, piece, move, clientId);
-  } else {
-    log('Piece not found @makeRemoteMove', moveData);
-  }
+function passTurn(state: MatchState): void {
+  state.players[state.currentColor].isInCheck = false;
+  state.currentColor = invertColor(state.currentColor);
+  startTurn(state);
 }
 
-function signalMoveMultiplayer(piece: Piece, move: MoveType): void {
-  // signalMove(piece.id, move);
-  // makeLocalMove(piece, move);
-}
-
-function startTurn(state: MatchState, clientId: number): void {
-  const { currentColor, movesHistory } = state;
-  const { boardPieces, colorPieces, players } = state;
-
-  // TODO: stalemate by repetition
+/**
+ * At this point, the turn has been passed, therefore
+ * Current color is updated for the new turn
+ */
+function startTurn(state: MatchState): void {
+  const { boardPieces, colorPieces, currentColor, movesHistory, players } = state;
 
   // Am I in check?
   // Compute moves
-  const imInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[invertColor(currentColor)], state);
+  const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces, state);
 
-  if (imInCheck) {
-    players[clientId].isInCheck = true;
-    log('check');
+  if (playerIsInCheck) {
+    players[currentColor].isInCheck = true;
+    log(`Player ${currentColor} is in check at room ...`);
   }
 
   // CHECK/STALE MATE
-  let numLegalMoves = 0;
 
-  // Compute all legal moves for current player.
-  // (Moves that don't put the player in check)
-  // If no legal moves, then it's check mate or stale mate.
+  var playerHasNoLegalMoves = true;
 
-  colorPieces[currentColor].forEach(piece => {
+  // Compute legal moves for current player's pieces.
+  const currentPieces = colorPieces[currentColor];
+
+  for (let p = 0; p < currentPieces.length; p++) {
+    const piece = currentPieces[p];
+
     // Compute moves
-    computeMoves[piece.name](boardPieces, piece, { movesHistory, isInCheck: players[currentColor].isInCheck });
-    const legalMoves = filterLegalMoves(state, piece);
-    piece.moves = legalMoves;
-    numLegalMoves += legalMoves.length;
-  });
+    computeMoves[piece.name](boardPieces, piece, {
+      movesHistory,
+      isInCheck: players[currentColor].isInCheck,
+    });
 
-  if (!numLegalMoves) {
-    if (imInCheck) {
+    if (piece.moves.length) {
+      const legalMoves = computePieceLegalMoves(state, piece);
+
+      if (legalMoves.length) {
+        playerHasNoLegalMoves = false;
+        break;
+      }
+    }
+  }
+
+  if (playerHasNoLegalMoves) {
+    if (playerIsInCheck) {
       setTimeout(() => {
         log('Check Mate!');
       }, 100);
@@ -94,10 +93,4 @@ function startTurn(state: MatchState, clientId: number): void {
   }
 }
 
-function passTurn(state: MatchState, clientId: number): void {
-  state.players[clientId].isInCheck = false;
-  state.currentColor = invertColor(state.currentColor);
-  startTurn(state, clientId);
-}
-
-export { movesHistory, makeLocalMove, signalMoveMultiplayer, makeRemoteMove, startTurn, putPieceOnBoard };
+export { movesHistory, makeLocalMove, putPieceOnBoard };
