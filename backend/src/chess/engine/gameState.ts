@@ -1,5 +1,3 @@
-'use strict';
-
 import { BoardPiecesType, CellType, HistoryItemType, MatchState, MoveType, Piece } from '../types';
 import { computePieceLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves';
 import { invertColor } from './utils';
@@ -24,9 +22,9 @@ function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): void {
   movesHistory.push(historyItem);
 
   if (move.castleSteps) {
-    doCastle(state.boardPieces, piece, move);
+    doCastle(state.boardPieces, piece, move, false);
   } else {
-    doMove(state, piece, move);
+    doMove(state, piece, move, false);
   }
 
   passTurn(state);

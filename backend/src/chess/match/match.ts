@@ -1,5 +1,6 @@
 import { log } from '../../utils/utils';
 import { Client } from '../../clients/clients';
+import { ClientsById } from '../../rooms';
 import { initialPieces } from '../constants';
 import { computeMoves } from '../engine/computePieceMovements';
 import { computePieceLegalMoves } from '../engine/filterLegalMoves';
@@ -18,21 +19,16 @@ import {
 
 const colors: ColorType[] = ['w', 'b'];
 
-function newMatch(clientIds: number[]): MatchState {
+function newMatch(clients: ClientsById): MatchState {
+  const clientIds = [];
+
+  for (const clientId in clients) clientIds.push(parseInt(clientId));
+
   if (clientIds.length !== 2) throw new Error('clientIds should be 2 @newMatch');
 
   const players: PlayersType = {};
   const colorPieces: ColorPiecesType = { w: [], b: [] };
-  const boardPieces: BoardPiecesType = {
-    0: {},
-    1: {},
-    2: {},
-    3: {},
-    4: {},
-    5: {},
-    6: {},
-    7: {},
-  };
+  const boardPieces: BoardPiecesType = { 0: {}, 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {} };
 
   for (let i = 0; i < initialPieces.length; i++) {
     // Create pieces
@@ -62,12 +58,12 @@ function newMatch(clientIds: number[]): MatchState {
   };
 }
 
-type ValidateMove = {
+type OutgoingMoveData = {
   piece: Piece;
   move: MoveType;
 };
 
-function validateMove(state: MatchState, client: Client, moveFrom: CellType, to: CellType): ValidateMove {
+function validateMove(state: MatchState, client: Client, moveFrom: CellType, to: CellType): OutgoingMoveData {
   const { boardPieces, currentColor, movesHistory, players } = state;
 
   if (client.playerColor !== currentColor) throw new Error(`Not player ${client.id}'s turn`);

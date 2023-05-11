@@ -1,3 +1,4 @@
+import { P, _Z } from '../constants';
 import {
   BoardPiecesType,
   CellType,
@@ -8,10 +9,7 @@ import {
   MoveType,
   Pawn,
   Piece,
-  PlayerState,
-  PlayersType,
 } from '../types';
-import { P, _Z } from '../constants';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
   const obj: { moveTo: CellType; captureAt?: CellType } = {
@@ -328,7 +326,7 @@ function pawn(boardPieces: BoardPiecesType, _piece: Piece, { movesHistory }: Ext
 }
 
 type ComputeMovesType = {
-  [key: string]: (boardPieces: BoardPiecesType, piece: Piece|King|Pawn, extraOptions: ExtraOptions) => void;
+  [key: string]: (boardPieces: BoardPiecesType, piece: Piece | King | Pawn, extraOptions: ExtraOptions) => void;
 };
 
 const computeMoves: ComputeMovesType = {
