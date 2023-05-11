@@ -1,9 +1,8 @@
-import { newMatch } from './chess/match/match';
-import { MatchState } from './chess/types';
-import { Client, writeSocket } from './clients';
 import { log } from './utils/utils';
-
-let roomIdCount = 0;
+import { MatchState } from './chess/types';
+import { newMatch } from './chess/match/match';
+import { Client, WSPayloadType } from './clients/clients';
+import { writeSocket } from './clients/websocket';
 
 export type RoomType = {
   id: number;
@@ -15,7 +14,10 @@ export type RoomType = {
 };
 
 const roomIds: number[] = [];
+
 const rooms: RoomType[] = [];
+
+var roomIdCount = 0;
 
 function getRoomIndex(roomId: number) {
   return roomIds.findIndex((rId) => rId === roomId);
@@ -30,7 +32,7 @@ function getRoom(roomId: number): RoomType | null {
 function createRoom(): RoomType {
   const roomId = ++roomIdCount;
 
-  const room: RoomType = {
+  const room = {
     id: roomId,
     name: 'room_' + Date.now(),
     clients: [],
@@ -46,9 +48,7 @@ function createRoom(): RoomType {
 function joinOrCreateRoom(client: Client): void {
   var room = rooms.find((r) => r.numActiveClients < 2);
 
-  if (!room) {
-    room = createRoom();
-  }
+  if (!room) room = createRoom();
 
   room.clients[client.id] = client;
   room.numActiveClients++;
@@ -68,8 +68,10 @@ function joinOrCreateRoom(client: Client): void {
 
     for (const color in match.players) {
       const player = match.players[color];
+
       const client = room.clients[player.clientId];
       client.playerColor = color;
+
       writeSocket(client._s, {
         type: 'ROOM_READY',
         data: {
@@ -83,7 +85,9 @@ function joinOrCreateRoom(client: Client): void {
 
 function removeClientAndDestroyRoom(client: Client): void {
   const room = client.activeRoom;
+
   if (!room) return;
+
   // send OPONENT_ABANDONED message to the other player (if any)
   for (const clientId in room.clients) {
     const roomClient = room.clients[clientId];
@@ -94,4 +98,24 @@ function removeClientAndDestroyRoom(client: Client): void {
   }
 }
 
-export { getRoom, createRoom, joinOrCreateRoom, removeClientAndDestroyRoom };
+/**
+ * Send message to all clients in the room.
+ * If exceptClientId is provided, do not send to that client.
+ * @param {RoomType} room
+ * @param {JSON} msg
+ * @param {number} exceptClientId
+ * @returns {void}
+ */
+function sendRoomMessage(room: RoomType, payload: WSPayloadType, exceptClientId?: number): void {
+  const roomClients = room.clients;
+
+  for (const clientId in roomClients) {
+    const roomClient = roomClients[clientId];
+
+    if (roomClient.id !== exceptClientId) {
+      writeSocket(roomClient._s, payload);
+    }
+  }
+}
+
+export { getRoom, createRoom, joinOrCreateRoom, removeClientAndDestroyRoom, sendRoomMessage };

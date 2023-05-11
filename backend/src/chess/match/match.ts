@@ -1,5 +1,5 @@
-import { Client } from '../../clients';
 import { log } from '../../utils/utils';
+import { Client } from '../../clients/clients';
 import { initialPieces } from '../constants';
 import { computeMoves } from '../engine/computePieceMovements';
 import { computePieceLegalMoves } from '../engine/filterLegalMoves';

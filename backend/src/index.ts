@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { Duplex } from 'stream';
 
 import { log } from './utils/utils';
-import { registerClient } from './clients';
+import { registerClient } from './clients/clients';
 
 // -------
 // SERVER:
