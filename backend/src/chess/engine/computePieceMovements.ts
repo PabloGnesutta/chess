@@ -1,9 +1,21 @@
-import { BoardPiecesType, CellType, ColorType, HistoryItemType, King, KingMoveType, MoveType, Pawn, Piece, PlayerState, PlayersType } from '../types';
+import {
+  BoardPiecesType,
+  CellType,
+  ColorType,
+  HistoryItemType,
+  King,
+  KingMoveType,
+  MoveType,
+  Pawn,
+  Piece,
+  PlayerState,
+  PlayersType,
+} from '../types';
 import { P, _Z } from '../constants';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
-  const obj: {moveTo: CellType, captureAt?: CellType} = { 
-    moveTo
+  const obj: { moveTo: CellType; captureAt?: CellType } = {
+    moveTo,
   };
   if (captureAt) obj.captureAt = captureAt;
   return obj;
@@ -155,7 +167,13 @@ function specificMoves(boardPieces: BoardPiecesType, potentialMoves: CellType[],
   return moves;
 }
 
-function king(boardPieces: BoardPiecesType, player: PlayerState, _king: King): void {
+type ExtraOptions = {
+  isInCheck: boolean;
+  movesHistory: HistoryItemType[];
+};
+
+function king(boardPieces: BoardPiecesType, _piece: Piece, { isInCheck }: ExtraOptions): void {
+  const _king = _piece as King;
   const { row, col } = _king;
   const potentialMoves: CellType[] = [
     [row + 1, col],
@@ -171,7 +189,7 @@ function king(boardPieces: BoardPiecesType, player: PlayerState, _king: King): v
   const castleMoves: KingMoveType[] = [];
 
   castle: {
-    if (!_king.hasntMoveYet || player.isInCheck) {
+    if (!_king.hasntMoveYet || isInCheck) {
       break castle;
     }
 
@@ -257,7 +275,8 @@ function knight(boardPieces: BoardPiecesType, _piece: Piece): void {
   _piece.moves = specificMoves(boardPieces, potentialMoves, _piece.color);
 }
 
-function pawn(boardPieces: BoardPiecesType, movesHistory: HistoryItemType[], _pawn: Pawn): void {
+function pawn(boardPieces: BoardPiecesType, _piece: Piece, { movesHistory }: ExtraOptions): void {
+  const _pawn = _piece as Pawn;
   const moves = [];
   const oneRankAhead = _pawn.row + _pawn.delta;
 
@@ -277,17 +296,13 @@ function pawn(boardPieces: BoardPiecesType, movesHistory: HistoryItemType[], _pa
   const adjacentCol1 = _pawn.col + 1;
   let oponentPiece = boardPieces[oneRankAhead][adjacentCol1];
   if (oponentPiece && oponentPiece.color !== _pawn.color) {
-    moves.push(
-      moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1])
-    );
+    moves.push(moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1]));
   }
 
   const adjacentCol2 = _pawn.col - 1;
   oponentPiece = boardPieces[oneRankAhead][adjacentCol2];
   if (oponentPiece && oponentPiece.color !== _pawn.color) {
-    moves.push(
-      moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2])
-    );
+    moves.push(moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2]));
   }
 
   // EN-PASSANT
@@ -299,19 +314,11 @@ function pawn(boardPieces: BoardPiecesType, movesHistory: HistoryItemType[], _pa
       const lastMoveTo = lastMove.to;
       const lastMoveFrom = lastMove.from;
       // Oponent pawn was at starting rank and moved to _pawn' rank
-      if (
-        lastMoveFrom[0] === _pawn.enPassantRow + _pawn.delta * 2 &&
-        lastMoveTo[0] === _pawn.enPassantRow
-      ) {
+      if (lastMoveFrom[0] === _pawn.enPassantRow + _pawn.delta * 2 && lastMoveTo[0] === _pawn.enPassantRow) {
         // Oponent pawn is adjacent to pawn
-        if (
-          lastMoveTo[1] === _pawn.col + 1 ||
-          lastMoveTo[1] === _pawn.col - 1
-        ) {
+        if (lastMoveTo[1] === _pawn.col + 1 || lastMoveTo[1] === _pawn.col - 1) {
           // Capture one row ahead at opponent pawn's file
-          moves.push(
-            moveObj([_pawn.row + _pawn.delta, lastMoveTo[1]], lastMoveTo)
-          );
+          moves.push(moveObj([_pawn.row + _pawn.delta, lastMoveTo[1]], lastMoveTo));
         }
       }
     }
@@ -321,8 +328,8 @@ function pawn(boardPieces: BoardPiecesType, movesHistory: HistoryItemType[], _pa
 }
 
 type ComputeMovesType = {
-  [key: string]: Function
-}
+  [key: string]: (boardPieces: BoardPiecesType, piece: Piece|King|Pawn, extraOptions: ExtraOptions) => void;
+};
 
 const computeMoves: ComputeMovesType = {
   king,

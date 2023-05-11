@@ -1,12 +1,31 @@
 'use strict';
 
-import { BoardPiecesType, CellType, ColorPiecesType, ColorType, King, KingMoveType, MatchState, MoveType, Pawn, Piece, PieceNameType, PlayersType } from '../types';
-import { K, Q, R, B, N, P, _Z } from '../constants'
+import {
+  BoardPiecesType,
+  CellType,
+  ColorPiecesType,
+  ColorType,
+  King,
+  KingMoveType,
+  MatchState,
+  MoveType,
+  Pawn,
+  Piece,
+  PieceNameType,
+  PlayersType,
+} from '../types';
+import { K, Q, R, B, N, P, _Z } from '../constants';
 import { putPieceOnBoard } from './gameState';
 import { invertColor } from './utils';
 import { log } from 'console';
 
-function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece|King|Pawn {
+function newPiece(
+  id: number,
+  name: PieceNameType,
+  row: number,
+  col: number,
+  color: ColorType
+): Piece | King | Pawn {
   return {
     id,
     name,
@@ -22,7 +41,7 @@ function updateBoardAndPieceWithMove(
   boardPieces: BoardPiecesType,
   piece: Piece,
   moveTo: any,
-  isSimulation: boolean = false,
+  isSimulation: boolean = false
 ): void {
   const { row: rowFrom, col: colFrom } = piece;
   const [rowTo, colTo] = moveTo;
@@ -34,21 +53,14 @@ function updateBoardAndPieceWithMove(
   piece.row = rowTo;
   piece.col = colTo;
   boardPieces[rowTo][colTo] = piece;
-  
+
   if (!isSimulation) {
     piece.hasntMoveYet = false;
   }
 }
 
-function doMove(
-  boardPieces: BoardPiecesType,
-  colorPieces: ColorPiecesType,
-  players: PlayersType,
-  state: MatchState,
-  piece: Piece,
-  move: MoveType
-): void {
-  const { currentColor } = state;
+function doMove(state: MatchState, piece: Piece, move: MoveType): void {
+  const { boardPieces, colorPieces, currentColor } = state;
   const opositeColor = invertColor(currentColor);
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -58,17 +70,14 @@ function doMove(
   // Capture:
   if (captureAt) {
     const [captureRow, captureCol] = captureAt;
+
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
+
     // Remove captured piece from colorPieces
     const colorPieceIndex = colorPieces[opositeColor].findIndex(
-      piece => piece.id === captueredBoardPiece.id
+      (piece) => piece.id === captueredBoardPiece.id
     );
-
-    {
-      const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
-      // Add to player's captures
-      // players[currentColor].captures.push(capturedColorPiece);
-    }
+    colorPieces[opositeColor].splice(colorPieceIndex, 1);
 
     // en-passant
     if (colTo !== captureCol || rowTo !== captureRow) {
@@ -78,7 +87,7 @@ function doMove(
 
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {
-    promotePawnAt(boardPieces, colorPieces, state, piece as Pawn, [rowTo, colTo]);
+    promotePawnAt(state, piece as Pawn, [rowTo, colTo]);
   }
 }
 
@@ -96,26 +105,25 @@ function doCastle(
   const [_row, _col] = rookFrom;
   const rook = boardPieces[_row][_col];
   if (!rook) return log('Rook not found while castling');
+
   updateBoardAndPieceWithMove(boardPieces, rook, rookTo);
 }
 
 function promotePawnAt(
-  boardPieces: BoardPiecesType,
-  colorPieces: ColorPiecesType,
   state: MatchState,
   pawn: Pawn,
   [row, col]: CellType
 ): void {
-  const { currentColor } = state;
+  const { boardPieces, colorPieces, currentColor } = state;
   const pieceIndex = colorPieces[currentColor].findIndex(
-    piece => piece.id === pawn.id
+    (piece) => piece.id === pawn.id
   );
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 
   const promotedPiece = queen(pawn.id, row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
-  putPieceOnBoard(promotedPiece, boardPieces)
+  putPieceOnBoard(promotedPiece, boardPieces);
 }
 
 function king(id: number, row: number, col: number, color: ColorType): King {
@@ -165,11 +173,6 @@ const createPiece = {
   pawn,
   queen,
   rook,
-}
+};
 
-export {
-  createPiece,
-  doMove,
-  doCastle,
-  updateBoardAndPieceWithMove,
-}
+export { createPiece, doMove, doCastle, updateBoardAndPieceWithMove };
