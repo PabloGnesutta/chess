@@ -1,6 +1,6 @@
 'use strict';
 
-import { initGame } from '../engine/initGame.js';
+import { InitialPieces, initGame } from '../engine/initGame.js';
 import { CellType, ColorType, makeRemoteMove, resetState, state } from '../engine/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
@@ -12,7 +12,8 @@ type WSMessage = {
 };
 
 // STATE
-let wsSend = function (payload: WSMessage): void {};
+let wsSend: (payload: WSMessage) => void;
+// let wsSend = function (payload: WSMessage): void {};
 let isWSOpen = false;
 let clientId = null;
 let activeRoomId: number = 0;
@@ -23,20 +24,20 @@ function connectWebSocket() {
 
     const ws = new WebSocket('ws://localhost:3000');
 
-    ws.onopen = e => {
+    ws.onopen = () => {
       isWSOpen = true;
       wsSend = (payload: WSMessage) => ws.send(JSON.stringify(payload));
       resolve('Connection established');
     };
 
-    ws.onerror = e => {
+    ws.onerror = (e) => {
       flushSocket(ws, 'ERROR', e);
       reject(e);
     };
 
-    ws.onmessage = e => processMessage(JSON.parse(e.data));
+    ws.onmessage = (e) => processMessage(JSON.parse(e.data));
 
-    ws.onclose = e => flushSocket(ws, 'CLOSE', e);
+    ws.onclose = (e) => flushSocket(ws, 'CLOSE', e);
   });
 }
 
@@ -46,7 +47,6 @@ function flushSocket(ws: WebSocket, cause: string, event: Event) {
   ws.onerror = null;
   ws.onclose = null;
   ws.onopen = null;
-  wsSend = function (payload: WSMessage): void {};
   isWSOpen = false;
   clientId = null;
   activeRoomId = 0;
@@ -85,6 +85,7 @@ function CLIENT_REGISTERED(data: any): void {
 type RoomReady = {
   roomId: number;
   playerColor: ColorType;
+  initialPieces: InitialPieces;
 };
 
 function ROOM_READY(data: RoomReady) {
@@ -92,11 +93,10 @@ function ROOM_READY(data: RoomReady) {
   activeRoomId = data.roomId;
   roomIdElement!.innerText = 'On Room ' + activeRoomId;
   state.playerColor = data.playerColor;
-  initGame(state.playerColor);
+  initGame(state.playerColor, data.initialPieces);
   closeModal();
 }
 
-// todo: add to backend
 export type MoveData = {
   pieceId: number;
   move: MoveType;

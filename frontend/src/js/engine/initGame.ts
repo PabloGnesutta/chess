@@ -2,9 +2,19 @@
 
 import { createPiece } from './piecesLib.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
-import { ColorType, boardPieces, colorPieces, PieceNameType, putPieceOnBoard, resetState, startTurn } from './gameState.js';
+import {
+  ColorType,
+  boardPieces,
+  colorPieces,
+  PieceNameType,
+  putPieceOnBoard,
+  resetState,
+  startTurn,
+} from './gameState.js';
 
-let initialPieces: [number, PieceNameType, number, number, ColorType][];
+export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
+
+let initialPieces: InitialPieces;
 
 initialPieces = [
   [1, K, 7, 4, 'w'],
@@ -42,7 +52,7 @@ initialPieces = [
   // [32, P, 1, 7, 'b'],
 ];
 
-function initGame(playerColor: ColorType) {
+function initGame(playerColor: ColorType, _initialPieces?: InitialPieces) {
   document.getElementById('board')?.classList.remove('display-none');
 
   {
@@ -53,13 +63,15 @@ function initGame(playerColor: ColorType) {
 
   {
     // INIT STATE:
-    for (let i = 0; i < initialPieces.length; i++) {
+    let initialPiecesSet: InitialPieces = _initialPieces || initialPieces;
+
+    for (let i = 0; i < initialPiecesSet.length; i++) {
       // Create pieces
-      const [id, type, row, col, color] = initialPieces[i];
+      const [id, type, row, col, color] = initialPiecesSet[i];
       const piece = createPiece[type](id, row, col, color);
       colorPieces[color].push(piece);
       // Put 'em on the board
-      putPieceOnBoard(piece, boardPieces)
+      putPieceOnBoard(piece, boardPieces);
     }
 
     drawBoard(playerColor);

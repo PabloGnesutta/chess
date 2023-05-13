@@ -13,7 +13,7 @@ let initialPieces: [number, PieceNameType, number, number, ColorType][];
 
 initialPieces = [
   [1, K, 7, 4, 'w'],
-  // [2, Q, 7, 3, 'w'],
+  [2, Q, 7, 3, 'w'],
   // [3, R, 7, 0, 'w'],
   // [4, R, 7, 7, 'w'],
   // [5, B, 7, 2, 'w'],

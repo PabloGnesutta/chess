@@ -3,6 +3,7 @@ import { MatchState } from './chess/types';
 import { newMatch } from './chess/match/match';
 import { Client, WSPayloadType } from './clients/clients';
 import { writeSocket } from './clients/websocket';
+import { initialPieces } from './chess/constants';
 
 export type ClientsById = { [key: number]: Client };
 
@@ -79,6 +80,7 @@ function sendRoomReadyToPlayers(room: RoomType, match: MatchState) {
     writeSocket(client._s, {
       type: 'ROOM_READY',
       data: {
+        initialPieces,
         roomId: room.id,
         playerColor: color,
       },
