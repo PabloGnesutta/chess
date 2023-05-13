@@ -4,11 +4,13 @@ import { newMatch } from './chess/match/match';
 import { Client, WSPayloadType } from './clients/clients';
 import { writeSocket } from './clients/websocket';
 
+export type ClientsById = { [key: number]: Client };
+
 export type RoomType = {
   id: number;
   name: string;
   createdBy?: number;
-  clients: { [key: number]: Client };
+  clients: ClientsById;
   numActiveClients: number;
   match?: MatchState;
 };
@@ -20,7 +22,7 @@ const rooms: RoomType[] = [];
 var roomIdCount = 0;
 
 function getRoomIndex(roomId: number) {
-  return roomIds.findIndex((rId) => rId === roomId);
+  return roomIds.findIndex(rId => rId === roomId);
 }
 
 function getRoom(roomId: number): RoomType | null {
@@ -46,7 +48,7 @@ function createRoom(): RoomType {
 }
 
 function joinOrCreateRoom(client: Client): void {
-  var room = rooms.find((r) => r.numActiveClients < 2);
+  var room = rooms.find(r => r.numActiveClients < 2);
 
   if (!room) room = createRoom();
 
@@ -58,28 +60,29 @@ function joinOrCreateRoom(client: Client): void {
   if (room.numActiveClients === 2) {
     // Room is ready. Create match & notify clients
 
-    const clientIds: number[] = [];
-    for (const clientId in room.clients) {
-      clientIds.push(parseInt(clientId));
-    }
-    const match: MatchState = newMatch(clientIds);
+    const match: MatchState = newMatch(room.clients);
 
     room.match = match;
 
-    for (const color in match.players) {
-      const player = match.players[color];
+    sendRoomReadyToPlayers(room, match);
+  }
+}
 
-      const client = room.clients[player.clientId];
-      client.playerColor = color;
+function sendRoomReadyToPlayers(room: RoomType, match: MatchState) {
+  for (const color in match.players) {
+    const player = match.players[color];
 
-      writeSocket(client._s, {
-        type: 'ROOM_READY',
-        data: {
-          roomId: room.id,
-          playerColor: color,
-        },
-      });
-    }
+    const client = room.clients[player.clientId];
+
+    client.playerColor = color;
+
+    writeSocket(client._s, {
+      type: 'ROOM_READY',
+      data: {
+        roomId: room.id,
+        playerColor: color,
+      },
+    });
   }
 }
 

@@ -1,9 +1,7 @@
-'use strict';
-
 import { K } from '../constants';
 import { BoardPiecesType, ColorPiecesType, KingMoveType, MatchState, MoveType, Piece } from '../types';
 import { copyBoard, copyColorPieces, invertColor } from './utils';
-import { updateBoardAndPieceWithMove } from './piecesLib';
+import { doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
 
 /**
@@ -31,7 +29,7 @@ function isPlayerInCheckAtPosition(
      * Needs refactoring.
      * for this, we only need the captures.
      * isInCheck is used to compute castling
-     * we pass it as true to avoid that computation
+     * we pass it as true to skip that computation
      */
     computeMoves[oponentsPiece.name](boardPieces, oponentsPiece, { movesHistory, isInCheck: true }); // do not compute castle
 
@@ -54,40 +52,23 @@ function isPlayerInCheckAtPosition(
 }
 
 function doesMovePutPlayerInCheck(state: MatchState, _piece: Piece, move: MoveType): boolean {
-  // NOTE: The move simulation is practically identical in _doMove()
-
   const { boardPieces, colorPieces, currentColor } = state;
-
-  const opositeColor = invertColor(currentColor);
-
-  const { moveTo, captureAt } = move;
-
-  const [rowTo, colTo] = moveTo;
 
   // Copy state
   const boardCopy = copyBoard(boardPieces);
   const piecesCopy = copyColorPieces(colorPieces);
   const pieceCopy = { ..._piece };
 
-  // Simulate move - Update piece and boardPieces status
-  updateBoardAndPieceWithMove(boardCopy, pieceCopy, moveTo, true);
-
-  // Simulate capture - Update colorPieces (remove captured)
-  if (captureAt) {
-    const [captureRow, captureCol] = captureAt;
-
-    const captueredBoardPiece = boardCopy[captureRow][captureCol];
-
-    const colorPieceIndex = piecesCopy[opositeColor].findIndex((p) => p.id === captueredBoardPiece.id);
-
-    piecesCopy[opositeColor].splice(colorPieceIndex, 1);
-
-    // en-passant
-    if (colTo !== captureCol || rowTo !== captureRow) {
-      // Update boardPieces (remove captured)
-      delete boardCopy[captureRow][captureCol];
-    }
-  }
+  doMove(
+    {
+      boardPieces: boardCopy,
+      colorPieces: piecesCopy,
+      currentColor,
+    },
+    pieceCopy,
+    move,
+    true
+  );
 
   const movePutsPlayerInCheck = isPlayerInCheckAtPosition(boardCopy, piecesCopy, state);
 
@@ -107,8 +88,8 @@ function computePieceLegalMoves(state: MatchState, piece: Piece): MoveType[] {
   const legalMoves: MoveType[] = [];
 
   // Anyting but King
-  if (piece.name !== 'king') {
-    piece.moves.forEach((move) => {
+  if (piece.name !== K) {
+    piece.moves.forEach(move => {
       if (!doesMovePutPlayerInCheck(state, piece, move)) {
         legalMoves.push(move);
       }
@@ -120,6 +101,7 @@ function computePieceLegalMoves(state: MatchState, piece: Piece): MoveType[] {
   // King
   piece.moves.forEach((move: KingMoveType) => {
     const castleSteps = move.castleSteps;
+
     if (castleSteps) {
       let castleIsLegal = true;
 

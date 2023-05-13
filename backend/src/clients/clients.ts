@@ -25,14 +25,14 @@ type Clients = { [key: number]: Client };
 
 const clients: Clients = {};
 
-let idCount = 0;
+let clientIdCount = 0;
 
 /**
  * Register new web socket client and its metadata
  * @param {Socket} _s
  */
 function registerClient(_s: Duplex): void {
-  const clientId = ++idCount;
+  const clientId = ++clientIdCount;
 
   clients[clientId] = {
     id: clientId,

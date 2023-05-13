@@ -1,5 +1,3 @@
-'use strict';
-
 import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, Piece } from '../types';
 
 const invertColor = (currentColor: ColorType) => (currentColor === 'w' ? 'b' : 'w');
@@ -20,10 +18,10 @@ function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {
 
 function copyColorPieces(colorPieces: ColorPiecesType): ColorPiecesType {
   const copiedPieces: ColorPiecesType = { w: [], b: [] };
-  colorPieces.w.forEach((piece) => {
+  colorPieces.w.forEach(piece => {
     copiedPieces.w.push({ ...piece });
   });
-  colorPieces.b.forEach((piece) => {
+  colorPieces.b.forEach(piece => {
     copiedPieces.b.push({ ...piece });
   });
   return copiedPieces;

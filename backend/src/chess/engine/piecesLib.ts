@@ -1,31 +1,21 @@
-'use strict';
-
 import {
   BoardPiecesType,
   CellType,
-  ColorPiecesType,
   ColorType,
+  DoMovePartialState,
   King,
   KingMoveType,
-  MatchState,
   MoveType,
   Pawn,
   Piece,
   PieceNameType,
-  PlayersType,
 } from '../types';
 import { K, Q, R, B, N, P, _Z } from '../constants';
 import { putPieceOnBoard } from './gameState';
 import { invertColor } from './utils';
 import { log } from 'console';
 
-function newPiece(
-  id: number,
-  name: PieceNameType,
-  row: number,
-  col: number,
-  color: ColorType
-): Piece | King | Pawn {
+function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece | King | Pawn {
   return {
     id,
     name,
@@ -41,7 +31,7 @@ function updateBoardAndPieceWithMove(
   boardPieces: BoardPiecesType,
   piece: Piece,
   moveTo: any,
-  isSimulation: boolean = false
+  isSimulation: boolean
 ): void {
   const { row: rowFrom, col: colFrom } = piece;
   const [rowTo, colTo] = moveTo;
@@ -59,28 +49,30 @@ function updateBoardAndPieceWithMove(
   }
 }
 
-function doMove(state: MatchState, piece: Piece, move: MoveType): void {
+function doMove(state: DoMovePartialState, piece: Piece, move: MoveType, isSimulation: boolean): void {
   const { boardPieces, colorPieces, currentColor } = state;
+
   const opositeColor = invertColor(currentColor);
+
   const { moveTo, captureAt } = move;
+
   const [rowTo, colTo] = moveTo;
 
-  updateBoardAndPieceWithMove(boardPieces, piece, moveTo, false);
+  updateBoardAndPieceWithMove(boardPieces, piece, moveTo, isSimulation);
 
-  // Capture:
+  // Capture - Update colorPieces (remove captured)
   if (captureAt) {
     const [captureRow, captureCol] = captureAt;
 
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
 
-    // Remove captured piece from colorPieces
-    const colorPieceIndex = colorPieces[opositeColor].findIndex(
-      (piece) => piece.id === captueredBoardPiece.id
-    );
+    const colorPieceIndex = colorPieces[opositeColor].findIndex(piece => piece.id === captueredBoardPiece.id);
+
     colorPieces[opositeColor].splice(colorPieceIndex, 1);
 
     // en-passant
     if (colTo !== captureCol || rowTo !== captureRow) {
+      // Update boardPieces (remove captured)
       delete boardPieces[captureRow][captureCol];
     }
   }
@@ -91,14 +83,10 @@ function doMove(state: MatchState, piece: Piece, move: MoveType): void {
   }
 }
 
-function doCastle(
-  boardPieces: BoardPiecesType,
-  king: King,
-  move: KingMoveType
-): void {
+function doCastle(boardPieces: BoardPiecesType, king: King, move: KingMoveType, isSimulation: boolean): void {
   const { moveTo, rookFrom, rookTo } = move;
   // Move king
-  updateBoardAndPieceWithMove(boardPieces, king, moveTo);
+  updateBoardAndPieceWithMove(boardPieces, king, moveTo, isSimulation);
 
   // Move corresponding rook
   if (!rookFrom) return log('rookFrom not provided');
@@ -106,18 +94,12 @@ function doCastle(
   const rook = boardPieces[_row][_col];
   if (!rook) return log('Rook not found while castling');
 
-  updateBoardAndPieceWithMove(boardPieces, rook, rookTo);
+  updateBoardAndPieceWithMove(boardPieces, rook, rookTo, isSimulation);
 }
 
-function promotePawnAt(
-  state: MatchState,
-  pawn: Pawn,
-  [row, col]: CellType
-): void {
+function promotePawnAt(state: DoMovePartialState, pawn: Pawn, [row, col]: CellType): void {
   const { boardPieces, colorPieces, currentColor } = state;
-  const pieceIndex = colorPieces[currentColor].findIndex(
-    (piece) => piece.id === pawn.id
-  );
+  const pieceIndex = colorPieces[currentColor].findIndex(piece => piece.id === pawn.id);
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 
