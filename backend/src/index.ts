@@ -22,7 +22,7 @@ function logRoom(room: RoomType) {
   const _room: Partial<RoomType> = { ...room };
   delete _room.clients;
   delete _room.match;
-  log('room', room);
+  log('room', _room);
 
   logClients(room.clients, '  room client');
 
@@ -38,18 +38,22 @@ function logMatch(match: MatchState, label = 'match') {
 // SERVER:
 
 const server = createServer((req, res) => {
+  log(' ----------------- ');
   log(' ** ROOMS');
   rooms.forEach((room) => {
     logRoom(room);
   });
+  log(' ');
 
   log(' ** CLIENTS');
-  logClients(clients);
+  // logClients(clients);
+  log(' ');
 
   log('** MATCHES');
-  for (const id in matches) {
-    logMatch(matches[id]);
-  }
+  // for (const id in matches) {
+  //   logMatch(matches[id]);
+  // }
+  log(' ');
 
   res.end('OK');
 });

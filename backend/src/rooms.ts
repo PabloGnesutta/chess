@@ -51,9 +51,12 @@ function joinOrCreateRoom(client: Client): void {
 
   if (!room) room = createRoom();
 
+  log('join or create', room);
+
   room.clients[client.id] = client;
   room.numActiveClients++;
 
+  log('join or create after', room);
   client.activeRoom = room;
 
   if (room.numActiveClients === 2) {
@@ -86,23 +89,35 @@ function sendRoomReadyToPlayers(room: RoomType, match: MatchState) {
   }
 }
 
-function removeClientAndDestroyRoom(client: Client): void {
+function resetRoomAndInformOponent(client: Client): void {
   const room = client.activeRoom;
 
-  if (!room) return log(`---room property not set in client @removeClientAndDestroyRoom`);
+  if (!room) return log(`---room property not set in client @resetRoomAndInformOponent`);
 
-  delete room.clients[client.id];
-  room.numActiveClients--;
+  const match = room.match;
+
+  if (match) {
+    match.status = 'CLOSED';
+    match.statusDetail = 'PLAYER_LEFT';
+  }
+
   room.match = undefined;
 
   // send OPONENT_ABANDONED message to the other player (if any)
   for (const clientId in room.clients) {
     const roomClient = room.clients[clientId];
 
+    roomClient.activeRoom = null;
+
     if (roomClient.id !== client.id) {
+      // Inform remaining player
       writeSocket(roomClient._s, { type: 'OPONENT_ABANDONED', data: {} });
     }
   }
+
+  room.clients = {};
+  room.numActiveClients = 0;
+  room.match = undefined;
 }
 
 /**
@@ -125,4 +140,4 @@ function sendRoomMessage(room: RoomType, payload: WSPayloadType, exceptClientId?
   }
 }
 
-export { rooms, getRoom, createRoom, joinOrCreateRoom, removeClientAndDestroyRoom, sendRoomMessage };
+export { rooms, getRoom, createRoom, joinOrCreateRoom, resetRoomAndInformOponent, sendRoomMessage };

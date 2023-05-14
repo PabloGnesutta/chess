@@ -1,7 +1,7 @@
 import { Duplex } from 'stream';
 
 import { log } from '../utils/utils';
-import { RoomType, removeClientAndDestroyRoom } from '../rooms';
+import { RoomType, resetRoomAndInformOponent } from '../rooms';
 import { readSocket, writeSocket } from './websocket';
 
 export type WSPayloadType = {
@@ -61,7 +61,7 @@ function deleteClient(client: Client): void {
 
   client._s.destroy();
 
-  removeClientAndDestroyRoom(client);
+  resetRoomAndInformOponent(client);
 
   delete clients[client.id];
 }
