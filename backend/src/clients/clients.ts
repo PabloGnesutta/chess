@@ -21,9 +21,9 @@ export type Client = {
   _s: Duplex;
 };
 
-type Clients = { [key: number]: Client };
+export type ClientsById = { [key: number]: Client };
 
-const clients: Clients = {};
+const clients: ClientsById = {};
 
 let clientIdCount = 0;
 
@@ -66,4 +66,4 @@ function deleteClient(client: Client): void {
   delete clients[client.id];
 }
 
-export { registerClient };
+export { clients, registerClient };

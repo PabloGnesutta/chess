@@ -15,7 +15,7 @@ import { computeMoves } from './computePieceMovements';
 function isPlayerInCheckAtPosition(
   boardPieces: BoardPiecesType,
   colorPieces: ColorPiecesType,
-  { currentColor, movesHistory, players }: MatchState
+  { currentColor, movesHistory }: MatchState
 ): boolean {
   const oponentPieces = colorPieces[invertColor(currentColor)];
 

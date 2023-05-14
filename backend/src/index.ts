@@ -1,15 +1,56 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { createServer } from 'http';
 import { Duplex } from 'stream';
 
 import { log } from './utils/utils';
-import { registerClient } from './clients/clients';
+import { Client, ClientsById, clients, registerClient } from './clients/clients';
+import { RoomType, rooms } from './rooms';
+import { matches } from './chess/match/match';
+import { MatchState } from './chess/types';
+import { match } from 'assert';
 
+function logClients(clients: ClientsById, label = 'client') {
+  for (const id in clients) {
+    const client: Partial<Client> = { ...clients[id] };
+    delete client._s;
+    delete client.activeRoom;
+    log(label, client);
+  }
+}
+
+function logRoom(room: RoomType) {
+  const _room: Partial<RoomType> = { ...room };
+  delete _room.clients;
+  delete _room.match;
+  log('room', room);
+
+  logClients(room.clients, '  room client');
+
+  if (room.match) {
+    log('  room match id', room.match.id);
+  }
+}
+
+function logMatch(match: MatchState, label = 'match') {
+  log(label, match);
+}
 // -------
 // SERVER:
 
 const server = createServer((req, res) => {
-  log(req);
+  log(' ** ROOMS');
+  rooms.forEach((room) => {
+    logRoom(room);
+  });
+
+  log(' ** CLIENTS');
+  logClients(clients);
+
+  log('** MATCHES');
+  for (const id in matches) {
+    logMatch(matches[id]);
+  }
+
   res.end('OK');
 });
 
@@ -42,4 +83,6 @@ server.on('upgrade', (req, socket: Duplex) => {
   socket.write(responseHeaders.join('\r\n') + '\r\n\r\n');
 
   registerClient(socket);
+
+  return;
 });

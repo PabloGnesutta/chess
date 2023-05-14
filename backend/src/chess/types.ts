@@ -63,11 +63,14 @@ export type PlayersType = {
 };
 
 export type MatchState = {
+  id: number;
   colorPieces: ColorPiecesType;
   boardPieces: BoardPiecesType;
   players: PlayersType;
   movesHistory: HistoryItemType[];
   currentColor: ColorType;
+  status?: string;
+  statusDetail?: string;
 };
 
 export type DoMovePartialState = {

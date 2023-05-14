@@ -1,6 +1,5 @@
 import { log } from '../../utils/utils';
-import { Client } from '../../clients/clients';
-import { ClientsById } from '../../rooms';
+import { Client, ClientsById } from '../../clients/clients';
 import { initialPieces } from '../constants';
 import { computeMoves } from '../engine/computePieceMovements';
 import { computePieceLegalMoves } from '../engine/filterLegalMoves';
@@ -18,6 +17,12 @@ import {
 } from '../types';
 
 const colors: ColorType[] = ['w', 'b'];
+
+type MatchesById = { [key: number]: MatchState };
+
+const matches: MatchesById = {};
+
+let matchIdCount = 0;
 
 function newMatch(clients: ClientsById): MatchState {
   const clientIds = [];
@@ -49,13 +54,19 @@ function newMatch(clients: ClientsById): MatchState {
     };
   }
 
-  return {
+  const id = ++matchIdCount;
+  const match: MatchState = {
+    id,
     currentColor: 'w',
     boardPieces,
     colorPieces,
     movesHistory: [],
     players,
   };
+
+  matches[id] = match;
+
+  return match;
 }
 
 type OutgoingMoveData = {
@@ -122,4 +133,4 @@ function validateMove(state: MatchState, client: Client, moveFrom: CellType, to:
   };
 }
 
-export { newMatch, validateMove };
+export { matches, newMatch, validateMove };

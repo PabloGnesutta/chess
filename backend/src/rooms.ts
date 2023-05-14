@@ -1,11 +1,9 @@
 import { log } from './utils/utils';
 import { MatchState } from './chess/types';
 import { newMatch } from './chess/match/match';
-import { Client, WSPayloadType } from './clients/clients';
+import { Client, ClientsById, WSPayloadType } from './clients/clients';
 import { writeSocket } from './clients/websocket';
 import { initialPieces } from './chess/constants';
-
-export type ClientsById = { [key: number]: Client };
 
 export type RoomType = {
   id: number;
@@ -23,7 +21,7 @@ const rooms: RoomType[] = [];
 var roomIdCount = 0;
 
 function getRoomIndex(roomId: number) {
-  return roomIds.findIndex(rId => rId === roomId);
+  return roomIds.findIndex((rId) => rId === roomId);
 }
 
 function getRoom(roomId: number): RoomType | null {
@@ -35,10 +33,10 @@ function getRoom(roomId: number): RoomType | null {
 function createRoom(): RoomType {
   const roomId = ++roomIdCount;
 
-  const room = {
+  const room: RoomType = {
     id: roomId,
     name: 'room_' + Date.now(),
-    clients: [],
+    clients: {},
     numActiveClients: 0,
   };
 
@@ -49,7 +47,7 @@ function createRoom(): RoomType {
 }
 
 function joinOrCreateRoom(client: Client): void {
-  var room = rooms.find(r => r.numActiveClients < 2);
+  var room = rooms.find((r) => r.numActiveClients < 2);
 
   if (!room) room = createRoom();
 
@@ -91,7 +89,11 @@ function sendRoomReadyToPlayers(room: RoomType, match: MatchState) {
 function removeClientAndDestroyRoom(client: Client): void {
   const room = client.activeRoom;
 
-  if (!room) return;
+  if (!room) return log(`---room property not set in client @removeClientAndDestroyRoom`);
+
+  delete room.clients[client.id];
+  room.numActiveClients--;
+  room.match = undefined;
 
   // send OPONENT_ABANDONED message to the other player (if any)
   for (const clientId in room.clients) {
@@ -123,4 +125,4 @@ function sendRoomMessage(room: RoomType, payload: WSPayloadType, exceptClientId?
   }
 }
 
-export { getRoom, createRoom, joinOrCreateRoom, removeClientAndDestroyRoom, sendRoomMessage };
+export { rooms, getRoom, createRoom, joinOrCreateRoom, removeClientAndDestroyRoom, sendRoomMessage };
