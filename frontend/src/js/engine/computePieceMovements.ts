@@ -1,5 +1,5 @@
 import { King, KingMoveType, MoveType, Pawn, Piece } from './piecesLib.js';
-import { ColorType, players, state, movesHistory, CellType, BoardPiecesType} from './gameState.js';
+import { ColorType, players, state, CellType, BoardPiecesType, LastMoveType} from './gameState.js';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
   const obj: {moveTo: CellType, captureAt?: CellType} = { 
@@ -293,7 +293,7 @@ function pawn(boardPieces: BoardPiecesType, _pawn: Pawn): void {
   // EN-PASSANT
   // Pawn is on en-passant rank
   if (_pawn.row === _pawn.enPassantRow) {
-    const lastMove = movesHistory[movesHistory.length - 1];
+    const lastMove = state.lastMove as LastMoveType;
     // Last oponent move was a pawn
     if (lastMove.piece === P) {
       const lastMoveTo = lastMove.to;

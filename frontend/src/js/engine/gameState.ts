@@ -3,57 +3,53 @@
 import { filterLegalMoves } from './filterLegalMoves.js';
 import { isPlayerInCheckAtPosition } from '../utils/utils.js';
 import { Piece, doCastle, doMove, MoveType } from './piecesLib.js';
-import {
-  _imgContainers,
-  markLastMove,
-  unselectCurrentSquare,
-} from './board.js';
+import { _imgContainers, markLastMove, unselectCurrentSquare } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
 import { MoveData, signalMoveToServer } from '../ws/ws.js';
 
-export type ColorType = 'w'| 'b'
-export type PieceNameType = 'king'|'queen'|'rook'|'bishop'|'knight'|'pawn' 
+export type ColorType = 'w' | 'b';
+export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
 
 export type CellType = [number, number];
 
-type HistoryItemType = {
-  piece: PieceNameType,
-  from: CellType,
-  to: CellType,
-  color: string,
+export type LastMoveType = {
+  piece: PieceNameType;
+  from: CellType;
+  to: CellType;
+  color: string;
 };
 
 export type ColorPiecesType = {
-  [key: string]: Piece[],
-}
+  [key: string]: Piece[];
+};
 
-export type BoardPiecesType = { 
+export type BoardPiecesType = {
   // row
-  [key: number]: { 
+  [key: number]: {
     // col
-    [key: number]: Piece
-  } 
-}
+    [key: number]: Piece;
+  };
+};
 
-export type PlayersType = { 
+export type PlayersType = {
   // id
   [key: string]: {
-    color: ColorType,
-    isInCheck: boolean,
-    movesHistory: HistoryItemType[],
-    captures: Piece[]
-  } 
-}
+    color: ColorType;
+    isInCheck: boolean;
+    captures: Piece[];
+  };
+};
 
 export type State = {
-  currentColor: ColorType,
-  opositeColor: ColorType,
-  selectedPiece: Piece | null,
-  isMultiPlayer: boolean,
-  playerColor: ColorType | '',
-}
+  currentColor: ColorType;
+  opositeColor: ColorType;
+  selectedPiece: Piece | null;
+  isMultiPlayer: boolean;
+  playerColor: ColorType | '';
+  lastMove: LastMoveType | {};
+};
 
-const movesHistory: HistoryItemType[] = [];
+const movesHistory: string[] = [];
 
 const colorPieces: ColorPiecesType = {
   w: [],
@@ -71,21 +67,15 @@ const boardPieces: BoardPiecesType = {
   7: {},
 };
 
-function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
-  boardPieces[piece.row][piece.col] = piece;
-}
-
 const players: PlayersType = {
-  'w': {
+  w: {
     color: 'w',
     isInCheck: false,
-    movesHistory: [],
     captures: [],
   },
-  'b': {
+  b: {
     color: 'b',
     isInCheck: false,
-    movesHistory: [],
     captures: [],
   },
 };
@@ -96,14 +86,18 @@ const state: State = {
   selectedPiece: null,
   isMultiPlayer: false,
   playerColor: '',
+  lastMove: {},
 };
+
+function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
+  boardPieces[piece.row][piece.col] = piece;
+}
 
 function resetState(): void {
   for (const color in players) {
     const player = players[color];
     colorPieces[color].splice(0, colorPieces[color].length);
     player.isInCheck = false;
-    player.movesHistory = [];
     player.captures = [];
   }
 
@@ -119,6 +113,7 @@ function resetState(): void {
   state.currentColor = 'w';
   state.opositeColor = 'b';
   state.selectedPiece = null;
+  state.lastMove = {};
 }
 
 function makeLocalMove(piece: Piece, move: MoveType): void {
@@ -128,30 +123,31 @@ function makeLocalMove(piece: Piece, move: MoveType): void {
     piece: piece.name,
     from: [piece.row, piece.col] as CellType,
     to: move.moveTo,
-    color: state.currentColor // this breaks things?
+    color: state.currentColor,
   };
-  movesHistory.push({ ...historyItem }); // color was a separate property instead of part of the history item
-  players[state.currentColor].movesHistory.push({ ...historyItem });
+
+  movesHistory.push(JSON.stringify(historyItem));
+
+  state.lastMove = historyItem;
 
   unselectCurrentSquare();
 
   if (move.castleSteps) {
-    doCastle(piece, move)
+    doCastle(piece, move);
   } else {
-    doMove(piece, move)
+    doMove(piece, move);
   }
 
   passTurn();
 }
 
-
 function makeRemoteMove(moveData: MoveData): void {
   const { pieceId, move } = moveData;
-  const piece = colorPieces[state.currentColor].find(p => p.id === pieceId);
+  const piece = colorPieces[state.currentColor].find((p) => p.id === pieceId);
   if (piece) {
     makeLocalMove(piece, move);
   } else {
-    warn('Piece not found @makeRemoteMove', moveData)
+    warn('Piece not found @makeRemoteMove', moveData);
   }
 }
 
@@ -159,7 +155,6 @@ function signalMoveMultiplayer(piece: Piece, move: MoveType): void {
   signalMoveToServer([piece.row, piece.col], move.moveTo);
   makeLocalMove(piece, move);
 }
-
 
 function startTurn(): void {
   const { currentColor, opositeColor } = state;
@@ -179,7 +174,7 @@ function startTurn(): void {
   // If no legal moves, then it's check mate or stale mate.
   let numLegalMoves = 0;
 
-  colorPieces[currentColor].forEach(piece => {
+  colorPieces[currentColor].forEach((piece) => {
     computeMoves[piece.name](boardPieces, piece);
     const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;

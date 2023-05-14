@@ -1,4 +1,4 @@
-import { ColorType, PieceNameType } from "./types";
+import { ColorType, PieceNameType } from './types';
 
 const P = 'pawn';
 const K = 'king';
@@ -47,13 +47,4 @@ initialPieces = [
   // [32, P, 1, 7, 'b'],
 ];
 
-export {
-  K,
-  Q,
-  R,
-  B,
-  N,
-  P,
-  _Z,
-  initialPieces
-}
+export { K, Q, R, B, N, P, _Z, initialPieces };
