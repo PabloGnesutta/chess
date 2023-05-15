@@ -1,4 +1,4 @@
-import { BoardPiecesType, ColorPiecesType, ColorType, MatchState, Piece } from '../types';
+import { BoardPiecesType, ColorPiecesType, ColorType } from '../types';
 
 const invertColor = (currentColor: ColorType) => (currentColor === 'w' ? 'b' : 'w');
 

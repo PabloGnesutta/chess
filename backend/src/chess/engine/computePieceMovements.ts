@@ -3,9 +3,9 @@ import {
   BoardPiecesType,
   CellType,
   ColorType,
-  HistoryItemType,
   King,
   KingMoveType,
+  LastMoveType,
   MoveType,
   Pawn,
   Piece,
@@ -167,7 +167,7 @@ function specificMoves(boardPieces: BoardPiecesType, potentialMoves: CellType[],
 
 type ExtraOptions = {
   isInCheck: boolean;
-  movesHistory: HistoryItemType[];
+  lastMove: LastMoveType;
 };
 
 function king(boardPieces: BoardPiecesType, _piece: Piece, { isInCheck }: ExtraOptions): void {
@@ -273,7 +273,7 @@ function knight(boardPieces: BoardPiecesType, _piece: Piece): void {
   _piece.moves = specificMoves(boardPieces, potentialMoves, _piece.color);
 }
 
-function pawn(boardPieces: BoardPiecesType, _piece: Piece, { movesHistory }: ExtraOptions): void {
+function pawn(boardPieces: BoardPiecesType, _piece: Piece, { lastMove }: ExtraOptions): void {
   const _pawn = _piece as Pawn;
   const moves = [];
   const oneRankAhead = _pawn.row + _pawn.delta;
@@ -304,9 +304,9 @@ function pawn(boardPieces: BoardPiecesType, _piece: Piece, { movesHistory }: Ext
   }
 
   // EN-PASSANT
+
   // Pawn is on en-passant rank
   if (_pawn.row === _pawn.enPassantRow) {
-    const lastMove = movesHistory[movesHistory.length - 1];
     // Last oponent move was a pawn
     if (lastMove.piece === P) {
       const lastMoveTo = lastMove.to;

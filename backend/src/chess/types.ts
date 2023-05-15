@@ -45,7 +45,7 @@ export type BoardPiecesType = {
   };
 };
 
-export type HistoryItemType = {
+export type LastMoveType = {
   piece: PieceNameType;
   from: CellType;
   to: CellType;
@@ -67,10 +67,10 @@ export type MatchState = {
   colorPieces: ColorPiecesType;
   boardPieces: BoardPiecesType;
   players: PlayersType;
-  movesHistory: HistoryItemType[];
   currentColor: ColorType;
   status?: string;
   statusDetail?: string;
+  lastMove: LastMoveType | {};
 };
 
 export type DoMovePartialState = {

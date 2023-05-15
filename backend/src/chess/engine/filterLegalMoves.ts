@@ -1,5 +1,5 @@
 import { K } from '../constants';
-import { BoardPiecesType, ColorPiecesType, KingMoveType, MatchState, MoveType, Piece } from '../types';
+import { BoardPiecesType, ColorPiecesType, KingMoveType, LastMoveType, MatchState, MoveType, Piece } from '../types';
 import { copyBoard, copyColorPieces, invertColor } from './utils';
 import { doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
@@ -15,7 +15,7 @@ import { computeMoves } from './computePieceMovements';
 function isPlayerInCheckAtPosition(
   boardPieces: BoardPiecesType,
   colorPieces: ColorPiecesType,
-  { currentColor, movesHistory }: MatchState
+  { currentColor, lastMove }: MatchState
 ): boolean {
   const oponentPieces = colorPieces[invertColor(currentColor)];
 
@@ -31,7 +31,10 @@ function isPlayerInCheckAtPosition(
      * isInCheck is used to compute castling
      * we pass it as true to skip that computation
      */
-    computeMoves[oponentsPiece.name](boardPieces, oponentsPiece, { movesHistory, isInCheck: true }); // do not compute castle
+    computeMoves[oponentsPiece.name](boardPieces, oponentsPiece, {
+      lastMove: lastMove as LastMoveType,
+      isInCheck: true,
+    }); // do not compute castle
 
     const moves = oponentsPiece.moves;
 
@@ -51,13 +54,13 @@ function isPlayerInCheckAtPosition(
   return playerIsInCheck;
 }
 
-function doesMovePutPlayerInCheck(state: MatchState, _piece: Piece, move: MoveType): boolean {
+function isPlayerInCheckAfterMove(state: MatchState, piece: Piece, move: MoveType): boolean {
   const { boardPieces, colorPieces, currentColor } = state;
 
   // Copy state
   const boardCopy = copyBoard(boardPieces);
   const piecesCopy = copyColorPieces(colorPieces);
-  const pieceCopy = { ..._piece };
+  const pieceCopy = { ...piece };
 
   doMove(
     {
@@ -90,7 +93,7 @@ function computePieceLegalMoves(state: MatchState, piece: Piece): MoveType[] {
   // Anyting but King
   if (piece.name !== K) {
     piece.moves.forEach(move => {
-      if (!doesMovePutPlayerInCheck(state, piece, move)) {
+      if (!isPlayerInCheckAfterMove(state, piece, move)) {
         legalMoves.push(move);
       }
     });
@@ -107,7 +110,7 @@ function computePieceLegalMoves(state: MatchState, piece: Piece): MoveType[] {
 
       for (let s = 0; s < castleSteps.length; s++) {
         const castleStep = castleSteps[s];
-        if (doesMovePutPlayerInCheck(state, piece, { moveTo: castleStep })) {
+        if (isPlayerInCheckAfterMove(state, piece, { moveTo: castleStep })) {
           castleIsLegal = false;
           break;
         }
@@ -117,7 +120,7 @@ function computePieceLegalMoves(state: MatchState, piece: Piece): MoveType[] {
         legalMoves.push(move);
       }
     } else {
-      if (!doesMovePutPlayerInCheck(state, piece, move)) {
+      if (!isPlayerInCheckAfterMove(state, piece, move)) {
         legalMoves.push(move);
       }
     }

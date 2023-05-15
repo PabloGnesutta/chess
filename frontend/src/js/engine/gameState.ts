@@ -1,7 +1,6 @@
 'use strict';
 
-import { filterLegalMoves } from './filterLegalMoves.js';
-import { isPlayerInCheckAtPosition } from '../utils/utils.js';
+import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
 import { Piece, doCastle, doMove, MoveType } from './piecesLib.js';
 import { _imgContainers, markLastMove, unselectCurrentSquare } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
@@ -143,7 +142,7 @@ function makeLocalMove(piece: Piece, move: MoveType): void {
 
 function makeRemoteMove(moveData: MoveData): void {
   const { pieceId, move } = moveData;
-  const piece = colorPieces[state.currentColor].find((p) => p.id === pieceId);
+  const piece = colorPieces[state.currentColor].find(p => p.id === pieceId);
   if (piece) {
     makeLocalMove(piece, move);
   } else {
@@ -174,7 +173,7 @@ function startTurn(): void {
   // If no legal moves, then it's check mate or stale mate.
   let numLegalMoves = 0;
 
-  colorPieces[currentColor].forEach((piece) => {
+  colorPieces[currentColor].forEach(piece => {
     computeMoves[piece.name](boardPieces, piece);
     const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;

@@ -1,16 +1,45 @@
 'use strict';
 
-import { boardPieces, colorPieces, state } from './gameState.js';
-import {
-  copyBoard,
-  copyColorPieces,
-  isPlayerInCheckAtPosition,
-} from '../utils/utils.js';
+import { BoardPiecesType, boardPieces, colorPieces, state } from './gameState.js';
+import { copyBoard, copyColorPieces } from '../utils/utils.js';
 import { KingMoveType, MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
+import { computeMoves } from './computePieceMovements';
 
+/**
+ * For each oponent's piece
+ * compute all it's movements.
+ * If one of those is a capture agains player's king, then it's check.
+ * Once a check is found, break the loop and return.
+ * @param {BoardPieces} boardPieces
+ * @param {Pieces} oponentPieces
+ * @returns {boolean}
+ */
+function isPlayerInCheckAtPosition(boardPieces: BoardPiecesType, oponentPieces: Piece[]) {
+  let playerIsInCheck = false;
+  for (let p = 0; p < oponentPieces.length; p++) {
+    const oponentsPiece = oponentPieces[p];
+
+    // Compute oponent moves one piece at a time
+    computeMoves[oponentsPiece.name](boardPieces, oponentsPiece);
+
+    const moves = oponentsPiece.moves;
+    for (let m = 0; m < moves.length; m++) {
+      const { captureAt } = moves[m];
+      if (captureAt) {
+        // If the move is a capture, check if the capture is player's king
+        const target = boardPieces[captureAt[0]][captureAt[1]];
+        if (target && target.name === K) {
+          playerIsInCheck = true;
+          break;
+        }
+      }
+    }
+  }
+  return playerIsInCheck;
+}
 
 // TODO: The move simulation is practically identical in _doMove()
-function doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
+function isPlayerInCheckAfterMove(piece: Piece, move: MoveType): boolean {
   const { opositeColor } = state;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -18,22 +47,21 @@ function doesMovePutMeInCheck(piece: Piece, move: MoveType): boolean {
   // Simulate board state
   const boardCopy = copyBoard(boardPieces);
   const piecesCopy = copyColorPieces(colorPieces);
+  const pieceCopy = { ...piece };
 
   // Simulate move
-  updateBoardAndPieceWithMove(boardCopy, piece, moveTo, true)
-  
+  updateBoardAndPieceWithMove(boardCopy, pieceCopy, moveTo, true);
+
   if (captureAt) {
     const [captureRow, captureCol] = captureAt;
     const captueredBoardPiece = boardCopy[captureRow][captureCol];
     // Remove captured piece from colorPieces
-    const colorPieceIndex = piecesCopy[opositeColor].findIndex(
-      p => p.id === captueredBoardPiece.id
-    );
+    const colorPieceIndex = piecesCopy[opositeColor].findIndex(p => p.id === captueredBoardPiece.id);
 
     {
       piecesCopy[opositeColor].splice(colorPieceIndex, 1);
     }
-      
+
     // en-passant
     if (colTo !== captureCol || rowTo !== captureRow) {
       delete boardCopy[captureRow][captureCol];
@@ -53,7 +81,7 @@ function filterLegalMoves(piece: Piece): MoveType[] {
   // Anyting but King
   if (piece.name !== K) {
     piece.moves.forEach(move => {
-      if (!doesMovePutMeInCheck({ ...piece }, move)) {
+      if (!isPlayerInCheckAfterMove(piece, move)) {
         legalMoves.push(move);
       }
     });
@@ -69,7 +97,7 @@ function filterLegalMoves(piece: Piece): MoveType[] {
 
       for (let s = 0; s < castleSteps.length; s++) {
         const castleStep = castleSteps[s];
-        if (doesMovePutMeInCheck({ ...piece }, { moveTo: castleStep })) {
+        if (isPlayerInCheckAfterMove(piece, { moveTo: castleStep })) {
           castleIsLegal = false;
           break;
         }
@@ -79,7 +107,7 @@ function filterLegalMoves(piece: Piece): MoveType[] {
         legalMoves.push(move);
       }
     } else {
-      if (!doesMovePutMeInCheck({ ...piece }, move)) {
+      if (!isPlayerInCheckAfterMove(piece, move)) {
         legalMoves.push(move);
       }
     }
@@ -88,4 +116,4 @@ function filterLegalMoves(piece: Piece): MoveType[] {
   return legalMoves;
 }
 
-export { filterLegalMoves };
+export { filterLegalMoves, isPlayerInCheckAtPosition };

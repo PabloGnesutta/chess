@@ -1,25 +1,23 @@
-import { BoardPiecesType, CellType, HistoryItemType, MatchState, MoveType, Piece } from '../types';
+import { BoardPiecesType, LastMoveType, MatchState, MoveType, Piece } from '../types';
 import { computePieceLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves';
 import { invertColor } from './utils';
 import { doCastle, doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
 import { log } from '../../utils/utils';
 
-const movesHistory: HistoryItemType[] = [];
-
 function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
 }
 
 function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): void {
-  const historyItem = {
+  const historyItem: LastMoveType = {
     piece: piece.name,
-    from: [piece.row, piece.col] as CellType,
+    from: [piece.row, piece.col],
     to: move.moveTo,
     color: state.currentColor,
   };
 
-  movesHistory.push(historyItem);
+  state.lastMove = historyItem;
 
   if (move.castleSteps) {
     doCastle(state.boardPieces, piece, move, false);
@@ -41,7 +39,7 @@ function passTurn(state: MatchState): void {
  * Current color is updated for the new turn
  */
 function startTurn(state: MatchState): void {
-  const { boardPieces, colorPieces, currentColor, movesHistory, players } = state;
+  const { boardPieces, colorPieces, currentColor, lastMove, players } = state;
 
   // Am I in check?
   // Compute moves
@@ -64,7 +62,7 @@ function startTurn(state: MatchState): void {
 
     // Compute moves
     computeMoves[piece.name](boardPieces, piece, {
-      movesHistory,
+      lastMove: lastMove as LastMoveType,
       isInCheck: players[currentColor].isInCheck,
     });
 
@@ -91,4 +89,4 @@ function startTurn(state: MatchState): void {
   }
 }
 
-export { movesHistory, makeLocalMove, putPieceOnBoard };
+export { makeLocalMove, putPieceOnBoard };

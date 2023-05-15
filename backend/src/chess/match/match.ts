@@ -10,6 +10,7 @@ import {
   CellType,
   ColorPiecesType,
   ColorType,
+  LastMoveType,
   MatchState,
   MoveType,
   Piece,
@@ -60,9 +61,9 @@ function newMatch(clients: ClientsById): MatchState {
     currentColor: 'w',
     boardPieces,
     colorPieces,
-    movesHistory: [],
     players,
     status: 'ONGOING',
+    lastMove: {},
   };
 
   matches[id] = match;
@@ -76,7 +77,7 @@ type OutgoingMoveData = {
 };
 
 function validateMove(state: MatchState, client: Client, moveFrom: CellType, to: CellType): OutgoingMoveData {
-  const { boardPieces, currentColor, movesHistory, players } = state;
+  const { boardPieces, currentColor, lastMove, players } = state;
 
   if (client.playerColor !== currentColor) throw new Error(`Not player ${client.id}'s turn`);
 
@@ -89,7 +90,10 @@ function validateMove(state: MatchState, client: Client, moveFrom: CellType, to:
   if (piece.color !== currentColor)
     throw new Error(`Piece ${piece.id} (${piece.color}) doesn't belong to client ${client.id} (${client.playerColor})`);
 
-  computeMoves[piece.name](boardPieces, piece, { movesHistory, isInCheck: players[currentColor].isInCheck });
+  computeMoves[piece.name](boardPieces, piece, {
+    lastMove: lastMove as LastMoveType,
+    isInCheck: players[currentColor].isInCheck,
+  });
 
   // Validate if move is valid (is a pattern in which the piece moves)
   const [rowTo, colTo] = to;
