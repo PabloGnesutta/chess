@@ -1,11 +1,11 @@
 'use strict';
 
-import { _imgContainers, initBoard } from './js/engine/board.js';
-import { state } from './js/engine/gameState.js';
-import { connectWebSocket, joinRoom } from './js/ws/ws.js';
-import { singlePlayerBtn, findGameBtn } from './js/ui/lobby-UI.js';
-import { initGame } from './js/engine/initGame.js';
-import { showModal } from './js/ui/modal.js';
+import { _imgContainers, initBoard } from './engine/board.js';
+import { state } from './engine/gameState.js';
+import { connectWebSocket, joinRoom } from './ws/ws.js';
+import { singlePlayerBtn, findGameBtn } from './ui/lobby-UI.js';
+import { initGame } from './engine/initGame.js';
+import { showModal } from './ui/modal.js';
 
 function findGame(): void {
   state.isMultiPlayer = true;
