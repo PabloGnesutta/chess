@@ -3,7 +3,7 @@
 import { BoardPiecesType, boardPieces, colorPieces, state } from './gameState.js';
 import { copyBoard, copyColorPieces } from '../utils/utils.js';
 import { KingMoveType, MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
-import { computeMoves } from './computePieceMovements';
+import { computeMoves } from './computePieceMovements.js';
 
 /**
  * For each oponent's piece
