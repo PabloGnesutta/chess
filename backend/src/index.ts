@@ -1,97 +1,15 @@
 import * as crypto from 'crypto';
 import { createServer } from 'http';
 import { Duplex } from 'stream';
-import * as fs from 'fs';
+
 import { log } from './utils/utils';
-import { Client, ClientsById, clients, registerClient } from './clients/clients';
-import { RoomType, rooms } from './rooms';
-import { matches } from './chess/match/match';
-import { MatchState } from './chess/types';
+import { registerClient } from './clients/clients';
+import { router } from './http/router';
 
-function logClients(clients: ClientsById, label = 'client') {
-  for (const id in clients) {
-    const client: Partial<Client> = { ...clients[id] };
-    delete client._s;
-    delete client.activeRoom;
-    log(label, client);
-  }
-}
-
-function logRoom(room: RoomType) {
-  const _room: Partial<RoomType> = { ...room };
-  delete _room.clients;
-  delete _room.match;
-  log('room', _room);
-
-  logClients(room.clients, '  room client');
-
-  if (room.match) {
-    log('  room match id', room.match.id);
-  }
-}
-
-function logMatch(match: MatchState, label = 'match') {
-  log(label, match);
-}
 // -------
 // SERVER:
 
-const server = createServer((req, res): any => {
-  // log(req.url);
-
-  const url = req.url;
-
-  if (!url) {
-    log('  ---  !url');
-    return res.end('WTF');
-  }
-
-  const pathArray = url.split('/');
-
-  // log('url', url);
-
-  try {
-    if (url === '/') {
-      const indexHTML = fs.readFileSync('../frontend/src/index.html');
-      res.write(indexHTML);
-      res.end();
-      // } else if (url.match(/\/css\/([a-z])\w+\.css/)) {
-    } else if (pathArray[1] === 'css') {
-      const fileName = pathArray[pathArray.length - 1];
-      const cssFile = fs.readFileSync('../frontend/src/css/' + fileName);
-      res.write(cssFile);
-      res.end();
-    } else if (pathArray[1] === 'build') {
-      const filePath = '../frontend/build/js/' + pathArray.slice(3, pathArray.length).join('/');
-      log('filePath', filePath);
-      const jsFile = fs.readFileSync(filePath);
-      // log('jsFile', jsFile);
-      res.writeHead(200, { 'content-type': 'application/javascript' });
-      res.write(jsFile);
-      res.end();
-    } else if (url === '/logs') {
-      log(' ----------------- ');
-      log(' ** ROOMS');
-      rooms.forEach((room) => {
-        logRoom(room);
-      });
-      log(' ');
-
-      log(' ** CLIENTS');
-      // logClients(clients);
-      log(' ');
-
-      log(' ** MATCHES');
-      // for (const id in matches) logMatch(matches[id]);
-      log(' ');
-      res.end('Logs OK');
-    } else {
-      res.end('404');
-    }
-  } catch (error) {
-    log('error', error);
-  }
-});
+const server = createServer(router);
 
 server.listen(3000, () => log('listening on port', 3000));
 

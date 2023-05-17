@@ -51,12 +51,9 @@ function joinOrCreateRoom(client: Client): void {
 
   if (!room) room = createRoom();
 
-  log('join or create', room);
-
   room.clients[client.id] = client;
   room.numActiveClients++;
 
-  log('join or create after', room);
   client.activeRoom = room;
 
   if (room.numActiveClients === 2) {
@@ -92,7 +89,7 @@ function sendRoomReadyToPlayers(room: RoomType, match: MatchState) {
 function resetRoomAndInformOponent(client: Client): void {
   const room = client.activeRoom;
 
-  if (!room) return log(`---room property not set in client @resetRoomAndInformOponent`);
+  if (!room) return log(`---room property not set in client ${client.id} @resetRoomAndInformOponent`);
 
   const match = room.match;
 
