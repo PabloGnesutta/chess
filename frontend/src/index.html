@@ -1,61 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Chess</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="css/common.css" />
-    <link rel="stylesheet" href="css/utils.css" />
-    <link rel="stylesheet" href="css/modal.css" />
-    <link rel="stylesheet" href="css/header-footer.css" />
-    <link rel="stylesheet" href="css/lobby.css" />
-    <link rel="stylesheet" href="css/board.css" />
-    <link rel="stylesheet" href="css/squares.css" />
+  <title>Chess</title>
 
-    <script src="../build/js/globals.js" defer></script>
-    <script src="../build/js/ui/footer-UI.js" type="module" defer></script>
-    <script src="../build/js/app.js" type="module" defer async></script>
-  </head>
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/utils.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/header-footer.css" />
+  <link rel="stylesheet" href="css/lobby.css" />
+  <link rel="stylesheet" href="css/board.css" />
+  <link rel="stylesheet" href="css/squares.css" />
 
-  <body>
-    <div id="app">
-      <div class="connection-details">
-        <div id="client-id">Offline</div>
-        <div id="room-id"></div>
+  <script src="../build/js/globals.js" defer></script>
+
+  <script src="../build/js/ui/footer-UI.js" type="module" defer></script>
+  <!-- <script src="../build/js/ui/lobby-UI.js" type="module" defer></script>
+  <script src="../build/js/ui/modal.js" type="module" defer></script>
+
+  <script src="../build/js/ws/ws.js" type="module" defer></script>
+
+  <script src="../build/js/utils/utils.js" type="module" defer></script>
+
+  <script src="../build/js/engine/board.js" type="module" defer></script>
+  <script src="../build/js/engine/computePieceMovements.js" type="module" defer></script>
+  <script src="../build/js/engine/filterLegalMoves.js" type="module" defer></script>
+  <script src="../build/js/engine/gameState.js" type="module" defer></script>
+  <script src="../build/js/engine/initGame.js" type="module" defer></script>
+  <script src="../build/js/engine/piecesLib.js" type="module" defer></script> -->
+
+  <script src="../build/js/app.js" type="module" defer></script>
+</head>
+
+<body>
+  <div id="app">
+    <div class="connection-details">
+      <div id="client-id">Offline</div>
+      <div id="room-id"></div>
+    </div>
+
+    <br />
+
+    <div class="lobby-buttons">
+      <button id="single-player-btn">Single Player</button>
+      <button id="find-game-btn">Find Game</button>
+    </div>
+
+    <div id="board" class="board display-none"></div>
+
+    <footer id="footer" class="">
+      <div class="inner">
+        <button id="show-state">State</button>
+        <button id="show-board">Board</button>
+        <button id="show-pieces">Pieces</button>
+        <button id="show-moves-history">Moves History</button>
+        <button id="show-board-history">Board History</button>
+        <button id="flip-board">Flip Board</button>
       </div>
+    </footer>
 
-      <br />
-
-      <div class="lobby-buttons">
-        <button id="single-player-btn">Single Player</button>
-        <button id="find-game-btn">Find Game</button>
+    <div id="modal" class="display-none">
+      <div class="modal-buttons-container">
+        <span id="close-modal-btn"> &times; </span>
       </div>
-
-      <div id="board" class="board display-none"></div>
-
-      <footer id="footer" class="">
-        <div class="inner">
-          <button id="show-state">State</button>
-          <button id="show-board">Board</button>
-          <button id="show-pieces">Pieces</button>
-          <button id="show-moves-history">Moves History</button>
-          <button id="show-board-history">Board History</button>
-          <button id="flip-board">Flip Board</button>
-        </div>
-      </footer>
-
-      <div id="modal" class="display-none">
-        <div class="modal-buttons-container">
-          <span id="close-modal-btn"> &times; </span>
-        </div>
-        <div id="modal-content">
-          <h1>Looking for players</h1>
-          <p>Hang in there...</p>
-        </div>
+      <div id="modal-content">
+        <h1>Looking for players</h1>
+        <p>Hang in there...</p>
       </div>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>

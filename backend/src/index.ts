@@ -1,13 +1,12 @@
 import * as crypto from 'crypto';
 import { createServer } from 'http';
 import { Duplex } from 'stream';
-
+import * as fs from 'fs';
 import { log } from './utils/utils';
 import { Client, ClientsById, clients, registerClient } from './clients/clients';
 import { RoomType, rooms } from './rooms';
 import { matches } from './chess/match/match';
 import { MatchState } from './chess/types';
-import { match } from 'assert';
 
 function logClients(clients: ClientsById, label = 'client') {
   for (const id in clients) {
@@ -37,25 +36,61 @@ function logMatch(match: MatchState, label = 'match') {
 // -------
 // SERVER:
 
-const server = createServer((req, res) => {
-  log(' ----------------- ');
-  log(' ** ROOMS');
-  rooms.forEach((room) => {
-    logRoom(room);
-  });
-  log(' ');
+const server = createServer((req, res): any => {
+  // log(req.url);
 
-  log(' ** CLIENTS');
-  // logClients(clients);
-  log(' ');
+  const url = req.url;
 
-  log('** MATCHES');
-  // for (const id in matches) {
-  //   logMatch(matches[id]);
-  // }
-  log(' ');
+  if (!url) {
+    log('  ---  !url');
+    return res.end('WTF');
+  }
 
-  res.end('OK');
+  const pathArray = url.split('/');
+
+  // log('url', url);
+
+  try {
+    if (url === '/') {
+      const indexHTML = fs.readFileSync('../frontend/src/index.html');
+      res.write(indexHTML);
+      res.end();
+      // } else if (url.match(/\/css\/([a-z])\w+\.css/)) {
+    } else if (pathArray[1] === 'css') {
+      const fileName = pathArray[pathArray.length - 1];
+      const cssFile = fs.readFileSync('../frontend/src/css/' + fileName);
+      res.write(cssFile);
+      res.end();
+    } else if (pathArray[1] === 'build') {
+      const filePath = '../frontend/build/js/' + pathArray.slice(3, pathArray.length).join('/');
+      log('filePath', filePath);
+      const jsFile = fs.readFileSync(filePath);
+      // log('jsFile', jsFile);
+      res.writeHead(200, { 'content-type': 'application/javascript' });
+      res.write(jsFile);
+      res.end();
+    } else if (url === '/logs') {
+      log(' ----------------- ');
+      log(' ** ROOMS');
+      rooms.forEach((room) => {
+        logRoom(room);
+      });
+      log(' ');
+
+      log(' ** CLIENTS');
+      // logClients(clients);
+      log(' ');
+
+      log(' ** MATCHES');
+      // for (const id in matches) logMatch(matches[id]);
+      log(' ');
+      res.end('Logs OK');
+    } else {
+      res.end('404');
+    }
+  } catch (error) {
+    log('error', error);
+  }
 });
 
 server.listen(3000, () => log('listening on port', 3000));
