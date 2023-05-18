@@ -39,11 +39,11 @@ function joinRoom(client: Client): void {
 function processMove(client: Client, incommingMoveData: IncommingMoveData): void {
   const room = client.activeRoom;
 
-  if (!room) throw new Error('---client room not found @receiveMoveFromClient');
+  if (!room) throw new Error('---client room not found @processMove');
 
   const state = room.match;
 
-  if (!state) throw new Error('---Room has no match @receiveMoveFromClient');
+  if (!state) throw new Error('---Room has no match @processMove');
 
   try {
     const { piece, move } = validateMove(state, client, incommingMoveData.from, incommingMoveData.to);
@@ -57,7 +57,7 @@ function processMove(client: Client, incommingMoveData: IncommingMoveData): void
       data: { errMsg: 'Error processing move', err },
     });
 
-    log({ err, state, incommingMoveData }, '@receiveMoveFromClient');
+    log({ err, state, incommingMoveData }, '@processMove');
   }
 }
 

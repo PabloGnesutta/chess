@@ -7,6 +7,8 @@ import { singlePlayerBtn, findGameBtn } from './ui/lobby-UI.js';
 import { initGame } from './engine/initGame.js';
 import { showModal } from './ui/modal.js';
 
+// TODO: Remove all top-level async/await, they create __awaiter and __generatot functions
+
 function findGame(): void {
   state.isMultiPlayer = true;
   joinRoom();
@@ -34,6 +36,6 @@ findGameBtn!.onclick = async () => {
 initBoard();
 
 setTimeout(() => {
-  singlePlayerBtn!.click();
-  // findGameBtn!.click();
+  // singlePlayerBtn!.click();
+  findGameBtn!.click();
 }, 300);

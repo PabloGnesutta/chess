@@ -6,12 +6,18 @@ import { log } from './utils/utils';
 import { registerClient } from './clients/clients';
 import { router } from './http/router';
 
+import { config } from 'dotenv';
+
+config();
+
+const PORT = process.env.PORT;
+
 // -------
 // SERVER:
 
 const server = createServer(router);
 
-server.listen(3000, () => log('listening on port', 3000));
+server.listen(PORT, () => log('listening on port', PORT));
 
 // ------------------------------
 // UPGRADE to WebSocket Protocol:

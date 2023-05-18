@@ -4,13 +4,9 @@ import { InitialPieces, initGame } from '../engine/initGame.js';
 import { CellType, ColorType, makeRemoteMove, resetState, state } from '../engine/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
-import { MoveType } from '../engine/piecesLib';
-
-// const WS_PROTOCOL =  'wss://'
-// const WS_HOST = 'ea73-152-170-94-208.sa.ngrok.io';
-const WS_PROTOCOL = 'ws://';
-const WS_HOST = 'localhost:3000';
-
+import { MoveType } from '../engine/piecesLib.js';
+import { WS_URL } from '../env.js';
+ 
 type WSMessage = {
   type: string;
   data: any;
@@ -27,7 +23,7 @@ function connectWebSocket() {
   return new Promise((resolve, reject) => {
     if (isWSOpen) return resolve('Connection already open');
 
-    const ws = new WebSocket(WS_PROTOCOL + WS_HOST);
+    const ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
       isWSOpen = true;
@@ -35,14 +31,14 @@ function connectWebSocket() {
       resolve('Connection established');
     };
 
-    ws.onerror = (e) => {
+    ws.onerror = e => {
       flushSocket(ws, 'ERROR', e);
       reject(e);
     };
 
-    ws.onmessage = (e) => processMessage(JSON.parse(e.data));
+    ws.onmessage = e => processMessage(JSON.parse(e.data));
 
-    ws.onclose = (e) => flushSocket(ws, 'CLOSE', e);
+    ws.onclose = e => flushSocket(ws, 'CLOSE', e);
   });
 }
 
