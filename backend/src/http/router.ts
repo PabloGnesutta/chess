@@ -43,18 +43,6 @@ function router(req: IncomingMessage, res: ServerResponse): any {
       const assetFile = fs.readFileSync(filePath);
       res.writeHead(200, { 'content-type': 'image/svg+xml' });
       res.end(assetFile);
-    } else if (pathArray[1] === 'test-cache') {
-      // TEST CACHE
-      log(' --- test cache hit');
-      const assetFile = fs.readFileSync(path.join(__dirname, 'test-cache.js'));
-      res.writeHead(200, {
-        'content-type': 'application/javascript',
-        // 'cache-control': 'max-age=60',
-        // 'cache-control': 'public',
-        'last-modified': 'Wed, 17 May 2023 02:59:00 GMT',
-        // etag: 'aaaabbb',
-      });
-      res.end(assetFile);
     } else if (url === '/logs') {
       // LOGGING
       log(' ----------------- ');
@@ -84,3 +72,15 @@ function router(req: IncomingMessage, res: ServerResponse): any {
 }
 
 export { router };
+
+// TEST CACHE
+// log(' --- test cache hit');
+// const assetFile = fs.readFileSync(path.join(__dirname, 'test-cache.js'));
+// res.writeHead(200, {
+//   'content-type': 'application/javascript',
+//   // 'cache-control': 'max-age=60',
+//   // 'cache-control': 'public',
+//   'last-modified': 'Wed, 17 May 2023 02:59:00 GMT',
+//   // etag: 'aaaabbb',
+// });
+// res.end(assetFile);
