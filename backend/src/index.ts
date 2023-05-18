@@ -7,8 +7,9 @@ import { registerClient } from './clients/clients';
 import { router } from './http/router';
 
 import { config } from 'dotenv';
+import path = require('path');
 
-config();
+config({ path: path.join(__dirname, '../', '.env') });
 
 const PORT = process.env.PORT;
 
