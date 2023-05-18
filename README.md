@@ -13,12 +13,9 @@ Development:
         npm run serve
 
 Production/Staging/Etc:
-    /frontend:
-        npm i
-
     /backend
-        npm i
-        make sure environment variables are properly set
+        cp .env.example .env
+        set env variables
 
     / (root):
         ./build.sh
