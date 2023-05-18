@@ -10,4 +10,3 @@ echo "Transpiling backend"
 npm run build
 echo "Building frontend environment"
 node build-env-frontend.js
-npm run serve

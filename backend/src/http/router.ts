@@ -6,7 +6,7 @@ import { log, logClients, logRoom } from '../utils/utils';
 import { clients } from '../clients/clients';
 import { rooms } from '../rooms';
 
-const FRONTEND_DIR = path.join('../', 'frontend');
+const FRONTEND_DIR = path.join(__dirname, '../', '../', '../', 'frontend');
 const HTML_DIR = path.join(FRONTEND_DIR, 'src', 'index.html');
 const CSS_DIR = path.join(FRONTEND_DIR, 'src', 'css');
 const SVG_DIR = path.join(FRONTEND_DIR, 'src', 'svg');
@@ -59,7 +59,7 @@ function router(req: IncomingMessage, res: ServerResponse): any {
       // LOGGING
       log(' ----------------- ');
       log(' ** ROOMS');
-      rooms.forEach((room) => {
+      rooms.forEach(room => {
         logRoom(room);
       });
       log(' ');
