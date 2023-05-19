@@ -1,12 +1,12 @@
 cd ./frontend
-echo "Installing frontend dependencies"
+echo " - Installing frontend dependencies"
 npm i
-echo "Transpiling frontend"
+echo " - Transpiling frontend"
 npm run build
 cd ../backend
-echo "Installing backend dependencies"
+echo "- Installing backend dependencies"
 npm i
-echo "Transpiling backend"
+echo " - Transpiling backend"
 npm run build
-echo "Building frontend environment"
+echo " - Building frontend environment"
 node build-env-frontend.js
