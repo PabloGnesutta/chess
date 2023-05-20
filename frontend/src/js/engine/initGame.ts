@@ -14,9 +14,9 @@ import {
 
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
 
-let initialPieces: InitialPieces;
+let defaultInitialPieces: InitialPieces;
 
-initialPieces = [
+defaultInitialPieces = [
   [1, K, 7, 4, 'w'],
   // [2, Q, 7, 3, 'w'],
   // [3, R, 7, 0, 'w'],
@@ -52,7 +52,7 @@ initialPieces = [
   // [32, P, 1, 7, 'b'],
 ];
 
-function initGame(playerColor: ColorType, _initialPieces?: InitialPieces) {
+function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
   document.getElementById('board')?.classList.remove('display-none');
 
   {
@@ -63,7 +63,7 @@ function initGame(playerColor: ColorType, _initialPieces?: InitialPieces) {
 
   {
     // INIT STATE:
-    let initialPiecesSet: InitialPieces = _initialPieces || initialPieces;
+    let initialPiecesSet: InitialPieces = initialPieces || defaultInitialPieces;
 
     for (let i = 0; i < initialPiecesSet.length; i++) {
       // Create pieces
