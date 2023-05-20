@@ -1,5 +1,7 @@
 'use strict';
 
+import { ALLOW_DEBUG } from '../env.js';
+import { debug, footer } from '../ui/footer-UI.js';
 import { createPiece } from './piecesLib.js';
 import { drawBoard, drawPieces, clearLastMoveMarks } from './board.js';
 import {
@@ -53,6 +55,9 @@ defaultInitialPieces = [
 ];
 
 function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
+  footer?.classList.remove('display-none');
+  if (ALLOW_DEBUG) debug?.classList.remove('display-none');
+
   document.getElementById('board')?.classList.remove('display-none');
 
   {

@@ -16,7 +16,7 @@
   border-radius: 6px;
 }
 
-.modal-buttons-container {
+.modal-close-button-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -24,6 +24,12 @@
   width: 100%;
   display: flex;
   justify-content: flex-end;
+}
+
+.modal-bottom-buttons-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 #close-modal-btn {

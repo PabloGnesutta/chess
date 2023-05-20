@@ -1,7 +1,9 @@
 .board {
-  border: 1px solid black;
-  width: 546px;
-  height: 546px;
+  /* border: 1px solid black; */
+  width: 544px;
+  height: 544px;
+  margin: auto;
+  box-shadow: 1px 1px 8px 3px rgba(0, 0, 0, 0.699);
 }
 
 .row {

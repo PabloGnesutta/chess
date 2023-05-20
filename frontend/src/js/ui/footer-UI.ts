@@ -1,12 +1,10 @@
 'use strict';
 
 import { drawBoard, drawPieces } from '../engine/board.js';
-import {
-  boardPieces,
-  colorPieces,
-  movesHistory,
-  state,
-} from '../engine/gameState.js';
+import { boardPieces, colorPieces, movesHistory, state } from '../engine/gameState.js';
+
+const footer = document.getElementById('footer');
+const debug = document.getElementById('debug');
 
 const showState = document.getElementById('show-state');
 showState!.addEventListener('click', () => {
@@ -35,3 +33,5 @@ const showMovesHistory = document.getElementById('show-moves-history');
 showMovesHistory!.addEventListener('click', () => {
   log(movesHistory);
 });
+
+export { debug, footer };

@@ -1,5 +1,3 @@
-"use strict";
-
 const ROW_MAP = [8, 7, 6, 5, 4, 3, 2, 1];
 const COL_MAP = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 

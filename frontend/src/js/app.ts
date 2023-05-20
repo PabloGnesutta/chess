@@ -5,14 +5,14 @@ import { state } from './engine/gameState.js';
 import { connectWebSocket, joinRoom } from './ws/ws.js';
 import { singlePlayerBtn, findGameBtn } from './ui/lobby-UI.js';
 import { initGame } from './engine/initGame.js';
-import { showModal } from './ui/modal.js';
+import { m_LookingForPlayers, m_Welcome } from './ui/modal.js';
 
 // TODO: Remove all top-level async/await, they create __awaiter and __generatot functions
 
 function findGame(): void {
   state.isMultiPlayer = true;
   joinRoom();
-  showModal();
+  m_LookingForPlayers();
 }
 
 // SINGLE PLAYER
@@ -37,5 +37,7 @@ initBoard();
 
 setTimeout(() => {
   // singlePlayerBtn!.click();
-  findGameBtn!.click();
+  // findGameBtn!.click();
 }, 300);
+
+m_Welcome();

@@ -1,5 +1,15 @@
-const ctx = new window.AudioContext();
+let audioInitialized = false;
 
-// const audioOut = ctx.destination;
+let ctx: AudioContext;
+let audioOut: AudioDestinationNode;
 
-export { ctx };
+function initAudio(): void {
+  if (!audioInitialized) {
+    ctx = new window.AudioContext();
+    audioOut = ctx.destination;
+    log('Audio initialized');
+    audioInitialized = true;
+  }
+}
+
+export { initAudio };

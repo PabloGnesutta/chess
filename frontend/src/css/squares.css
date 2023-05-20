@@ -30,7 +30,7 @@
 [row='7'][col='3'],
 [row='7'][col='5'],
 [row='7'][col='7'] {
-  background-color: #fee3c9;
+  background-color: var(--light-square-color);
 }
 
 .square {
@@ -45,7 +45,7 @@
   cursor: default;
   user-select: none;
   font-weight: bold;
-  background-color: #ff9229;
+  background-color: var(--dark-square-color);
 }
 
 .square::after {
@@ -71,12 +71,13 @@
 
 /* rows and cols, not ranks and files */
 .row-col-indicator {
-  /* display: none; */
   position: absolute;
   bottom: 0;
   left: 0;
   font-size: 12px;
   z-index: 999;
+  /* comment for debug: */
+  display: none;
 }
 
 .rank-indicator,
@@ -85,7 +86,7 @@
   color: black;
   font-size: 12px;
   /* uncomment for debug: */
-  display: none; 
+  /* display: none;  */
 }
 .rank-indicator {
   top: 4px;
