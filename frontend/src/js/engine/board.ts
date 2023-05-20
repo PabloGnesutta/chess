@@ -1,11 +1,4 @@
-import {
-  state,
-  boardPieces,
-  makeLocalMove,
-  signalMoveMultiplayer,
-  ColorPiecesType,
-  CellType,
-} from './gameState.js';
+import { state, boardPieces, makeLocalMove, signalMoveMultiplayer, ColorPiecesType, CellType } from './gameState.js';
 
 import { MoveType, getPieceImage } from './piecesLib.js';
 
@@ -31,14 +24,14 @@ const _imgContainers = [
   new Array(8).fill(null),
 ];
 
-var selectedSquare: HTMLElement|null = null;
+var selectedSquare: HTMLElement | null = null;
 var movementMarkSquares: HTMLElement[] = [];
-var lastMoveCells = [
+var lastMoveCells: CellType[] = [
   [0, 0], // from
   [0, 0], // to
 ];
 
-function initBoard() {
+function initializeBoard() {
   for (let row = 0; row <= _Z; row++) {
     const _row = document.createElement('row');
     _row.className = 'row';
@@ -120,8 +113,7 @@ function drawPieces(colorPieces: ColorPiecesType) {
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
     pieces.forEach(piece => {
-      _imgContainers[piece.row][piece.col].innerHTML =
-        getPieceImage(piece);
+      _imgContainers[piece.row][piece.col].innerHTML = getPieceImage(piece);
     });
   }
 }
@@ -186,9 +178,7 @@ function squareClick([row, col]: [number, number]) {
   if (selectedPiece) {
     if (currentColor === selectedPiece.color) {
       // Make move
-      const move = selectedPiece.moves.find(
-        ({ moveTo }) => moveTo[0] === row && moveTo[1] === col
-      );
+      const move = selectedPiece.moves.find(({ moveTo }) => moveTo[0] === row && moveTo[1] === col);
 
       if (move) {
         if (state.isMultiPlayer) {
@@ -202,13 +192,14 @@ function squareClick([row, col]: [number, number]) {
     }
   }
 
-  state.selectedPiece = null;
-
   const piece = boardPieces[row][col];
-  if (!piece) return;
 
-  state.selectedPiece = piece;
-  displayMoves(piece.moves);
+  if (piece) {
+    state.selectedPiece = piece;
+    displayMoves(piece.moves);
+  } else {
+    state.selectedPiece = null;
+  }
 }
 
 export {
@@ -216,7 +207,7 @@ export {
   unselectCurrentSquare,
   clearLastMoveMarks,
   markLastMove,
-  initBoard,
+  initializeBoard,
   drawBoard,
   drawPieces,
 };

@@ -1,10 +1,8 @@
-'use strict';
-
-import { _imgContainers, initBoard } from './engine/board.js';
-import { state } from './engine/gameState.js';
 import { connectWebSocket, joinRoom } from './ws/ws.js';
-import { singlePlayerBtn, findGameBtn } from './ui/lobby-UI.js';
+import { state } from './engine/gameState.js';
 import { initGame } from './engine/initGame.js';
+import { initializeBoard } from './engine/board.js';
+import { singlePlayerBtn, findGameBtn } from './ui/lobby-UI.js';
 import { m_LookingForPlayers, m_Welcome } from './ui/modal.js';
 
 // TODO: Remove all top-level async/await, they create __awaiter and __generatot functions
@@ -33,7 +31,7 @@ findGameBtn!.onclick = async () => {
   }
 };
 
-initBoard();
+initializeBoard();
 
 setTimeout(() => {
   // singlePlayerBtn!.click();

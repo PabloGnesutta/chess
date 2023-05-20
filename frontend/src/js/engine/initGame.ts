@@ -55,8 +55,9 @@ defaultInitialPieces = [
 ];
 
 function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
-  footer?.classList.remove('display-none');
   if (ALLOW_DEBUG) debug?.classList.remove('display-none');
+
+  footer?.classList.remove('display-none');
 
   document.getElementById('board')?.classList.remove('display-none');
 

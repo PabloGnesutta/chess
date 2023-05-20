@@ -4,13 +4,15 @@ type CreateElementOptions = {
   classList?: string[];
 };
 
-function createElement(tag: string, options?: CreateElementOptions): HTMLElement {
+type HTLMTag = 'button' | 'div' | 'h1' | 'p';
+
+function createElement(tag: HTLMTag, options?: CreateElementOptions): HTMLElement {
   const el = document.createElement(tag);
 
   if (options) {
     const { text, id, classList } = options;
-    if (text) el.innerText = text;
     if (id) el.id = id;
+    if (text) el.innerText = text;
     if (classList) el.classList.add(...classList);
   }
 
