@@ -1,13 +1,13 @@
-import * as crypto from 'crypto';
-import { createServer } from 'http';
-import { Duplex } from 'stream';
+import path = require('node:path');
+import * as crypto from 'node:crypto';
+import { createServer } from 'node:http';
+import { Duplex } from 'node:stream';
+
+import { config } from 'dotenv';
 
 import { log } from './utils/utils';
 import { registerClient } from './clients/clients';
 import { router } from './http/router';
-
-import { config } from 'dotenv';
-import path = require('path');
 
 config({ path: path.join(__dirname, '../', '.env') });
 

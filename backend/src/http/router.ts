@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import path = require('path');
-import { IncomingMessage, ServerResponse } from 'http';
+import * as fs from 'node:fs';
+import path = require('node:path');
+import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { log, logClients, logRoom } from '../utils/utils';
 import { clients } from '../clients/clients';

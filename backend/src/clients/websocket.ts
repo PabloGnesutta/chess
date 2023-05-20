@@ -1,7 +1,8 @@
+import { Duplex } from 'node:stream';
+
 import { log } from '../utils/utils';
 import { Client, WSPayloadType } from './clients';
 import { processIncommingMessage } from './messageProcessing';
-import { Duplex } from 'stream';
 
 function parseJSON(unmaskedData: Buffer, client: Client): void {
   try {

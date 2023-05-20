@@ -1,4 +1,4 @@
-import { Duplex } from 'stream';
+import { Duplex } from 'node:stream';
 
 import { log } from '../utils/utils';
 import { RoomType, resetRoomAndInformOponent } from '../rooms';

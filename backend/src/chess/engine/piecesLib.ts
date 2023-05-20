@@ -1,3 +1,5 @@
+import { log } from '../../utils/utils';
+import { K, Q, R, B, N, P, _Z } from '../constants';
 import {
   BoardPiecesType,
   CellType,
@@ -10,10 +12,8 @@ import {
   Piece,
   PieceNameType,
 } from '../types';
-import { K, Q, R, B, N, P, _Z } from '../constants';
 import { putPieceOnBoard } from './gameState';
 import { invertColor } from './utils';
-import { log } from 'console';
 
 function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece | King | Pawn {
   return {
@@ -66,7 +66,7 @@ function doMove(state: DoMovePartialState, piece: Piece, move: MoveType, isSimul
 
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
 
-    const colorPieceIndex = colorPieces[opositeColor].findIndex(piece => piece.id === captueredBoardPiece.id);
+    const colorPieceIndex = colorPieces[opositeColor].findIndex((piece) => piece.id === captueredBoardPiece.id);
 
     colorPieces[opositeColor].splice(colorPieceIndex, 1);
 
@@ -99,7 +99,7 @@ function doCastle(boardPieces: BoardPiecesType, king: King, move: KingMoveType, 
 
 function promotePawnAt(state: DoMovePartialState, pawn: Pawn, [row, col]: CellType): void {
   const { boardPieces, colorPieces, currentColor } = state;
-  const pieceIndex = colorPieces[currentColor].findIndex(piece => piece.id === pawn.id);
+  const pieceIndex = colorPieces[currentColor].findIndex((piece) => piece.id === pawn.id);
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 

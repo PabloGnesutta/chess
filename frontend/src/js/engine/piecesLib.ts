@@ -1,37 +1,47 @@
 'use strict';
 
 import { _imgContainers } from './board.js';
-import { BoardPiecesType, CellType, ColorType, PieceNameType, boardPieces, colorPieces, players, putPieceOnBoard, state } from './gameState.js';
+import {
+  BoardPiecesType,
+  CellType,
+  ColorType,
+  PieceNameType,
+  boardPieces,
+  colorPieces,
+  players,
+  putPieceOnBoard,
+  state,
+} from './gameState.js';
 
 export type MoveType = {
-  moveTo: CellType, 
-  captureAt?: CellType
-  castleSteps?: CellType[]
-}
+  moveTo: CellType;
+  captureAt?: CellType;
+  castleSteps?: CellType[];
+};
 export type KingMoveType = MoveType & {
-  rookFrom?: CellType,
-  rookTo?: CellType,
-}
+  rookFrom?: CellType;
+  rookTo?: CellType;
+};
 
 export type Piece = {
-  id: number,
-  name: PieceNameType,
-  row: number,
-  col: number,
-  color: ColorType,
-  moves: MoveType[],
-  hasntMoveYet: boolean,
-}
+  id: number;
+  name: PieceNameType;
+  row: number;
+  col: number;
+  color: ColorType;
+  moves: MoveType[];
+  hasntMoveYet: boolean;
+};
 export type King = Piece & {
-  moves: KingMoveType[]
-}
+  moves: KingMoveType[];
+};
 export type Pawn = Piece & {
-  delta: number,
-  startingRow: number,
-  enPassantRow: number,
-}
+  delta: number;
+  startingRow: number;
+  enPassantRow: number;
+};
 
-function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece|King|Pawn {
+function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece | King | Pawn {
   return {
     id,
     name,
@@ -47,7 +57,7 @@ function updateBoardAndPieceWithMove(
   boardPieces: BoardPiecesType,
   piece: Piece,
   moveTo: any,
-  isSimulation: boolean = false,
+  isSimulation: boolean = false
 ): void {
   const { row: rowFrom, col: colFrom } = piece;
   const [rowTo, colTo] = moveTo;
@@ -59,7 +69,7 @@ function updateBoardAndPieceWithMove(
   piece.row = rowTo;
   piece.col = colTo;
   boardPieces[rowTo][colTo] = piece;
-  
+
   if (!isSimulation) {
     _imgContainers[rowFrom][colFrom].innerHTML = null; // render
     _imgContainers[rowTo][colTo].innerHTML = getPieceImage(piece); // render
@@ -67,10 +77,7 @@ function updateBoardAndPieceWithMove(
   }
 }
 
-function doMove(
-  piece: Piece,
-  move: MoveType
-): void {
+function doMove(piece: Piece, move: MoveType): void {
   const { currentColor, opositeColor } = state;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
@@ -82,9 +89,7 @@ function doMove(
     const [captureRow, captureCol] = captureAt;
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
     // Remove captured piece from colorPieces
-    const colorPieceIndex = colorPieces[opositeColor].findIndex(
-      piece => piece.id === captueredBoardPiece.id
-    );
+    const colorPieceIndex = colorPieces[opositeColor].findIndex((piece) => piece.id === captueredBoardPiece.id);
 
     {
       const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
@@ -120,15 +125,13 @@ function doCastle(king: King, move: KingMoveType): void {
 
 function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: CellType): void {
   const { currentColor } = state;
-  const pieceIndex = colorPieces[currentColor].findIndex(
-    piece => piece.id === pawn.id
-  );
+  const pieceIndex = colorPieces[currentColor].findIndex((piece) => piece.id === pawn.id);
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 
   const promotedPiece = queen(pawn.id, row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
-  putPieceOnBoard(promotedPiece, boardPieces)
+  putPieceOnBoard(promotedPiece, boardPieces);
   _imgContainers[row][col].innerHTML = getPieceImage(promotedPiece); // render
 }
 
@@ -188,12 +191,6 @@ const createPiece = {
   pawn,
   queen,
   rook,
-}
+};
 
-export {
-  createPiece,
-  doMove,
-  doCastle,
-  updateBoardAndPieceWithMove,
-  getPieceImage,
-}
+export { createPiece, doMove, doCastle, updateBoardAndPieceWithMove, getPieceImage };

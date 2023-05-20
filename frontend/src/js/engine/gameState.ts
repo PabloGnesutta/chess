@@ -1,10 +1,8 @@
-'use strict';
-
+import { MoveData, signalMoveToServer } from '../ws/ws.js';
 import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
 import { Piece, doCastle, doMove, MoveType } from './piecesLib.js';
 import { _imgContainers, markLastMove, unselectCurrentSquare } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
-import { MoveData, signalMoveToServer } from '../ws/ws.js';
 
 export type ColorType = 'w' | 'b';
 export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';

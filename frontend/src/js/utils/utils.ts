@@ -1,5 +1,3 @@
-'use strict';
-
 import { BoardPiecesType, ColorPiecesType } from '../engine/gameState.js';
 
 function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {

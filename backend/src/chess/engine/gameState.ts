@@ -1,9 +1,9 @@
+import { log } from '../../utils/utils';
 import { BoardPiecesType, LastMoveType, MatchState, MoveType, Piece } from '../types';
 import { computePieceLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves';
 import { invertColor } from './utils';
 import { doCastle, doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
-import { log } from '../../utils/utils';
 
 function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
