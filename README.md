@@ -21,5 +21,9 @@ Production/Staging/Etc:
         ./build.sh
             This will build the backend, the frontend and its environment
 
-    Then PM2 or whatever
+    /backend/build
+        Then PM2 (or whatever) index.chess.js
+
+
+TypeScript files on the frontend will be transpiled to /public/js-build, and from there be served on the backend
 
