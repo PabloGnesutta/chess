@@ -20,7 +20,7 @@ let defaultInitialPieces: InitialPieces;
 
 defaultInitialPieces = [
   [1, K, 7, 4, 'w'],
-  // [2, Q, 7, 3, 'w'],
+  [2, Q, 7, 3, 'w'],
   // [3, R, 7, 0, 'w'],
   // [4, R, 7, 7, 'w'],
   // [5, B, 7, 2, 'w'],
@@ -37,7 +37,7 @@ defaultInitialPieces = [
   // [16, P, 6, 7, 'w'],
 
   [17, K, 0, 4, 'b'],
-  // [18, Q, 0, 3, 'b'],
+  [18, Q, 0, 3, 'b'],
   // [19, R, 0, 0, 'b'],
   // [20, R, 0, 7, 'b'],
   // [21, B, 0, 2, 'b'],

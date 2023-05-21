@@ -58,8 +58,6 @@ function doMove(state: DoMovePartialState, piece: Piece, move: MoveType, isSimul
 
   const [rowTo, colTo] = moveTo;
 
-  updateBoardAndPieceWithMove(boardPieces, piece, moveTo, isSimulation);
-
   // Capture - Update colorPieces (remove captured)
   if (captureAt) {
     const [captureRow, captureCol] = captureAt;
@@ -76,6 +74,8 @@ function doMove(state: DoMovePartialState, piece: Piece, move: MoveType, isSimul
       delete boardPieces[captureRow][captureCol];
     }
   }
+
+  updateBoardAndPieceWithMove(boardPieces, piece, moveTo, isSimulation);
 
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {

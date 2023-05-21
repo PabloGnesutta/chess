@@ -49,24 +49,23 @@ function isPlayerInCheckAfterMove(piece: Piece, move: MoveType): boolean {
   const piecesCopy = copyColorPieces(colorPieces);
   const pieceCopy = { ...piece };
 
-  // Simulate move
-  updateBoardAndPieceWithMove(boardCopy, pieceCopy, moveTo, true);
-
+  // Simulate capture
   if (captureAt) {
     const [captureRow, captureCol] = captureAt;
     const captueredBoardPiece = boardCopy[captureRow][captureCol];
-    // Remove captured piece from colorPieces
-    const colorPieceIndex = piecesCopy[opositeColor].findIndex(p => p.id === captueredBoardPiece.id);
 
-    {
-      piecesCopy[opositeColor].splice(colorPieceIndex, 1);
-    }
+    // Remove captured piece from colorPieces
+    const colorPieceIndex = piecesCopy[opositeColor].findIndex((p) => p.id === captueredBoardPiece.id);
+    piecesCopy[opositeColor].splice(colorPieceIndex, 1);
 
     // en-passant
     if (colTo !== captureCol || rowTo !== captureRow) {
       delete boardCopy[captureRow][captureCol];
     }
   }
+
+  // Simulate move
+  updateBoardAndPieceWithMove(boardCopy, pieceCopy, moveTo, true);
 
   // Once the simulation is done, check if the resulting position puts player in check
   const oponentPieces = piecesCopy[opositeColor];
@@ -80,7 +79,7 @@ function filterLegalMoves(piece: Piece): MoveType[] {
 
   // Anyting but King
   if (piece.name !== K) {
-    piece.moves.forEach(move => {
+    piece.moves.forEach((move) => {
       if (!isPlayerInCheckAfterMove(piece, move)) {
         legalMoves.push(move);
       }

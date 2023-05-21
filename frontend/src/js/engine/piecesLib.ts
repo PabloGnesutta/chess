@@ -53,6 +53,14 @@ function newPiece(id: number, name: PieceNameType, row: number, col: number, col
   };
 }
 
+/**
+ * Removes the piece from its original position
+ * and puts it in the new position
+ * @param boardPieces
+ * @param piece
+ * @param moveTo
+ * @param isSimulation
+ */
 function updateBoardAndPieceWithMove(
   boardPieces: BoardPiecesType,
   piece: Piece,
@@ -82,8 +90,6 @@ function doMove(piece: Piece, move: MoveType): void {
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
 
-  updateBoardAndPieceWithMove(boardPieces, piece, moveTo, false);
-
   // Capture:
   if (captureAt) {
     const [captureRow, captureCol] = captureAt;
@@ -103,6 +109,8 @@ function doMove(piece: Piece, move: MoveType): void {
       _imgContainers[captureRow][captureCol].innerHTML = null; // render
     }
   }
+
+  updateBoardAndPieceWithMove(boardPieces, piece, moveTo, false);
 
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {

@@ -10,13 +10,14 @@ const FRONTEND_DIR = path.join(__dirname, '../', '../', '../', 'frontend');
 const HTML_DIR = path.join(FRONTEND_DIR, 'src', 'index.html');
 const CSS_DIR = path.join(FRONTEND_DIR, 'src', 'css');
 const SVG_DIR = path.join(FRONTEND_DIR, 'src', 'svg');
+const AUDIO_ASSETS_DIR = path.join(FRONTEND_DIR, 'src', 'audio-assets');
 const JS_DIR = path.join(FRONTEND_DIR, 'build', 'js');
 
 // LOGGING
 function doTheLogging(): void {
   log(' ----------------- ');
   log(' ** ROOMS');
-  rooms.forEach(room => {
+  rooms.forEach((room) => {
     logRoom(room);
   });
   log(' ');
@@ -65,11 +66,16 @@ function router(req: IncomingMessage, res: ServerResponse): any {
       // SVG
       const filePath = path.join(SVG_DIR, ...pathArray.slice(2, pathLen));
       sendAssetFile(res, filePath, 'image/svg+xml');
+    } else if (pathArray[1] === 'audio-assets') {
+      // AUDIO
+      const filePath = path.join(AUDIO_ASSETS_DIR, ...pathArray.slice(2, pathLen));
+      sendAssetFile(res, filePath, 'audio/mp3');
     } else if (url === '/logs') {
       // LOGGING
       doTheLogging();
       res.end('Logs OK');
     } else {
+      log(pathArray);
       res.writeHead(404);
       res.end('Resource not found');
     }
