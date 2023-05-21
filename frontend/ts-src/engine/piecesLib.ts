@@ -91,7 +91,7 @@ function doMove(piece: Piece, move: MoveType): SoundName {
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
 
-  let soundToPlay: SoundName = 'move-self';
+  let soundToPlay: SoundName = 'moveSelf';
 
   // Capture:
   if (captureAt) {
@@ -101,7 +101,7 @@ function doMove(piece: Piece, move: MoveType): SoundName {
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
 
     // Remove captured piece from colorPieces
-    const colorPieceIndex = colorPieces[opositeColor].findIndex((piece) => piece.id === captueredBoardPiece.id);
+    const colorPieceIndex = colorPieces[opositeColor].findIndex(piece => piece.id === captueredBoardPiece.id);
     const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
 
     // Add to player's captures
@@ -140,7 +140,7 @@ function doCastle(king: King, move: KingMoveType): void {
 
 function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: CellType): void {
   const { currentColor } = state;
-  const pieceIndex = colorPieces[currentColor].findIndex((piece) => piece.id === pawn.id);
+  const pieceIndex = colorPieces[currentColor].findIndex(piece => piece.id === pawn.id);
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 

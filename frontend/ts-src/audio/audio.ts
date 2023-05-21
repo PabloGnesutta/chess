@@ -1,42 +1,54 @@
+import { API_URL } from '../env.js';
+
+export type SoundName = 'capture' | 'castle' | 'check' | 'moveSelf' | 'promote' | '';
+
+let audioReady = false;
+
 let ctx: AudioContext;
 let audioOut: AudioDestinationNode;
 
-const audioCapture = document.getElementById('capture') as HTMLMediaElement;
-const audioCastle = document.getElementById('castle') as HTMLMediaElement;
-const audioCheck = document.getElementById('check') as HTMLMediaElement;
-const audioMoveSelf = document.getElementById('move-self') as HTMLMediaElement;
-const audioPromote = document.getElementById('promote') as HTMLMediaElement;
+const audioBuffers: { [key: string]: AudioBuffer | null } = {
+  capture: null,
+  castle: null,
+  check: null,
+  moveSelf: null,
+  promote: null,
+};
 
-function initAudio(): void {
+function playBuffer(audioBuffer: AudioBuffer) {
+  const bufferSource = ctx.createBufferSource();
+  bufferSource.buffer = audioBuffer;
+  bufferSource.connect(audioOut);
+  bufferSource.start();
+}
+
+async function initAudio(): Promise<void> {
   if (!ctx) {
     ctx = new window.AudioContext();
     audioOut = ctx.destination;
-    log('Audio initialized');
+
+    log('Audio initialized... Fetching audio files');
+
+    const promiseArray = [];
+    for (const key in audioBuffers) {
+      promiseArray.push(
+        fetch(API_URL + '/audio-assets/' + key + '.mp3')
+          .then(res => res.arrayBuffer())
+          .then(arrayBuffer => ctx.decodeAudioData(arrayBuffer))
+          .then(audioBuffer => (audioBuffers[key] = audioBuffer))
+          .catch(err => log('Error fetching sound', err))
+      );
+    }
+
+    const promiseResults = await Promise.allSettled(promiseArray);
+    log('Audio loading finished', promiseResults);
+    audioReady = true;
   }
 }
 
-export type SoundName = 'capture' | 'castle' | 'check' | 'move-self' | 'promote' | '';
-
 function playSound(sound: SoundName): void {
-  log('Play sound: ', sound);
-  switch (sound) {
-    case 'capture':
-      audioCapture.play();
-      break;
-    case 'castle':
-      audioCastle.play();
-      break;
-    case 'check':
-      audioCheck.play();
-      break;
-    case 'move-self':
-      audioMoveSelf.play();
-      break;
-    case 'promote':
-      audioPromote.play();
-      break;
-    default:
-      break;
+  if (audioReady && sound) {
+    playBuffer(audioBuffers[sound] as AudioBuffer);
   }
 }
 

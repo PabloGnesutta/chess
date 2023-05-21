@@ -6,7 +6,7 @@ const { config } = require('dotenv');
 
 config();
 
-const FRONTEND_DIR = path.join(__dirname, '../', 'frontend', 'build', 'js');
+const FRONTEND_DIR = path.join(__dirname, '../', 'frontend', 'public', 'js-build');
 
 // Remember to update frontend's env.ts
 
