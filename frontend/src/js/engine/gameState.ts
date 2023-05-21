@@ -3,7 +3,7 @@ import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.
 import { Piece, doCastle, doMove, MoveType } from './piecesLib.js';
 import { _imgContainers, markLastMove, unselectCurrentSquare } from './board.js';
 import { computeMoves } from './computePieceMovements.js';
-import { audioCastle, audioCheck, audioMoveSelf } from '../audio/audio.js';
+import { SoundName, playSound } from '../audio/audio.js';
 
 export type ColorType = 'w' | 'b';
 export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
@@ -45,6 +45,7 @@ export type State = {
   isMultiPlayer: boolean;
   playerColor: ColorType | '';
   lastMove: LastMoveType | {};
+  soundToPlay: SoundName;
 };
 
 const movesHistory: string[] = [];
@@ -85,6 +86,7 @@ const state: State = {
   isMultiPlayer: false,
   playerColor: '',
   lastMove: {},
+  soundToPlay: '',
 };
 
 function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
@@ -114,6 +116,16 @@ function resetState(): void {
   state.lastMove = {};
 }
 
+function makeRemoteMove(moveData: MoveData): void {
+  const { pieceId, move } = moveData;
+  const piece = colorPieces[state.currentColor].find((p) => p.id === pieceId);
+  if (piece) {
+    makeLocalMove(piece, move);
+  } else {
+    warn('Piece not found @makeRemoteMove', moveData);
+  }
+}
+
 function makeLocalMove(piece: Piece, move: MoveType): void {
   markLastMove([piece.row, piece.col], move.moveTo);
 
@@ -131,29 +143,21 @@ function makeLocalMove(piece: Piece, move: MoveType): void {
   unselectCurrentSquare();
 
   if (move.castleSteps) {
-    audioCastle.play();
+    state.soundToPlay = 'castle';
     doCastle(piece, move);
   } else {
-    audioMoveSelf.play();
-    doMove(piece, move);
+    state.soundToPlay = doMove(piece, move);
   }
 
   passTurn();
 }
 
-function makeRemoteMove(moveData: MoveData): void {
-  const { pieceId, move } = moveData;
-  const piece = colorPieces[state.currentColor].find((p) => p.id === pieceId);
-  if (piece) {
-    makeLocalMove(piece, move);
-  } else {
-    warn('Piece not found @makeRemoteMove', moveData);
-  }
-}
-
-function signalMoveMultiplayer(piece: Piece, move: MoveType): void {
-  signalMoveToServer([piece.row, piece.col], move.moveTo);
-  makeLocalMove(piece, move);
+function passTurn(): void {
+  players[state.currentColor].isInCheck = false;
+  state.selectedPiece = null;
+  state.currentColor = state.currentColor === 'w' ? 'b' : 'w';
+  state.opositeColor = state.opositeColor === 'b' ? 'w' : 'b';
+  startTurn();
 }
 
 function startTurn(): void {
@@ -162,12 +166,11 @@ function startTurn(): void {
   // TODO: stalemate by repetition
 
   // Am I in check?
-  const imInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
+  const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
-  if (imInCheck) {
+  if (playerIsInCheck) {
     players[currentColor].isInCheck = true;
-    audioCheck.play();
-    log('check');
+    state.soundToPlay = 'check';
   }
 
   // Compute all legal moves for current player.
@@ -182,8 +185,10 @@ function startTurn(): void {
     numLegalMoves += legalMoves.length;
   });
 
+  playSound(state.soundToPlay);
+
   if (!numLegalMoves) {
-    if (imInCheck) {
+    if (playerIsInCheck) {
       setTimeout(() => {
         alert('Check Mate!');
       }, 100);
@@ -195,12 +200,9 @@ function startTurn(): void {
   }
 }
 
-function passTurn(): void {
-  players[state.currentColor].isInCheck = false;
-  state.selectedPiece = null;
-  state.currentColor = state.currentColor === 'w' ? 'b' : 'w';
-  state.opositeColor = state.opositeColor === 'b' ? 'w' : 'b';
-  startTurn();
+function signalMoveMultiplayer(piece: Piece, move: MoveType): void {
+  signalMoveToServer([piece.row, piece.col], move.moveTo);
+  makeLocalMove(piece, move);
 }
 
 export {

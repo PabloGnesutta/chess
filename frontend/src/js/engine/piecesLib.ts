@@ -1,5 +1,6 @@
 'use strict';
 
+import { SoundName } from '../audio/audio.js';
 import { _imgContainers } from './board.js';
 import {
   BoardPiecesType,
@@ -85,23 +86,26 @@ function updateBoardAndPieceWithMove(
   }
 }
 
-function doMove(piece: Piece, move: MoveType): void {
+function doMove(piece: Piece, move: MoveType): SoundName {
   const { currentColor, opositeColor } = state;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
 
+  let soundToPlay: SoundName = 'move-self';
+
   // Capture:
   if (captureAt) {
+    soundToPlay = 'capture';
+
     const [captureRow, captureCol] = captureAt;
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
+
     // Remove captured piece from colorPieces
     const colorPieceIndex = colorPieces[opositeColor].findIndex((piece) => piece.id === captueredBoardPiece.id);
+    const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
 
-    {
-      const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
-      // Add to player's captures
-      players[currentColor].captures.push(capturedColorPiece);
-    }
+    // Add to player's captures
+    players[currentColor].captures.push(capturedColorPiece);
 
     // en-passant
     if (colTo !== captureCol || rowTo !== captureRow) {
@@ -115,7 +119,10 @@ function doMove(piece: Piece, move: MoveType): void {
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {
     promotePawnAt(boardPieces, piece as Pawn, [rowTo, colTo]);
+    soundToPlay = 'promote';
   }
+
+  return soundToPlay;
 }
 
 function doCastle(king: King, move: KingMoveType): void {
