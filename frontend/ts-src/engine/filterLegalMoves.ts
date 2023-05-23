@@ -44,7 +44,7 @@ function isPlayerInCheckAfterMove(piece: Piece, move: MoveType): boolean {
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
 
-  // Simulate board state
+  // Copy state for simulation
   const boardCopy = copyBoard(boardPieces);
   const piecesCopy = copyColorPieces(colorPieces);
   const pieceCopy = { ...piece };

@@ -88,7 +88,9 @@ function updateBoardAndPieceWithMove(
 
 function doMove(piece: Piece, move: MoveType): SoundName {
   const { currentColor, opositeColor } = state;
+
   const { moveTo, captureAt } = move;
+  
   const [rowTo, colTo] = moveTo;
 
   let soundToPlay: SoundName = 'moveSelf';

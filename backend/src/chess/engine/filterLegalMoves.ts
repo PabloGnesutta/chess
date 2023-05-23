@@ -57,7 +57,7 @@ function isPlayerInCheckAtPosition(
 function isPlayerInCheckAfterMove(state: MatchState, piece: Piece, move: MoveType): boolean {
   const { boardPieces, colorPieces, currentColor } = state;
 
-  // Copy state
+  // Copy state for simulation
   const boardCopy = copyBoard(boardPieces);
   const piecesCopy = copyColorPieces(colorPieces);
   const pieceCopy = { ...piece };
