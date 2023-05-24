@@ -1,4 +1,4 @@
-import { BoardPiecesType, ColorPiecesType } from '../engine/gameState.js';
+import { BoardPiecesType, ColorPiecesType } from '../state/gameState.js';
 
 function copyBoard(boardPieces: BoardPiecesType): BoardPiecesType {
   const copiedBoard: BoardPiecesType = [];

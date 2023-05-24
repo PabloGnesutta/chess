@@ -1,5 +1,8 @@
-import { state, boardPieces, makeLocalMove, signalMoveMultiplayer, ColorPiecesType, CellType } from './gameState.js';
+import { COL_MAP, ROW_MAP, _Z } from '../globals.js';
+import { appState } from '../state/appState.js';
+import { CellType, ColorPiecesType, gameState } from '../state/gameState.js';
 
+import { makeLocalMove, signalMoveMultiplayer } from './gameFlow.js';
 import { MoveType, getPieceImage } from './piecesLib.js';
 
 const _squares = [
@@ -173,7 +176,7 @@ function selectSquare([row, col]: [number, number]) {
 function squareClick([row, col]: [number, number]) {
   selectSquare([row, col]);
 
-  const { selectedPiece, currentColor } = state;
+  const { selectedPiece, currentColor } = gameState;
 
   if (selectedPiece) {
     if (currentColor === selectedPiece.color) {
@@ -181,24 +184,25 @@ function squareClick([row, col]: [number, number]) {
       const move = selectedPiece.moves.find(({ moveTo }) => moveTo[0] === row && moveTo[1] === col);
 
       if (move) {
-        if (state.isMultiPlayer) {
-          if (state.playerColor === currentColor) {
+        if (appState.isMultiplayer) {
+          if (gameState.playerColor === currentColor) {
             signalMoveMultiplayer(selectedPiece, move);
           }
         } else {
           makeLocalMove(selectedPiece, move);
         }
+        return;
       }
     }
   }
 
-  const piece = boardPieces[row][col];
+  const piece = gameState.boardPieces[row][col];
 
   if (piece) {
-    state.selectedPiece = piece;
+    gameState.selectedPiece = piece;
     displayMoves(piece.moves);
   } else {
-    state.selectedPiece = null;
+    gameState.selectedPiece = null;
   }
 }
 

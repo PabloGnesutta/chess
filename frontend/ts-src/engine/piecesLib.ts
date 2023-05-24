@@ -1,18 +1,9 @@
-'use strict';
-
+import { B, K, N, P, Q, R, _Z, warn } from '../globals.js';
 import { SoundName } from '../audio/audio.js';
+import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState } from '../state/gameState.js';
+
 import { _imgContainers } from './board.js';
-import {
-  BoardPiecesType,
-  CellType,
-  ColorType,
-  PieceNameType,
-  boardPieces,
-  colorPieces,
-  players,
-  putPieceOnBoard,
-  state,
-} from './gameState.js';
+import { putPieceOnBoard } from './gameFlow.js';
 
 export type MoveType = {
   moveTo: CellType;
@@ -87,10 +78,10 @@ function updateBoardAndPieceWithMove(
 }
 
 function doMove(piece: Piece, move: MoveType): SoundName {
-  const { currentColor, opositeColor } = state;
+  const { boardPieces, colorPieces, currentColor, opositeColor, players } = gameState;
 
   const { moveTo, captureAt } = move;
-  
+
   const [rowTo, colTo] = moveTo;
 
   let soundToPlay: SoundName = 'moveSelf';
@@ -128,7 +119,10 @@ function doMove(piece: Piece, move: MoveType): SoundName {
 }
 
 function doCastle(king: King, move: KingMoveType): void {
+  const { boardPieces } = gameState;
+
   const { moveTo, rookFrom, rookTo } = move;
+
   // Move king
   updateBoardAndPieceWithMove(boardPieces, king, moveTo);
 
@@ -141,7 +135,7 @@ function doCastle(king: King, move: KingMoveType): void {
 }
 
 function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: CellType): void {
-  const { currentColor } = state;
+  const { currentColor, colorPieces } = gameState;
   const pieceIndex = colorPieces[currentColor].findIndex(piece => piece.id === pawn.id);
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];

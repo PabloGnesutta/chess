@@ -1,4 +1,5 @@
 import { API_URL } from '../env.js';
+import { log } from '../globals.js';
 
 export type SoundName = 'capture' | 'castle' | 'check' | 'moveSelf' | 'promote' | '';
 

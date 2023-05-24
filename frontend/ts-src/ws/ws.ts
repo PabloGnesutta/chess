@@ -1,15 +1,20 @@
-'use strict';
-
-import { InitialPieces, initGame } from '../engine/initGame.js';
-import { CellType, ColorType, makeRemoteMove, resetState, state } from '../engine/gameState.js';
+import { WS_URL } from '../env.js';
+import { log, warn } from '../globals.js';
+import { MoveType } from '../engine/piecesLib.js';
+import { InitialPieces, initGame, makeRemoteMove } from '../engine/gameFlow.js';
+import { CellType, ColorType, gameState, resetGameState } from '../state/gameState.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 import { closeModal } from '../ui/modal.js';
-import { MoveType } from '../engine/piecesLib.js';
-import { WS_URL } from '../env.js';
- 
+
 type WSMessage = {
   type: string;
   data: any;
+};
+
+type RoomReady = {
+  roomId: number;
+  playerColor: ColorType;
+  initialPieces: InitialPieces;
 };
 
 // STATE
@@ -82,19 +87,13 @@ function CLIENT_REGISTERED(data: any): void {
   clientIdElement!.innerText = 'Online | Client ID: ' + clientId;
 }
 
-// todo: add to backend
-type RoomReady = {
-  roomId: number;
-  playerColor: ColorType;
-  initialPieces: InitialPieces;
-};
-
 function ROOM_READY(data: RoomReady) {
   log(' * READY TO START GAME');
   activeRoomId = data.roomId;
   roomIdElement!.innerText = 'On Room ' + activeRoomId;
-  state.playerColor = data.playerColor;
-  initGame(state.playerColor, data.initialPieces);
+  gameState.playerColor = data.playerColor;
+
+  initGame(gameState.playerColor, data.initialPieces);
   closeModal();
 }
 
@@ -109,14 +108,14 @@ function OPONENT_MOVED(data: MoveData) {
 
 function ROOM_LEFT() {
   activeRoomId = 0;
-  resetState();
+  resetGameState();
   document.getElementById('board')?.classList.add('display-none');
 }
 
 function OPONENT_ABANDONED() {
   log(' * OPONENT ABANDONED, YOU WIN');
   activeRoomId = 0;
-  resetState();
+  resetGameState();
   document.getElementById('board')?.classList.add('display-none');
 }
 

@@ -1,24 +1,23 @@
-'use strict';
-
+import { log } from '../globals.js';
 import { drawBoard, drawPieces } from '../engine/board.js';
-import { boardPieces, colorPieces, movesHistory, state } from '../engine/gameState.js';
+import { gameState } from '../state/gameState.js';
 
 const footer = document.getElementById('footer');
 const debug = document.getElementById('debug');
 
 const showState = document.getElementById('show-state');
 showState!.addEventListener('click', () => {
-  log(state);
+  log(gameState);
 });
 
 const showBoard = document.getElementById('show-board');
 showBoard!.addEventListener('click', () => {
-  log(boardPieces);
+  log(gameState.boardPieces);
 });
 
 const showPieces = document.getElementById('show-pieces');
 showPieces!.addEventListener('click', () => {
-  log(colorPieces);
+  log(gameState.colorPieces);
 });
 
 let pov = 'w';
@@ -26,12 +25,12 @@ const flipBoard = document.getElementById('flip-board');
 flipBoard!.addEventListener('click', () => {
   pov = pov === 'w' ? 'b' : 'w';
   drawBoard(pov);
-  drawPieces(colorPieces);
+  drawPieces(gameState.colorPieces);
 });
 
 const showMovesHistory = document.getElementById('show-moves-history');
 showMovesHistory!.addEventListener('click', () => {
-  log(movesHistory);
+  log(gameState.movesHistory);
 });
 
 export { debug, footer };

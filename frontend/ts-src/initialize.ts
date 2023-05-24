@@ -1,21 +1,22 @@
-import { initAudio } from './audio/audio.js';
-import { state } from './engine/gameState.js';
-import { initGame } from './engine/initGame.js';
-import { closeModal, m_LookingForPlayers } from './ui/modal.js';
+import { log, warn } from './globals.js';
 import { connectWebSocket, joinRoom } from './ws/ws.js';
+import { appState } from './state/appState.js';
+import { initAudio } from './audio/audio.js';
+import { initGame } from './engine/gameFlow.js';
+import { closeModal, m_LookingForPlayers } from './ui/modal.js';
 
 async function initApp(playMode: string) {
   initAudio();
 
   if (playMode === 'SOLO') {
-    state.isMultiPlayer = false;
+    appState.isMultiplayer = false;
     initGame('w');
     closeModal();
   } else {
     try {
       const connectionMessage = await connectWebSocket();
       log(connectionMessage);
-      state.isMultiPlayer = true;
+      appState.isMultiplayer = true;
       joinRoom();
       m_LookingForPlayers();
     } catch (err) {

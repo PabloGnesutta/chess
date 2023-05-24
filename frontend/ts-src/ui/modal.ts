@@ -1,5 +1,5 @@
-import { createElement } from './DOM.js';
 import { initApp } from '../initialize.js';
+import { createElement } from './DOM.js';
 
 const modal = document.getElementById('modal');
 const modalContent = document.getElementById('modal-content');

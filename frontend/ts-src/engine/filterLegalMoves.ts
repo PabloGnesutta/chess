@@ -1,9 +1,9 @@
-'use strict';
-
+import { K } from '../globals.js';
 import { copyBoard, copyColorPieces } from '../utils/utils.js';
-import { BoardPiecesType, boardPieces, colorPieces, state } from './gameState.js';
-import { KingMoveType, MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
+import { BoardPiecesType, gameState } from '../state/gameState.js';
+
 import { computeMoves } from './computePieceMovements.js';
+import { KingMoveType, MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
 
 /**
  * For each oponent's piece
@@ -40,13 +40,13 @@ function isPlayerInCheckAtPosition(boardPieces: BoardPiecesType, oponentPieces: 
 
 // TODO: The move simulation is practically identical in _doMove()
 function isPlayerInCheckAfterMove(piece: Piece, move: MoveType): boolean {
-  const { opositeColor } = state;
+  const { opositeColor } = gameState;
   const { moveTo, captureAt } = move;
   const [rowTo, colTo] = moveTo;
 
   // Copy state for simulation
-  const boardCopy = copyBoard(boardPieces);
-  const piecesCopy = copyColorPieces(colorPieces);
+  const boardCopy = copyBoard(gameState.boardPieces);
+  const piecesCopy = copyColorPieces(gameState.colorPieces);
   const pieceCopy = { ...piece };
 
   // Simulate capture
@@ -55,7 +55,7 @@ function isPlayerInCheckAfterMove(piece: Piece, move: MoveType): boolean {
     const captueredBoardPiece = boardCopy[captureRow][captureCol];
 
     // Remove captured piece from colorPieces
-    const colorPieceIndex = piecesCopy[opositeColor].findIndex((p) => p.id === captueredBoardPiece.id);
+    const colorPieceIndex = piecesCopy[opositeColor].findIndex((p: Piece) => p.id === captueredBoardPiece.id);
     piecesCopy[opositeColor].splice(colorPieceIndex, 1);
 
     // en-passant
@@ -79,7 +79,7 @@ function filterLegalMoves(piece: Piece): MoveType[] {
 
   // Anyting but King
   if (piece.name !== K) {
-    piece.moves.forEach((move) => {
+    piece.moves.forEach(move => {
       if (!isPlayerInCheckAfterMove(piece, move)) {
         legalMoves.push(move);
       }

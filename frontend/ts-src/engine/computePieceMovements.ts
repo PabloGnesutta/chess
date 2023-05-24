@@ -1,9 +1,11 @@
+import { P, _Z } from '../globals.js';
+import { BoardPiecesType, ColorType, CellType, gameState, LastMoveType } from '../state/gameState.js';
+
 import { King, KingMoveType, MoveType, Pawn, Piece } from './piecesLib.js';
-import { ColorType, players, state, CellType, BoardPiecesType, LastMoveType} from './gameState.js';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
-  const obj: {moveTo: CellType, captureAt?: CellType} = { 
-    moveTo
+  const obj: { moveTo: CellType; captureAt?: CellType } = {
+    moveTo,
   };
   if (captureAt) obj.captureAt = captureAt;
   return obj;
@@ -171,7 +173,7 @@ function king(boardPieces: BoardPiecesType, _king: King): void {
   const castleMoves: KingMoveType[] = [];
 
   castle: {
-    if (!_king.hasntMoveYet || players[state.currentColor].isInCheck) {
+    if (!_king.hasntMoveYet || gameState.players[gameState.currentColor].isInCheck) {
       break castle;
     }
 
@@ -277,41 +279,29 @@ function pawn(boardPieces: BoardPiecesType, _pawn: Pawn): void {
   const adjacentCol1 = _pawn.col + 1;
   let oponentPiece = boardPieces[oneRankAhead][adjacentCol1];
   if (oponentPiece && oponentPiece.color !== _pawn.color) {
-    moves.push(
-      moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1])
-    );
+    moves.push(moveObj([oneRankAhead, adjacentCol1], [oneRankAhead, adjacentCol1]));
   }
 
   const adjacentCol2 = _pawn.col - 1;
   oponentPiece = boardPieces[oneRankAhead][adjacentCol2];
   if (oponentPiece && oponentPiece.color !== _pawn.color) {
-    moves.push(
-      moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2])
-    );
+    moves.push(moveObj([oneRankAhead, adjacentCol2], [oneRankAhead, adjacentCol2]));
   }
 
   // EN-PASSANT
   // Pawn is on en-passant rank
   if (_pawn.row === _pawn.enPassantRow) {
-    const lastMove = state.lastMove as LastMoveType;
+    const lastMove = gameState.lastMove as LastMoveType;
     // Last oponent move was a pawn
     if (lastMove.piece === P) {
       const lastMoveTo = lastMove.to;
       const lastMoveFrom = lastMove.from;
       // Oponent pawn was at starting rank and moved to _pawn' rank
-      if (
-        lastMoveFrom[0] === _pawn.enPassantRow + _pawn.delta * 2 &&
-        lastMoveTo[0] === _pawn.enPassantRow
-      ) {
+      if (lastMoveFrom[0] === _pawn.enPassantRow + _pawn.delta * 2 && lastMoveTo[0] === _pawn.enPassantRow) {
         // Oponent pawn is adjacent to pawn
-        if (
-          lastMoveTo[1] === _pawn.col + 1 ||
-          lastMoveTo[1] === _pawn.col - 1
-        ) {
+        if (lastMoveTo[1] === _pawn.col + 1 || lastMoveTo[1] === _pawn.col - 1) {
           // Capture one row ahead at opponent pawn's file
-          moves.push(
-            moveObj([_pawn.row + _pawn.delta, lastMoveTo[1]], lastMoveTo)
-          );
+          moves.push(moveObj([_pawn.row + _pawn.delta, lastMoveTo[1]], lastMoveTo));
         }
       }
     }
@@ -321,8 +311,8 @@ function pawn(boardPieces: BoardPiecesType, _pawn: Pawn): void {
 }
 
 type ComputeMovesType = {
-  [key: string]: Function
-}
+  [key: string]: Function;
+};
 
 const computeMoves: ComputeMovesType = {
   king,
