@@ -1,6 +1,7 @@
 import { ALLOW_DEBUG } from '../env.js';
 import { defaultInitialPieces, warn } from '../globals.js';
-import { MoveData, signalMoveToServer } from '../ws/ws.js';
+import { MoveData } from '../ws/incomingMessages.js';
+import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
 import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState, resetGameState } from '../state/gameState.js';
 import { debug, footer } from '../ui/footer-UI.js';

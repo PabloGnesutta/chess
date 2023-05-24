@@ -1,5 +1,6 @@
 import { log, warn } from './globals.js';
-import { connectWebSocket, joinRoom } from './ws/ws.js';
+import { connectWebSocket } from './ws/ws.js';
+import { joinRoom } from './ws/outgoingMessages.js';
 import { appState } from './state/appState.js';
 import { initGame } from './engine/gameFlow.js';
 import { initializeBoard } from './engine/board.js';
@@ -15,14 +16,14 @@ function findGame(): void {
 }
 
 // SINGLE PLAYER
-singlePlayerBtn!.onclick = () => {
+singlePlayerBtn.onclick = () => {
   appState.isMultiplayer = false;
   // TODO: Disable if it's currently in a multiplayer game
   initGame('w');
 };
 
 // MULTI PLAYER
-findGameBtn!.onclick = async () => {
+findGameBtn.onclick = async () => {
   try {
     const connectionMessage = await connectWebSocket();
     log(connectionMessage);
@@ -35,8 +36,8 @@ findGameBtn!.onclick = async () => {
 initializeBoard();
 
 setTimeout(() => {
-  // singlePlayerBtn!.click();
-  // findGameBtn!.click();
+  // singlePlayerBtn.click();
+  // findGameBtn.click();
 }, 300);
 
 m_Welcome();

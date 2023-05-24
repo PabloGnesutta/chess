@@ -1,5 +1,6 @@
 import { log, warn } from './globals.js';
-import { connectWebSocket, joinRoom } from './ws/ws.js';
+import { connectWebSocket } from './ws/ws.js';
+import { joinRoom } from './ws/outgoingMessages.js';
 import { appState } from './state/appState.js';
 import { initAudio } from './audio/audio.js';
 import { initGame } from './engine/gameFlow.js';
