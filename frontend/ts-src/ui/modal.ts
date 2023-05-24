@@ -45,20 +45,12 @@ function wrapElements(elements: HTMLElement[], className = ''): HTMLElement {
   return container;
 }
 
-function m_LookingForPlayers() {
-  const h1 = createElement('h1', { text: 'Looking for players' });
-  const paragraph = createElement('p', { text: 'Hang in there...' });
-
-  const content = wrapElements([h1, paragraph]);
-  showModal(content, { hideCloseBtn: true });
-}
-
 function m_Welcome() {
   const h1 = createElement('h1', { text: 'Welcome to Chess' });
-  const paragraph = createElement('p', { text: 'Wanna play?' });
+  const p = createElement('p', { text: 'Wanna play?' });
   const buttons = wrapElements([playSolo, playOnline], 'modal-bottom-buttons-container');
 
-  const content = wrapElements([h1, paragraph, buttons]);
+  const content = wrapElements([h1, p, buttons]);
   showModal(content, { hideCloseBtn: false });
 }
 
@@ -67,6 +59,23 @@ function closeModal(callback?: () => void) {
   if (callback) callback();
 }
 
+function m_LookingForPlayers() {
+  const h1 = createElement('h1', { text: 'Looking for players' });
+  const p = createElement('p', { text: 'Hang in there...' });
+
+  const content = wrapElements([h1, p]);
+  showModal(content, { hideCloseBtn: true });
+}
+
+function m_OponentAbandoned() {
+  const h1 = createElement('h1', { text: 'Oponent abandoned. You Win!' });
+  const p = createElement('p', { text: 'What do you wanna do next?' });
+  const buttons = wrapElements([playSolo, playOnline], 'modal-bottom-buttons-container');
+
+  const content = wrapElements([h1, p, buttons]);
+  showModal(content, { hideCloseBtn: true });
+}
+
 closeModalBtn.onclick = () => closeModal();
 
-export { closeModal, m_LookingForPlayers, m_Welcome };
+export { closeModal, m_LookingForPlayers, m_OponentAbandoned, m_Welcome };

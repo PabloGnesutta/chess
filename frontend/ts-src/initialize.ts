@@ -6,7 +6,9 @@ import { initAudio } from './audio/audio.js';
 import { initGame } from './engine/gameFlow.js';
 import { closeModal, m_LookingForPlayers } from './ui/modal.js';
 
-async function initApp(playMode: string) {
+export type PlayMode = 'SOLO' | 'ONLINE';
+
+async function initApp(playMode: PlayMode) {
   initAudio();
 
   if (playMode === 'SOLO') {

@@ -3,7 +3,7 @@ import { appState, resetAppState } from '../state/appState.js';
 import { ColorType, gameState, resetGameState } from '../state/gameState.js';
 import { InitialPieces, initGame, makeRemoteMove } from '../engine/gameFlow.js';
 import { MoveType } from '../engine/piecesLib.js';
-import { closeModal } from '../ui/modal.js';
+import { closeModal, m_OponentAbandoned } from '../ui/modal.js';
 import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 
 import { WSMessage } from './ws.js';
@@ -59,6 +59,7 @@ function OPONENT_ABANDONED() {
   log(' * OPONENT ABANDONED, YOU WIN');
   resetGameState();
   resetAppState();
+  m_OponentAbandoned();
 }
 
 // function ROOM_LEFT() {
