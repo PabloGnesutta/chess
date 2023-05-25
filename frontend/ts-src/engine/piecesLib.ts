@@ -1,8 +1,8 @@
 import { B, K, N, P, Q, R, _Z, warn } from '../globals.js';
 import { SoundName } from '../audio/audio.js';
 import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState } from '../state/gameState.js';
+import { _imgContainers } from '../ui/board.js';
 
-import { _imgContainers } from './board.js';
 import { putPieceOnBoard } from './gameFlow.js';
 
 export type MoveType = {

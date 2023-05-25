@@ -6,6 +6,7 @@ export type AppState = {
   isWSOpen: boolean;
   clientId: number;
   activeRoomId: number;
+  audioReady: boolean;
 };
 
 const appState: AppState = {
@@ -13,6 +14,7 @@ const appState: AppState = {
   isWSOpen: false,
   clientId: 0,
   activeRoomId: 0,
+  audioReady: false,
 };
 
 function resetAppState(): void {

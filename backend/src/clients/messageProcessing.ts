@@ -1,5 +1,5 @@
 import { log } from '../utils/utils';
-import { makeLocalMove } from '../chess/engine/gameState';
+import { makeLocalMove } from '../chess/engine/gameFlow';
 import { validateMove } from '../chess/match/match';
 import { CellType, MoveType } from '../chess/types';
 import { RoomType, joinOrCreateRoom, sendRoomMessage } from '../rooms';

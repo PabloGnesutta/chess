@@ -12,7 +12,7 @@ import {
   Piece,
   PieceNameType,
 } from '../types';
-import { putPieceOnBoard } from './gameState';
+import { putPieceOnBoard } from './gameFlow';
 import { invertColor } from './utils';
 
 function newPiece(id: number, name: PieceNameType, row: number, col: number, color: ColorType): Piece | King | Pawn {

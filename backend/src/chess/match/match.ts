@@ -3,7 +3,7 @@ import { Client, ClientsById } from '../../clients/clients';
 import { initialPieces } from '../constants';
 import { computeMoves } from '../engine/computePieceMovements';
 import { computePieceLegalMoves } from '../engine/filterLegalMoves';
-import { putPieceOnBoard } from '../engine/gameState';
+import { putPieceOnBoard } from '../engine/gameFlow';
 import { createPiece } from '../engine/piecesLib';
 import {
   BoardPiecesType,

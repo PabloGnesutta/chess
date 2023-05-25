@@ -1,6 +1,6 @@
 import { SoundName } from '../audio/audio.js';
 import { Piece } from '../engine/piecesLib.js';
-import { _imgContainers } from '../engine/board.js';
+import { _imgContainers } from '../ui/board';
 
 export type ColorType = 'w' | 'b';
 export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
@@ -35,7 +35,7 @@ export type PlayersType = {
   };
 };
 
-export type State = {
+export type GameState = {
   currentColor: ColorType;
   opositeColor: ColorType;
   selectedPiece: Piece | null;
@@ -48,13 +48,13 @@ export type State = {
   movesHistory: string[];
 };
 
-let gameState: State = getInitialState();
+let gameState: GameState = getInitialState();
 
 function resetGameState(): void {
   gameState = getInitialState();
 }
 
-function getInitialState(): State {
+function getInitialState(): GameState {
   return {
     currentColor: 'w',
     opositeColor: 'b',

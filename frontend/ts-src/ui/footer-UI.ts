@@ -1,7 +1,8 @@
 import { log } from '../globals.js';
 import { appState, resetAppState } from '../state/appState.js';
 import { gameState, resetGameState } from '../state/gameState.js';
-import { drawBoard, drawPieces } from '../engine/board.js';
+
+import { drawBoard, drawPieces } from './board.js';
 
 import { m_Welcome } from './modal.js';
 

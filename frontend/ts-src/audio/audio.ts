@@ -1,9 +1,8 @@
 import { API_URL } from '../env.js';
 import { log } from '../globals.js';
+import { appState } from '../state/appState.js';
 
 export type SoundName = 'capture' | 'castle' | 'check' | 'moveSelf' | 'promote' | '';
-
-let audioReady = false;
 
 let ctx: AudioContext;
 let audioOut: AudioDestinationNode;
@@ -43,12 +42,12 @@ async function initAudio(): Promise<void> {
 
     const promiseResults = await Promise.allSettled(promiseArray);
     log('Audio loading finished', promiseResults);
-    audioReady = true;
+    appState.audioReady = true;
   }
 }
 
 function playSound(sound: SoundName): void {
-  if (audioReady && sound) {
+  if (appState.audioReady && sound) {
     playBuffer(audioBuffers[sound] as AudioBuffer);
   }
 }

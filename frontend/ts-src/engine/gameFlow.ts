@@ -5,9 +5,6 @@ import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
 import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState, resetGameState } from '../state/gameState.js';
 import { debug, footer } from '../ui/footer-UI.js';
-
-import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
-import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
 import {
   _imgContainers,
   clearLastMoveMarks,
@@ -15,7 +12,10 @@ import {
   drawPieces,
   markLastMove,
   unselectCurrentSquare,
-} from './board.js';
+} from '../ui/board.js';
+
+import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
+import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
 import { computeMoves } from './computePieceMovements.js';
 
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
