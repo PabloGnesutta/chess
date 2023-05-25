@@ -38,6 +38,11 @@ function showModal(content: HTMLElement, options?: ModalOptions) {
   }
 }
 
+function closeModal(callback?: () => void) {
+  modal.classList.add('display-none');
+  if (callback) callback();
+}
+
 function wrapElements(elements: HTMLElement[], className = ''): HTMLElement {
   const container = createElement('div');
   container.className = className;
@@ -52,11 +57,6 @@ function m_Welcome() {
 
   const content = wrapElements([h1, p, buttons]);
   showModal(content, { hideCloseBtn: false });
-}
-
-function closeModal(callback?: () => void) {
-  modal.classList.add('display-none');
-  if (callback) callback();
 }
 
 function m_LookingForPlayers() {

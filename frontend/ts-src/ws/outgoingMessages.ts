@@ -7,7 +7,7 @@ import { wsSend } from './ws.js';
 function joinRoom() {
   if (appState.activeRoomId) return warn('Leave the current room before joining another one');
 
-  wsSend({ type: 'JOIN_ROOM', data: {} });
+  wsSend({ type: 'JOIN_ROOM' });
 }
 
 function signalMoveToServer(from: CellType, to: CellType) {
@@ -17,6 +17,10 @@ function signalMoveToServer(from: CellType, to: CellType) {
   });
 }
 
-function leaveGame(): void {}
+function signalLeaveGameToServer(): void {
+  if (!appState.activeRoomId) return warn('Not currently in a room');
 
-export { joinRoom, leaveGame, signalMoveToServer };
+  wsSend({ type: 'LEAVE_GAME' });
+}
+
+export { joinRoom, signalLeaveGameToServer, signalMoveToServer };

@@ -1,4 +1,5 @@
 import { log } from '../globals.js';
+import { signalLeaveGameToServer } from '../ws/outgoingMessages.js';
 import { appState, resetAppState } from '../state/appState.js';
 import { gameState, resetGameState } from '../state/gameState.js';
 
@@ -24,12 +25,12 @@ leaveGame.addEventListener('click', () => {
   if (!confirm('Sure you want to leave the current game?')) return;
 
   if (appState.isMultiplayer) {
-    log('TODO: Leave multiplayer game');
-  } else {
-    resetAppState();
-    resetGameState();
-    m_Welcome();
+    signalLeaveGameToServer();
   }
+
+  resetAppState();
+  resetGameState();
+  m_Welcome();
 });
 
 // DEBUG CONTROLS:

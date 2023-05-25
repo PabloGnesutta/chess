@@ -2,7 +2,7 @@ import { log } from '../utils/utils';
 import { makeLocalMove } from '../chess/engine/gameFlow';
 import { validateMove } from '../chess/match/match';
 import { CellType, MoveType } from '../chess/types';
-import { RoomType, joinOrCreateRoom, sendRoomMessage } from '../rooms';
+import { RoomType, joinOrCreateRoom, resetRoomAndInformOponent, sendRoomMessage } from '../rooms';
 import { Client, WSMessage } from './clients';
 
 type IncommingMoveData = {
@@ -23,6 +23,8 @@ function processIncommingMessage(client: Client, msg: WSMessage): void {
         return joinRoom(client);
       case 'SIGNAL_MOVE':
         return processMove(client, msg.data);
+      case 'LEAVE_GAME':
+        return leaveGame(client);
       default:
         return log('---Invalid message type @processIncommingMessage');
     }
@@ -34,6 +36,12 @@ function processIncommingMessage(client: Client, msg: WSMessage): void {
 function joinRoom(client: Client): void {
   // Mutates the client
   joinOrCreateRoom(client);
+}
+
+function leaveGame(client: Client): void {
+  resetRoomAndInformOponent(client);
+  client.activeRoom = null;
+  client.playerColor = '';
 }
 
 function processMove(client: Client, incommingMoveData: IncommingMoveData): void {

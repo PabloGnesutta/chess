@@ -7,7 +7,7 @@ import { processIncomingMessage } from './incomingMessages.js';
 
 export type WSMessage = {
   type: string;
-  data: any;
+  data?: any;
 };
 
 let wsSend: (payload: WSMessage) => void;
