@@ -3,7 +3,16 @@ import { NAME_MAP, defaultInitialPieces, log, warn } from '../globals.js';
 import { IncommingMoveData } from '../ws/incomingMessages.js';
 import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
-import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState, resetGameState } from '../state/gameState.js';
+import {
+  BoardPiecesType,
+  CellType,
+  ColorPiecesType,
+  ColorType,
+  PieceNameType,
+  gameState,
+  resetGameState,
+  PositionHistoryItem,
+} from '../state/gameState.js';
 import { debug, footer } from '../ui/footer-UI.js';
 import {
   _imgContainers,
@@ -101,54 +110,14 @@ function passTurn(): void {
 }
 
 function startTurn(): void {
-  const { boardPieces, boardStateHistory, colorPieces, currentColor, opositeColor, players } = gameState;
+  const { boardPieces, positionHistory, colorPieces, currentColor, opositeColor, players } = gameState;
 
-  // Board state history
+  const positionHistoryResult = updatePositionHistory(colorPieces, positionHistory);
 
-  // Build state entry
-  const boardPositionsArray = [];
-  for (const color in colorPieces) {
-    const pieces = colorPieces[color];
-    for (let i = 0; i < pieces.length; i++) {
-      const { name, row, col } = pieces[i];
-      const str = `${color}_${NAME_MAP[name]}_${row}_${col}`;
-      boardPositionsArray.push(str);
-      boardPositionsArray.sort();
-    }
+  if (positionHistoryResult === 'STALEMATE') {
+    // TODO: Show modal, etc.
+    return log('STALEMATE BY REPETITION');
   }
-
-  const boardPositions = boardPositionsArray.join(';');
-
-  let isStalemateByRepetition = false;
-  // Find if the position previously occurred
-  let positionsAreNew = true;
-  for (let i = 0; i < boardStateHistory.length; i++) {
-    const historyItem = boardStateHistory[i];
-    const positions = historyItem.positions;
-    if (positions === boardPositions) {
-      log(' Position has previously occurred', historyItem.occuredTimes, 'times');
-      positionsAreNew = false;
-      historyItem.occuredTimes++;
-      if (historyItem.occuredTimes === 3) {
-        isStalemateByRepetition = true;
-      }
-      break;
-    }
-  }
-
-  if (isStalemateByRepetition) {
-    log('STALEMATE BY REPETITION');
-    return;
-  } else if (positionsAreNew) {
-    boardStateHistory.push({
-      occuredTimes: 1,
-      positions: boardPositions,
-    });
-  }
-
-  log(' *** boardStateHistory', boardStateHistory);
-
-  // TODO: stalemate by repetition
 
   // Am I in check?
   const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
@@ -183,6 +152,49 @@ function startTurn(): void {
       }, 100);
     }
   }
+}
+
+function updatePositionHistory(colorPieces: ColorPiecesType, positionHistory: PositionHistoryItem[]): 'STALEMATE' | '' {
+  // Build history item
+  const boardPositionArray = [];
+  for (const color in colorPieces) {
+    const pieces = colorPieces[color];
+    for (let i = 0; i < pieces.length; i++) {
+      const { name, row, col } = pieces[i];
+      const str = `${color}_${NAME_MAP[name]}_${row}_${col}`;
+      boardPositionArray.push(str);
+      boardPositionArray.sort();
+    }
+  }
+
+  const boardPosition = boardPositionArray.join(';');
+
+  let isStalemateByRepetition = false;
+  // Find if the position previously occurred
+  let positionIsNew = true;
+  for (let i = 0; i < positionHistory.length; i++) {
+    const historyItem = positionHistory[i];
+    const position = historyItem.position;
+    if (position === boardPosition) {
+      positionIsNew = false;
+      historyItem.occuredTimes++;
+      if (historyItem.occuredTimes === 3) {
+        isStalemateByRepetition = true;
+      }
+      break;
+    }
+  }
+
+  if (isStalemateByRepetition) {
+    return 'STALEMATE';
+  } else if (positionIsNew) {
+    positionHistory.push({
+      occuredTimes: 1,
+      position: boardPosition,
+    });
+  }
+
+  return '';
 }
 
 function signalMoveMultiplayer(piece: Piece, move: MoveType): void {

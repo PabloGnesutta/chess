@@ -35,8 +35,8 @@ export type PlayersType = {
   };
 };
 
-export type BoardStateHistoryItem = {
-  positions: string;
+export type PositionHistoryItem = {
+  position: string;
   occuredTimes: number;
 };
 
@@ -51,7 +51,7 @@ export type GameState = {
   colorPieces: ColorPiecesType;
   boardPieces: BoardPiecesType;
   movesHistory: string[];
-  boardStateHistory: BoardStateHistoryItem[];
+  positionHistory: PositionHistoryItem[];
 };
 
 let gameState: GameState = getInitialState();
@@ -95,7 +95,7 @@ function getInitialState(): GameState {
         captures: [],
       },
     },
-    boardStateHistory: [],
+    positionHistory: [],
   };
 }
 
