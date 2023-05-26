@@ -1,6 +1,6 @@
 import { ALLOW_DEBUG } from '../env.js';
 import { defaultInitialPieces, warn } from '../globals.js';
-import { MoveData } from '../ws/incomingMessages.js';
+import { IncommingMoveData } from '../ws/incomingMessages.js';
 import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
 import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState, resetGameState } from '../state/gameState.js';
@@ -56,7 +56,7 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
 }
 
-function makeRemoteMove(moveData: MoveData): void {
+function makeRemoteMove(moveData: IncommingMoveData): void {
   const { pieceId, move } = moveData;
   const piece = gameState.colorPieces[gameState.currentColor].find(p => p.id === pieceId);
   if (piece) {

@@ -8,7 +8,7 @@ import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
 
 import { WSMessage } from './ws.js';
 
-export type MoveData = {
+export type IncommingMoveData = {
   pieceId: number;
   move: MoveType;
 };
@@ -29,10 +29,8 @@ function processIncomingMessage(msg: WSMessage): void {
       return OPONENT_MOVED(msg.data);
     case 'OPONENT_ABANDONED':
       return OPONENT_ABANDONED();
-    // case 'ROOM_LEFT':
-    //   return ROOM_LEFT();
     default:
-      return warn('Message type not supported');
+      return warn('--- Message type not supported');
   }
 }
 
@@ -42,7 +40,6 @@ function CLIENT_REGISTERED(data: any): void {
 }
 
 function ROOM_READY(data: RoomReady) {
-  log(' * READY TO START GAME');
   appState.activeRoomId = data.roomId;
   gameState.playerColor = data.playerColor;
   roomIdElement.innerText = 'On Room ' + data.roomId;
@@ -51,20 +48,14 @@ function ROOM_READY(data: RoomReady) {
   closeModal();
 }
 
-function OPONENT_MOVED(data: MoveData) {
+function OPONENT_MOVED(data: IncommingMoveData) {
   makeRemoteMove(data);
 }
 
 function OPONENT_ABANDONED() {
-  log(' * OPONENT ABANDONED, YOU WIN');
   resetGameState();
   resetAppState();
   m_OponentAbandoned();
 }
-
-// function ROOM_LEFT() {
-//   resetGameState();
-//   resetAppState();
-// }
 
 export { processIncomingMessage };
