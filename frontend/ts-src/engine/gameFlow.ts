@@ -60,13 +60,13 @@ function makeRemoteMove(moveData: IncommingMoveData): void {
   const { pieceId, move } = moveData;
   const piece = gameState.colorPieces[gameState.currentColor].find(p => p.id === pieceId);
   if (piece) {
-    makeLocalMove(piece, move);
+    makeLocalMoveAndPassTurn(piece, move);
   } else {
     warn('Piece not found @makeRemoteMove', moveData);
   }
 }
 
-function makeLocalMove(piece: Piece, move: MoveType): void {
+function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
   markLastMove([piece.row, piece.col], move.moveTo);
 
   const historyItem = {
@@ -142,7 +142,7 @@ function startTurn(): void {
 
 function signalMoveMultiplayer(piece: Piece, move: MoveType): void {
   signalMoveToServer([piece.row, piece.col], move.moveTo);
-  makeLocalMove(piece, move);
+  makeLocalMoveAndPassTurn(piece, move);
 }
 
-export { initGame, makeLocalMove, makeRemoteMove, putPieceOnBoard, signalMoveMultiplayer, startTurn };
+export { initGame, makeLocalMoveAndPassTurn, makeRemoteMove, putPieceOnBoard, signalMoveMultiplayer, startTurn };

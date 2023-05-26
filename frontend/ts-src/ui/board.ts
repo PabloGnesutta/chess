@@ -2,7 +2,7 @@ import { COL_MAP, ROW_MAP, _Z } from '../globals.js';
 import { appState } from '../state/appState.js';
 import { CellType, ColorPiecesType, gameState } from '../state/gameState.js';
 
-import { makeLocalMove, signalMoveMultiplayer } from '../engine/gameFlow.js';
+import { makeLocalMoveAndPassTurn, signalMoveMultiplayer } from '../engine/gameFlow.js';
 import { MoveType, getPieceImage } from '../engine/piecesLib.js';
 
 const _squares = [
@@ -189,7 +189,7 @@ function squareClick([row, col]: [number, number]) {
             signalMoveMultiplayer(selectedPiece, move);
           }
         } else {
-          makeLocalMove(selectedPiece, move);
+          makeLocalMoveAndPassTurn(selectedPiece, move);
         }
         return;
       }

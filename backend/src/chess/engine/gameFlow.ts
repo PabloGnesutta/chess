@@ -14,7 +14,7 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
 }
 
-function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): MoveResult {
+function makeLocalMoveAndPassTurn(state: MatchState, piece: Piece, move: MoveType): MoveResult {
   const historyItem: LastMoveType = {
     piece: piece.name,
     from: [piece.row, piece.col],
@@ -105,4 +105,4 @@ function startTurn(state: MatchState): MoveResult {
   return startTurnResult;
 }
 
-export { makeLocalMove, putPieceOnBoard };
+export { makeLocalMoveAndPassTurn, putPieceOnBoard };

@@ -1,7 +1,7 @@
 import { log, warn } from '../utils/utils';
 import { CellType } from '../chess/types';
 import { newMatch, validateMove } from '../chess/match/match';
-import { makeLocalMove } from '../chess/engine/gameFlow';
+import { makeLocalMoveAndPassTurn } from '../chess/engine/gameFlow';
 import { findOrCreateRoom, clientLeftRoom } from '../rooms';
 
 import { Client, WSMessage } from './clients';
@@ -58,7 +58,7 @@ function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): voi
   try {
     const { piece, move } = validateMove(state, client, incommingMoveData.from, incommingMoveData.to);
 
-    const moveResult = makeLocalMove(state, piece, move);
+    const moveResult = makeLocalMoveAndPassTurn(state, piece, move);
 
     sendMoveToOponent(client.id, room, { move, pieceId: piece.id, moveResult });
   } catch (err) {
