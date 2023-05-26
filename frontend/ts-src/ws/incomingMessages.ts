@@ -1,4 +1,4 @@
-import { log } from '../globals.js';
+import { log, warn } from '../globals.js';
 import { appState, resetAppState } from '../state/appState.js';
 import { ColorType, gameState, resetGameState } from '../state/gameState.js';
 import { InitialPieces, initGame, makeRemoteMove } from '../engine/gameFlow.js';
@@ -32,7 +32,7 @@ function processIncomingMessage(msg: WSMessage): void {
     // case 'ROOM_LEFT':
     //   return ROOM_LEFT();
     default:
-      return log('Message type not supported');
+      return warn('Message type not supported');
   }
 }
 

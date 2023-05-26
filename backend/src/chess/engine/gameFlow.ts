@@ -5,11 +5,16 @@ import { invertColor } from './utils';
 import { doCastle, doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
 
+export type MoveResult = {
+  status: string;
+  target: string;
+};
+
 function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
   boardPieces[piece.row][piece.col] = piece;
 }
 
-function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): void {
+function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): MoveResult {
   const historyItem: LastMoveType = {
     piece: piece.name,
     from: [piece.row, piece.col],
@@ -25,21 +30,29 @@ function makeLocalMove(state: MatchState, piece: Piece, move: MoveType): void {
     doMove(state, piece, move, false);
   }
 
-  passTurn(state);
+  const passTurnResult = passTurn(state);
+  return passTurnResult;
 }
 
-function passTurn(state: MatchState): void {
+function passTurn(state: MatchState): MoveResult {
   state.players[state.currentColor].isInCheck = false;
   state.currentColor = invertColor(state.currentColor);
-  startTurn(state);
+
+  const startTurnResult = startTurn(state);
+  return startTurnResult;
 }
 
 /**
  * At this point, the turn has been passed, therefore
  * Current color is updated for the new turn
  */
-function startTurn(state: MatchState): void {
+function startTurn(state: MatchState): MoveResult {
   const { boardPieces, colorPieces, currentColor, lastMove, players } = state;
+
+  let startTurnResult: MoveResult = {
+    status: '',
+    target: '',
+  };
 
   // Am I in check?
   // Compute moves
@@ -48,6 +61,7 @@ function startTurn(state: MatchState): void {
   if (playerIsInCheck) {
     players[currentColor].isInCheck = true;
     log(`Player ${currentColor} is in check at room ...`);
+    startTurnResult = { status: 'CHECK', target: currentColor };
   }
 
   // CHECK/STALE MATE
@@ -78,15 +92,17 @@ function startTurn(state: MatchState): void {
 
   if (playerHasNoLegalMoves) {
     if (playerIsInCheck) {
-      setTimeout(() => {
-        log('Check Mate!');
-      }, 100);
+      log('Check Mate!');
+      startTurnResult.status = 'CHECK_MATE';
+      startTurnResult.target = currentColor;
     } else {
-      setTimeout(() => {
-        log('Stale Mate!');
-      }, 100);
+      log('Stale Mate!');
+      startTurnResult.status = 'STALE_MATE';
+      startTurnResult.target = 'BOTH';
     }
   }
+
+  return startTurnResult;
 }
 
 export { makeLocalMove, putPieceOnBoard };

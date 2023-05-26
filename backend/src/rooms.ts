@@ -1,14 +1,11 @@
-import { log } from './utils/utils';
+import { log, warn } from './utils/utils';
 import { MatchState } from './chess/types';
-import { newMatch } from './chess/match/match';
-import { Client, ClientsById, WSPayloadType } from './clients/clients';
-import { writeSocket } from './clients/websocket';
-import { initialPieces } from './chess/constants';
+import { Client, ClientsById } from './clients/clients';
+import { sendRoomMessage } from './clients/outgoingMessages';
 
 export type RoomType = {
   id: number;
   name: string;
-  createdBy?: number;
   clients: ClientsById;
   numActiveClients: number;
   match?: MatchState;
@@ -20,17 +17,7 @@ const rooms: RoomType[] = [];
 
 var roomIdCount = 0;
 
-function getRoomIndex(roomId: number) {
-  return roomIds.findIndex((rId) => rId === roomId);
-}
-
-function getRoom(roomId: number): RoomType | null {
-  const roomIndex = getRoomIndex(roomId);
-  if (roomIndex !== -1) return rooms[roomIndex];
-  else return null;
-}
-
-function createRoom(): RoomType {
+function newRoom(): RoomType {
   const roomId = ++roomIdCount;
 
   const room: RoomType = {
@@ -38,6 +25,7 @@ function createRoom(): RoomType {
     name: 'room_' + Date.now(),
     clients: {},
     numActiveClients: 0,
+    match: undefined,
   };
 
   rooms.push(room);
@@ -46,50 +34,37 @@ function createRoom(): RoomType {
   return room;
 }
 
-function joinOrCreateRoom(client: Client): void {
-  var room = rooms.find((r) => r.numActiveClients < 2);
-
-  if (!room) room = createRoom();
-
+function findOrCreateRoom(client: Client): RoomType {
+  var room = rooms.find(r => r.numActiveClients < 2);
+  if (!room) room = newRoom();
   room.clients[client.id] = client;
   room.numActiveClients++;
-
-  client.activeRoom = room;
-
-  if (room.numActiveClients === 2) {
-    // Room is ready. Create match & notify clients
-
-    const match: MatchState = newMatch(room.clients);
-
-    room.match = match;
-
-    sendRoomReadyToPlayers(room, match);
-  }
+  return room;
 }
 
-function sendRoomReadyToPlayers(room: RoomType, match: MatchState) {
-  for (const color in match.players) {
-    const player = match.players[color];
-
-    const client = room.clients[player.clientId];
-
-    client.playerColor = color;
-
-    writeSocket(client._s, {
-      type: 'ROOM_READY',
-      data: {
-        initialPieces,
-        roomId: room.id,
-        playerColor: color,
-      },
-    });
+function resetRoomsClientsAndInformOponent(room: RoomType, initiator: Client) {
+  const clients = room.clients;
+  for (const clientId in clients) {
+    const client = clients[clientId];
+    client.activeRoom = null;
+    client.playerColor = '';
   }
+
+  sendRoomMessage(room, { type: 'OPONENT_ABANDONED' }, initiator.id);
 }
 
-function resetRoomAndInformOponent(client: Client): void {
+/**
+ * Resets the room's clients, numActiveClients and match properties.
+ * Reset the room clients' activeRoom and playerColor properties.
+ * Closes the match if it exists: set its status to CLOSED.
+ * Informs the other player that the current player abandoned the game.
+ * @param {Client} client
+ * @returns {void}
+ */
+function clientLeftRoom(client: Client): void {
   const room = client.activeRoom;
 
-  if (!room) return log(`---room property not set in client ${client.id} @resetRoomAndInformOponent`);
+  if (!room) return warn(`--- room property not set in client ${client.id} @clientLeftRoom`);
 
   const match = room.match;
 
@@ -98,43 +73,11 @@ function resetRoomAndInformOponent(client: Client): void {
     match.statusDetail = 'PLAYER_LEFT';
   }
 
+  resetRoomsClientsAndInformOponent(room, client);
+
   room.match = undefined;
-
-  // send OPONENT_ABANDONED message to the other player (if any)
-  for (const clientId in room.clients) {
-    const roomClient = room.clients[clientId];
-
-    roomClient.activeRoom = null;
-
-    if (roomClient.id !== client.id) {
-      // Inform remaining player
-      writeSocket(roomClient._s, { type: 'OPONENT_ABANDONED', data: {} });
-    }
-  }
-
   room.clients = {};
   room.numActiveClients = 0;
-  room.match = undefined;
 }
 
-/**
- * Send message to all clients in the room.
- * If exceptClientId is provided, do not send to that client.
- * @param {RoomType} room
- * @param {JSON} msg
- * @param {number} exceptClientId
- * @returns {void}
- */
-function sendRoomMessage(room: RoomType, payload: WSPayloadType, exceptClientId?: number): void {
-  const roomClients = room.clients;
-
-  for (const clientId in roomClients) {
-    const roomClient = roomClients[clientId];
-
-    if (roomClient.id !== exceptClientId) {
-      writeSocket(roomClient._s, payload);
-    }
-  }
-}
-
-export { rooms, getRoom, createRoom, joinOrCreateRoom, resetRoomAndInformOponent, sendRoomMessage };
+export { rooms, findOrCreateRoom, clientLeftRoom };

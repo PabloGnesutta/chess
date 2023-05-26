@@ -3,6 +3,7 @@ import { Client, ClientsById } from '../clients/clients';
 import { RoomType } from '../rooms';
 
 const log = console.log;
+const warn = console.warn;
 
 function logClients(clients: ClientsById, label = 'client') {
   for (const id in clients) {
@@ -30,4 +31,4 @@ function logMatch(match: MatchState, label = 'match') {
   log(label, match);
 }
 
-export { log, logRoom, logClients, logMatch };
+export { log, logRoom, logClients, logMatch, warn };

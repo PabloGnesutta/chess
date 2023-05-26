@@ -1,12 +1,13 @@
 import { Duplex } from 'node:stream';
 
 import { log } from '../utils/utils';
-import { RoomType, resetRoomAndInformOponent } from '../rooms';
+import { RoomType, clientLeftRoom } from '../rooms';
+
 import { readSocket, writeSocket } from './websocket';
 
 export type WSPayloadType = {
   type: string;
-  data: any;
+  data?: any;
 };
 
 export type WSMessage = {
@@ -58,11 +59,8 @@ function registerClient(_s: Duplex): void {
 
 function deleteClient(client: Client): void {
   log(' / @deleteClient');
-
+  clientLeftRoom(client);
   client._s.destroy();
-
-  resetRoomAndInformOponent(client);
-
   delete clients[client.id];
 }
 
