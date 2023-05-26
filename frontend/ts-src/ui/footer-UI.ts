@@ -7,8 +7,8 @@ import { drawBoard, drawPieces } from './board.js';
 
 import { m_Welcome } from './modal.js';
 
-const footer = document.getElementById('footer')!;
-const debug = document.getElementById('debug')!;
+const _footer = document.getElementById('footer')!;
+const _debug = document.getElementById('debug')!;
 
 // GAME CONTROLS:
 
@@ -55,4 +55,4 @@ showMovesHistory.addEventListener('click', () => {
   log(gameState.movesHistory);
 });
 
-export { debug, footer };
+export { _debug, _footer };

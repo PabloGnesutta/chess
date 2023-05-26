@@ -12,8 +12,9 @@ import {
   resetGameState,
   PositionHistoryItem,
 } from '../state/gameState.js';
-import { debug, footer } from '../ui/footer-UI.js';
+import { _debug, _footer } from '../ui/footer-UI.js';
 import {
+  _board,
   _imgContainers,
   clearLastMoveMarks,
   drawBoard,
@@ -25,15 +26,18 @@ import {
 import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
 import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
 import { computeMoves } from './computePieceMovements.js';
+import { m_gameEnded } from '../ui/modal';
 
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
 
+export type EndGameStatus = 'CHECKMATE' | 'STALEMATE_BY_REPETITION' | 'STALEMATE_BY_DRAWN_KING';
+
 function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
-  if (ALLOW_DEBUG) debug?.classList.remove('display-none');
+  if (ALLOW_DEBUG) _debug?.classList.remove('display-none');
 
-  footer.classList.remove('display-none');
+  _footer.classList.remove('display-none');
 
-  document.getElementById('board')!.classList.remove('display-none');
+  _board.classList.remove('display-none');
 
   resetGameState();
 
@@ -113,7 +117,7 @@ function startTurn(): void {
 
   const positionHistoryResult = updatePositionHistory(colorPieces, positionHistory);
 
-  if (positionHistoryResult === 'STALEMATE') {
+  if (positionHistoryResult === 'STALEMATE_BY_REPETITION') {
     return endGame('STALEMATE_BY_REPETITION', currentColor);
   }
 
@@ -134,9 +138,8 @@ function startTurn(): void {
   }
 }
 
-function endGame(status: string, currentColor: string): void {
-  // TODO: Show modal, etc.
-  alert('Game ended: ' + status + ' - ' + currentColor);
+function endGame(status: EndGameStatus, currentColor: ColorType): void {
+  m_gameEnded(status, currentColor);
 }
 
 function computeLegalMovesForPlayer(boardPieces: BoardPiecesType, playerPieces: Piece[]) {
@@ -152,7 +155,7 @@ function computeLegalMovesForPlayer(boardPieces: BoardPiecesType, playerPieces: 
   return numLegalMoves;
 }
 
-type UpdatePositionHistoryResult = 'STALEMATE' | '';
+type UpdatePositionHistoryResult = 'STALEMATE_BY_REPETITION' | '';
 
 function updatePositionHistory(
   colorPieces: ColorPiecesType,
@@ -183,13 +186,13 @@ function updatePositionHistory(
       positionIsNew = false;
       historyItem.occuredTimes++;
       if (historyItem.occuredTimes === 3) {
-        updatePositionResult = 'STALEMATE';
+        updatePositionResult = 'STALEMATE_BY_REPETITION';
       }
       break;
     }
   }
 
-  if (updatePositionResult !== 'STALEMATE' && positionIsNew) {
+  if (updatePositionResult !== 'STALEMATE_BY_REPETITION' && positionIsNew) {
     positionHistory.push({
       occuredTimes: 1,
       position: boardPosition,

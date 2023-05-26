@@ -27,6 +27,8 @@ const _imgContainers = [
   new Array(8).fill(null),
 ];
 
+const _board = document.getElementById('board')!;
+
 var selectedSquare: HTMLElement | null = null;
 var movementMarkSquares: HTMLElement[] = [];
 var lastMoveCells: CellType[] = [
@@ -65,8 +67,7 @@ function initializeBoard() {
 }
 
 function drawBoard(pov = 'w') {
-  const _board = document.getElementById('board');
-  _board!.innerHTML = '';
+  _board.innerHTML = '';
 
   let rowStart = 0;
   let rowEval = (row: number) => row <= _Z;
@@ -108,7 +109,7 @@ function drawBoard(pov = 'w') {
         _square.appendChild(fileIndicator);
       }
     }
-    _board!.appendChild(_row);
+    _board.appendChild(_row);
   }
 }
 
@@ -207,6 +208,7 @@ function squareClick([row, col]: [number, number]) {
 }
 
 export {
+  _board,
   _imgContainers,
   unselectCurrentSquare,
   clearLastMoveMarks,

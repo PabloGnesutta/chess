@@ -1,4 +1,4 @@
-const clientIdElement = document.getElementById('client-id')!;
-const roomIdElement = document.getElementById('room-id')!;
+const _clientIdElement = document.getElementById('client-id')!;
+const _roomIdElement = document.getElementById('room-id')!;
 
-export { clientIdElement, roomIdElement };
+export { _clientIdElement, _roomIdElement };

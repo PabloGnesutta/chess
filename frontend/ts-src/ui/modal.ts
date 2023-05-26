@@ -1,4 +1,8 @@
+import { log } from '../globals';
 import { initApp } from '../initialize.js';
+import { ColorType } from '../state/gameState';
+import { EndGameStatus } from '../engine/gameFlow';
+
 import { createElement } from './DOM.js';
 
 const modal = document.getElementById('modal')!;
@@ -76,6 +80,11 @@ function m_OponentAbandoned() {
   showModal(content, { hideCloseBtn: true });
 }
 
+function m_gameEnded(status: EndGameStatus, currentColor: ColorType): void {
+  alert(`Game ended: ${status} - ${currentColor}`);
+  log(status, currentColor);
+}
+
 closeModalBtn.onclick = () => closeModal();
 
-export { closeModal, m_LookingForPlayers, m_OponentAbandoned, m_Welcome };
+export { closeModal, m_gameEnded, m_LookingForPlayers, m_OponentAbandoned, m_Welcome };

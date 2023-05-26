@@ -4,7 +4,7 @@ import { ColorType, gameState, resetGameState } from '../state/gameState.js';
 import { InitialPieces, initGame, makeRemoteMove } from '../engine/gameFlow.js';
 import { MoveType } from '../engine/piecesLib.js';
 import { closeModal, m_OponentAbandoned } from '../ui/modal.js';
-import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
+import { _clientIdElement, _roomIdElement } from '../ui/lobby-UI.js';
 
 import { WSMessage } from './ws.js';
 
@@ -36,13 +36,13 @@ function processIncomingMessage(msg: WSMessage): void {
 
 function CLIENT_REGISTERED(data: any): void {
   appState.clientId = data.clientId;
-  clientIdElement.innerText = 'Online | Client ID: ' + data.clientId;
+  _clientIdElement.innerText = 'Online | Client ID: ' + data.clientId;
 }
 
 function ROOM_READY(data: RoomReady) {
   appState.activeRoomId = data.roomId;
   gameState.playerColor = data.playerColor;
-  roomIdElement.innerText = 'On Room ' + data.roomId;
+  _roomIdElement.innerText = 'On Room ' + data.roomId;
 
   initGame(gameState.playerColor, data.initialPieces);
   closeModal();

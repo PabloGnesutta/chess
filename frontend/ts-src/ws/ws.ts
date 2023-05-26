@@ -1,7 +1,7 @@
 import { WS_URL } from '../env.js';
 import { log } from '../globals.js';
 import { appState } from '../state/appState.js';
-import { clientIdElement, roomIdElement } from '../ui/lobby-UI.js';
+import { _clientIdElement, _roomIdElement } from '../ui/lobby-UI.js';
 
 import { processIncomingMessage } from './incomingMessages.js';
 
@@ -44,8 +44,8 @@ function flushSocket(ws: WebSocket, cause: string, event: Event) {
   appState.isWSOpen = false;
   appState.clientId = 0;
   appState.activeRoomId = 0;
-  roomIdElement.innerText = '';
-  clientIdElement.innerText = 'Offline';
+  _roomIdElement.innerText = '';
+  _clientIdElement.innerText = 'Offline';
 }
 
 export { connectWebSocket, wsSend };
