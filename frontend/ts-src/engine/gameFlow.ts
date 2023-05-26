@@ -1,11 +1,10 @@
 import { ALLOW_DEBUG } from '../env.js';
-import { NAME_MAP, defaultInitialPieces, log, warn } from '../globals.js';
+import { NAME_MAP, defaultInitialPieces, warn } from '../globals.js';
 import { IncommingMoveData } from '../ws/incomingMessages.js';
 import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
 import {
   BoardPiecesType,
-  CellType,
   ColorPiecesType,
   ColorType,
   PieceNameType,
@@ -32,9 +31,9 @@ export type InitialPieces = [number, PieceNameType, number, number, ColorType][]
 function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
   if (ALLOW_DEBUG) debug?.classList.remove('display-none');
 
-  footer?.classList.remove('display-none');
+  footer.classList.remove('display-none');
 
-  document.getElementById('board')?.classList.remove('display-none');
+  document.getElementById('board')!.classList.remove('display-none');
 
   resetGameState();
 
@@ -67,7 +66,7 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
 
 function makeRemoteMove(moveData: IncommingMoveData): void {
   const { pieceId, move } = moveData;
-  const piece = gameState.colorPieces[gameState.currentColor].find((p) => p.id === pieceId);
+  const piece = gameState.colorPieces[gameState.currentColor].find(p => p.id === pieceId);
   if (piece) {
     makeLocalMoveAndPassTurn(piece, move);
   } else {
@@ -80,7 +79,7 @@ function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
 
   const historyItem = {
     piece: piece.name,
-    from: [piece.row, piece.col] as CellType,
+    from: [piece.row, piece.col],
     to: move.moveTo,
     color: gameState.currentColor,
   };
@@ -115,11 +114,9 @@ function startTurn(): void {
   const positionHistoryResult = updatePositionHistory(colorPieces, positionHistory);
 
   if (positionHistoryResult === 'STALEMATE') {
-    // TODO: Show modal, etc.
-    return log('STALEMATE BY REPETITION');
+    return endGame('STALEMATE_BY_REPETITION', currentColor);
   }
 
-  // Am I in check?
   const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
   if (playerIsInCheck) {
@@ -127,34 +124,42 @@ function startTurn(): void {
     gameState.soundToPlay = 'check';
   }
 
-  // Compute all legal moves for current player.
-  // (Moves that don't put the player in check)
-  // If no legal moves, then it's check mate or stale mate.
+  const numLegalMoves = computeLegalMovesForPlayer(boardPieces, colorPieces[currentColor]);
+
+  playSound(gameState.soundToPlay);
+
+  if (!numLegalMoves) {
+    if (playerIsInCheck) endGame('CHECKMATE', currentColor);
+    else endGame('STALEMATE_BY_DRAWN_KING', currentColor);
+  }
+}
+
+function endGame(status: string, currentColor: string): void {
+  // TODO: Show modal, etc.
+  alert('Game ended: ' + status + ' - ' + currentColor);
+}
+
+function computeLegalMovesForPlayer(boardPieces: BoardPiecesType, playerPieces: Piece[]) {
   let numLegalMoves = 0;
 
-  colorPieces[currentColor].forEach((piece) => {
+  playerPieces.forEach(piece => {
     computeMoves[piece.name](boardPieces, piece);
     const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;
     numLegalMoves += legalMoves.length;
   });
 
-  playSound(gameState.soundToPlay);
-
-  if (!numLegalMoves) {
-    if (playerIsInCheck) {
-      setTimeout(() => {
-        alert('Check Mate!');
-      }, 100);
-    } else {
-      setTimeout(() => {
-        alert('Stale Mate!');
-      }, 100);
-    }
-  }
+  return numLegalMoves;
 }
 
-function updatePositionHistory(colorPieces: ColorPiecesType, positionHistory: PositionHistoryItem[]): 'STALEMATE' | '' {
+type UpdatePositionHistoryResult = 'STALEMATE' | '';
+
+function updatePositionHistory(
+  colorPieces: ColorPiecesType,
+  positionHistory: PositionHistoryItem[]
+): UpdatePositionHistoryResult {
+  let updatePositionResult: UpdatePositionHistoryResult = '';
+
   // Build history item
   const boardPositionArray = [];
   for (const color in colorPieces) {
@@ -169,7 +174,6 @@ function updatePositionHistory(colorPieces: ColorPiecesType, positionHistory: Po
 
   const boardPosition = boardPositionArray.join(';');
 
-  let isStalemateByRepetition = false;
   // Find if the position previously occurred
   let positionIsNew = true;
   for (let i = 0; i < positionHistory.length; i++) {
@@ -179,22 +183,20 @@ function updatePositionHistory(colorPieces: ColorPiecesType, positionHistory: Po
       positionIsNew = false;
       historyItem.occuredTimes++;
       if (historyItem.occuredTimes === 3) {
-        isStalemateByRepetition = true;
+        updatePositionResult = 'STALEMATE';
       }
       break;
     }
   }
 
-  if (isStalemateByRepetition) {
-    return 'STALEMATE';
-  } else if (positionIsNew) {
+  if (updatePositionResult !== 'STALEMATE' && positionIsNew) {
     positionHistory.push({
       occuredTimes: 1,
       position: boardPosition,
     });
   }
 
-  return '';
+  return updatePositionResult;
 }
 
 function signalMoveMultiplayer(piece: Piece, move: MoveType): void {

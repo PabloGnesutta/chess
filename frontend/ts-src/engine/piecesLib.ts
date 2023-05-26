@@ -68,7 +68,8 @@ function updateBoardAndPieceWithMove(
   // Place piece on the board at new position
   piece.row = rowTo;
   piece.col = colTo;
-  boardPieces[rowTo][colTo] = piece;
+  putPieceOnBoard(piece, boardPieces);
+  // boardPieces[rowTo][colTo] = piece;
 
   if (!isSimulation) {
     _imgContainers[rowFrom][colFrom].innerHTML = null; // render
