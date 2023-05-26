@@ -1,5 +1,5 @@
 import { ALLOW_DEBUG } from '../env.js';
-import { defaultInitialPieces, warn } from '../globals.js';
+import { NAME_MAP, defaultInitialPieces, log, warn } from '../globals.js';
 import { IncommingMoveData } from '../ws/incomingMessages.js';
 import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
@@ -58,7 +58,7 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
 
 function makeRemoteMove(moveData: IncommingMoveData): void {
   const { pieceId, move } = moveData;
-  const piece = gameState.colorPieces[gameState.currentColor].find(p => p.id === pieceId);
+  const piece = gameState.colorPieces[gameState.currentColor].find((p) => p.id === pieceId);
   if (piece) {
     makeLocalMoveAndPassTurn(piece, move);
   } else {
@@ -101,15 +101,60 @@ function passTurn(): void {
 }
 
 function startTurn(): void {
-  const { currentColor, opositeColor } = gameState;
+  const { boardPieces, boardStateHistory, colorPieces, currentColor, opositeColor, players } = gameState;
+
+  // Board state history
+
+  // Build state entry
+  const boardPositionsArray = [];
+  for (const color in colorPieces) {
+    const pieces = colorPieces[color];
+    for (let i = 0; i < pieces.length; i++) {
+      const { name, row, col } = pieces[i];
+      const str = `${color}_${NAME_MAP[name]}_${row}_${col}`;
+      boardPositionsArray.push(str);
+      boardPositionsArray.sort();
+    }
+  }
+
+  const boardPositions = boardPositionsArray.join(';');
+
+  let isStalemateByRepetition = false;
+  // Find if the position previously occurred
+  let positionsAreNew = true;
+  for (let i = 0; i < boardStateHistory.length; i++) {
+    const historyItem = boardStateHistory[i];
+    const positions = historyItem.positions;
+    if (positions === boardPositions) {
+      log(' Position has previously occurred', historyItem.occuredTimes, 'times');
+      positionsAreNew = false;
+      historyItem.occuredTimes++;
+      if (historyItem.occuredTimes === 3) {
+        isStalemateByRepetition = true;
+      }
+      break;
+    }
+  }
+
+  if (isStalemateByRepetition) {
+    log('STALEMATE BY REPETITION');
+    return;
+  } else if (positionsAreNew) {
+    boardStateHistory.push({
+      occuredTimes: 1,
+      positions: boardPositions,
+    });
+  }
+
+  log(' *** boardStateHistory', boardStateHistory);
 
   // TODO: stalemate by repetition
 
   // Am I in check?
-  const playerIsInCheck = isPlayerInCheckAtPosition(gameState.boardPieces, gameState.colorPieces[opositeColor]);
+  const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
   if (playerIsInCheck) {
-    gameState.players[currentColor].isInCheck = true;
+    players[currentColor].isInCheck = true;
     gameState.soundToPlay = 'check';
   }
 
@@ -118,8 +163,8 @@ function startTurn(): void {
   // If no legal moves, then it's check mate or stale mate.
   let numLegalMoves = 0;
 
-  gameState.colorPieces[currentColor].forEach(piece => {
-    computeMoves[piece.name](gameState.boardPieces, piece);
+  colorPieces[currentColor].forEach((piece) => {
+    computeMoves[piece.name](boardPieces, piece);
     const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;
     numLegalMoves += legalMoves.length;

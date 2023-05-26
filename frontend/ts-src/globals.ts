@@ -10,6 +10,15 @@ const R = 'rook';
 const N = 'knight';
 const B = 'bishop';
 
+const NAME_MAP = {
+  pawn: 'P',
+  king: 'K',
+  queen: 'Q',
+  rook: 'R',
+  knight: 'N',
+  bishop: 'B',
+};
+
 const _Z = 7; // Largest row/col index
 
 const log = console.log;
@@ -53,4 +62,4 @@ defaultInitialPieces = [
   // [32, P, 1, 7, 'b'],
 ];
 
-export { ROW_MAP, COL_MAP, P, K, Q, R, N, B, _Z, log, warn, defaultInitialPieces };
+export { ROW_MAP, COL_MAP, P, K, Q, R, N, B, _Z, NAME_MAP, defaultInitialPieces, log, warn };

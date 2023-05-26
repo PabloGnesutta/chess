@@ -35,6 +35,11 @@ export type PlayersType = {
   };
 };
 
+export type BoardStateHistoryItem = {
+  positions: string;
+  occuredTimes: number;
+};
+
 export type GameState = {
   currentColor: ColorType;
   opositeColor: ColorType;
@@ -46,6 +51,7 @@ export type GameState = {
   colorPieces: ColorPiecesType;
   boardPieces: BoardPiecesType;
   movesHistory: string[];
+  boardStateHistory: BoardStateHistoryItem[];
 };
 
 let gameState: GameState = getInitialState();
@@ -89,6 +95,7 @@ function getInitialState(): GameState {
         captures: [],
       },
     },
+    boardStateHistory: [],
   };
 }
 
