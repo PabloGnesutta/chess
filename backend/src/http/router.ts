@@ -2,9 +2,10 @@ import * as fs from 'node:fs';
 import path = require('node:path');
 import { IncomingMessage, ServerResponse } from 'node:http';
 
-import { log, logClients, logRoom } from '../utils/utils';
+import { log, logClients, logMatch, logRoom } from '../utils/utils';
 import { clients } from '../clients/clients';
 import { rooms } from '../rooms';
+import { matches } from '../chess/match/match';
 
 const PUBLIC_DIR = path.join(__dirname, '../', '../', '../', 'frontend', 'public');
 const HTML_DIR = path.join(PUBLIC_DIR, 'index.html');
@@ -13,7 +14,7 @@ const HTML_DIR = path.join(PUBLIC_DIR, 'index.html');
 function doTheLogging(): void {
   log(' ----------------- ');
   log(' ** ROOMS');
-  rooms.forEach(room => {
+  rooms.forEach((room) => {
     logRoom(room);
   });
   log(' ');
@@ -23,7 +24,7 @@ function doTheLogging(): void {
   log(' ');
 
   log(' ** MATCHES');
-  // for (const id in matches) logMatch(matches[id]);
+  for (const id in matches) logMatch(matches[id]);
   log(' ');
 }
 
@@ -73,7 +74,7 @@ function router(req: IncomingMessage, res: ServerResponse): any {
     if (pathBase === 'audio-assets') return sendAssetFile(res, filePath, 'audio/mp3');
 
     // Catch-all 404
-    
+
     // log('Resource not found', pathArray);
 
     res.writeHead(404);

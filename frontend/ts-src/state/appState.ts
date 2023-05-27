@@ -1,4 +1,4 @@
-import { _board } from '../ui/board';
+import { _board } from '../ui/board.js';
 import { _footer } from '../ui/footer-UI.js';
 import { _roomIdElement } from '../ui/lobby-UI.js';
 

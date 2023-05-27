@@ -64,6 +64,7 @@ function newMatch(clients: ClientsById): MatchState {
     players,
     status: 'ONGOING',
     lastMove: {},
+    positionHistory: [],
   };
 
   matches[id] = match;

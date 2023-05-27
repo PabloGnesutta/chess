@@ -1,12 +1,23 @@
 import { log } from '../../utils/utils';
-import { BoardPiecesType, LastMoveType, MatchState, MoveType, Piece } from '../types';
+import {
+  BoardPiecesType,
+  ColorPiecesType,
+  LastMoveType,
+  MatchState,
+  MoveType,
+  Piece,
+  PositionHistoryItem,
+} from '../types';
 import { computePieceLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves';
 import { invertColor } from './utils';
 import { doCastle, doMove } from './piecesLib';
 import { computeMoves } from './computePieceMovements';
+import { NAME_MAP } from '../constants';
+
+type MoveResultStatus = 'CHECK' | 'CHECKMATE' | 'STALEMATE_BY_DRAWN_KING' | 'STALEMATE_BY_REPETITION' | '';
 
 export type MoveResult = {
-  status: string;
+  status: MoveResultStatus;
   target: string;
 };
 
@@ -30,16 +41,13 @@ function makeLocalMoveAndPassTurn(state: MatchState, piece: Piece, move: MoveTyp
     doMove(state, piece, move, false);
   }
 
-  const passTurnResult = passTurn(state);
-  return passTurnResult;
+  return passTurn(state);
 }
 
 function passTurn(state: MatchState): MoveResult {
   state.players[state.currentColor].isInCheck = false;
   state.currentColor = invertColor(state.currentColor);
-
-  const startTurnResult = startTurn(state);
-  return startTurnResult;
+  return startTurn(state);
 }
 
 /**
@@ -47,57 +55,36 @@ function passTurn(state: MatchState): MoveResult {
  * Current color is updated for the new turn
  */
 function startTurn(state: MatchState): MoveResult {
-  const { boardPieces, colorPieces, currentColor, lastMove, players } = state;
+  const { boardPieces, colorPieces, currentColor, players, positionHistory } = state;
 
   let startTurnResult: MoveResult = {
     status: '',
     target: '',
   };
 
-  // Am I in check?
-  // Compute moves
-  const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces, state);
+  const positionHistoryResult = updatePositionHistory(colorPieces, positionHistory);
 
-  if (playerIsInCheck) {
+  if (positionHistoryResult === 'STALEMATE_BY_REPETITION') {
+    startTurnResult.status = positionHistoryResult;
+    startTurnResult.target = 'BOTH';
+    return startTurnResult;
+  }
+
+  const isInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces, state);
+
+  if (isInCheck) {
     players[currentColor].isInCheck = true;
-    log(`Player ${currentColor} is in check at room ...`);
     startTurnResult = { status: 'CHECK', target: currentColor };
   }
 
-  // CHECK/STALE MATE
+  const hasNoLegalMoves = playerHasNoLegalMoves(state);
 
-  var playerHasNoLegalMoves = true;
-
-  // Compute legal moves for current player's pieces.
-  const currentPieces = colorPieces[currentColor];
-
-  for (let p = 0; p < currentPieces.length; p++) {
-    const piece = currentPieces[p];
-
-    // Compute moves
-    computeMoves[piece.name](boardPieces, piece, {
-      lastMove: lastMove as LastMoveType,
-      isInCheck: players[currentColor].isInCheck,
-    });
-
-    if (piece.moves.length) {
-      const legalMoves = computePieceLegalMoves(state, piece);
-
-      if (legalMoves.length) {
-        playerHasNoLegalMoves = false;
-        break;
-      }
-    }
-  }
-
-  if (playerHasNoLegalMoves) {
-    if (playerIsInCheck) {
-      log('Check Mate!');
-      startTurnResult.status = 'CHECK_MATE';
+  if (hasNoLegalMoves) {
+    if (isInCheck) {
+      startTurnResult.status = 'CHECKMATE';
       startTurnResult.target = currentColor;
     } else {
-      log('Stale Mate!');
-      startTurnResult.status = 'STALE_MATE';
+      startTurnResult.status = 'STALEMATE_BY_DRAWN_KING';
       startTurnResult.target = 'BOTH';
     }
   }
@@ -105,4 +92,80 @@ function startTurn(state: MatchState): MoveResult {
   return startTurnResult;
 }
 
-export { makeLocalMoveAndPassTurn, putPieceOnBoard };
+function playerHasNoLegalMoves(state: MatchState): boolean {
+  const { boardPieces, colorPieces, currentColor, lastMove, players } = state;
+
+  const playerPieces = colorPieces[currentColor];
+  const isInCheck = players[currentColor].isInCheck;
+
+  let hasNoLegalMoves = true;
+
+  for (let p = 0; p < playerPieces.length; p++) {
+    const piece = playerPieces[p];
+
+    computeMoves[piece.name](boardPieces, piece, {
+      lastMove: lastMove as LastMoveType,
+      isInCheck: isInCheck,
+    });
+
+    if (piece.moves.length) {
+      const legalMoves = computePieceLegalMoves(state, piece);
+
+      if (legalMoves.length) {
+        hasNoLegalMoves = false;
+        break;
+      }
+    }
+  }
+
+  return hasNoLegalMoves;
+}
+
+type UpdatePositionHistoryResult = 'STALEMATE_BY_REPETITION' | '';
+
+function updatePositionHistory(
+  colorPieces: ColorPiecesType,
+  positionHistory: PositionHistoryItem[]
+): UpdatePositionHistoryResult {
+  let updatePositionResult: UpdatePositionHistoryResult = '';
+
+  // Build history item
+  const currentBoardPositionArray = [];
+  for (const color in colorPieces) {
+    const pieces = colorPieces[color];
+    for (let i = 0; i < pieces.length; i++) {
+      const { name, row, col } = pieces[i];
+      const str = `${color}_${NAME_MAP[name]}${row}${col}`;
+      currentBoardPositionArray.push(str);
+      currentBoardPositionArray.sort();
+    }
+  }
+
+  const currentBoardPositionStr = currentBoardPositionArray.join(';');
+
+  // Find if the position previously occurred
+  let positionIsNew = true;
+  for (let i = 0; i < positionHistory.length; i++) {
+    const historyItem = positionHistory[i];
+    const position = historyItem.position;
+    if (position === currentBoardPositionStr) {
+      positionIsNew = false;
+      historyItem.occuredTimes++;
+      if (historyItem.occuredTimes === 3) {
+        updatePositionResult = 'STALEMATE_BY_REPETITION';
+      }
+      break;
+    }
+  }
+
+  if (updatePositionResult !== 'STALEMATE_BY_REPETITION' && positionIsNew) {
+    positionHistory.push({
+      occuredTimes: 1,
+      position: currentBoardPositionStr,
+    });
+  }
+
+  return updatePositionResult;
+}
+
+export { makeLocalMoveAndPassTurn, putPieceOnBoard, startTurn };

@@ -1,6 +1,6 @@
 import { SoundName } from '../audio/audio.js';
 import { Piece } from '../engine/piecesLib.js';
-import { _imgContainers } from '../ui/board';
+import { _imgContainers } from '../ui/board.js';
 
 export type ColorType = 'w' | 'b';
 export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';

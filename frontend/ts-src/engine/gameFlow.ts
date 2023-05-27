@@ -26,7 +26,7 @@ import {
 import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
 import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
 import { computeMoves } from './computePieceMovements.js';
-import { m_gameEnded } from '../ui/modal';
+import { m_gameEnded } from '../ui/modal.js';
 
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
 
@@ -70,7 +70,7 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
 
 function makeRemoteMove(moveData: IncommingMoveData): void {
   const { pieceId, move } = moveData;
-  const piece = gameState.colorPieces[gameState.currentColor].find(p => p.id === pieceId);
+  const piece = gameState.colorPieces[gameState.currentColor].find((p) => p.id === pieceId);
   if (piece) {
     makeLocalMoveAndPassTurn(piece, move);
   } else {
@@ -145,7 +145,7 @@ function endGame(status: EndGameStatus, currentColor: ColorType): void {
 function computeLegalMovesForPlayer(boardPieces: BoardPiecesType, playerPieces: Piece[]) {
   let numLegalMoves = 0;
 
-  playerPieces.forEach(piece => {
+  playerPieces.forEach((piece) => {
     computeMoves[piece.name](boardPieces, piece);
     const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;
@@ -164,25 +164,25 @@ function updatePositionHistory(
   let updatePositionResult: UpdatePositionHistoryResult = '';
 
   // Build history item
-  const boardPositionArray = [];
+  const currentBoardPositionArray = [];
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
     for (let i = 0; i < pieces.length; i++) {
       const { name, row, col } = pieces[i];
       const str = `${color}_${NAME_MAP[name]}_${row}_${col}`;
-      boardPositionArray.push(str);
-      boardPositionArray.sort();
+      currentBoardPositionArray.push(str);
+      currentBoardPositionArray.sort();
     }
   }
 
-  const boardPosition = boardPositionArray.join(';');
+  const currentBoardPositionStr = currentBoardPositionArray.join(';');
 
   // Find if the position previously occurred
   let positionIsNew = true;
   for (let i = 0; i < positionHistory.length; i++) {
     const historyItem = positionHistory[i];
     const position = historyItem.position;
-    if (position === boardPosition) {
+    if (position === currentBoardPositionStr) {
       positionIsNew = false;
       historyItem.occuredTimes++;
       if (historyItem.occuredTimes === 3) {
@@ -195,7 +195,7 @@ function updatePositionHistory(
   if (updatePositionResult !== 'STALEMATE_BY_REPETITION' && positionIsNew) {
     positionHistory.push({
       occuredTimes: 1,
-      position: boardPosition,
+      position: currentBoardPositionStr,
     });
   }
 

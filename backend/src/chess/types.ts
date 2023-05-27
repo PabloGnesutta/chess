@@ -62,6 +62,11 @@ export type PlayersType = {
   [key: string]: PlayerState;
 };
 
+export type PositionHistoryItem = {
+  position: string;
+  occuredTimes: number;
+};
+
 export type MatchState = {
   id: number;
   colorPieces: ColorPiecesType;
@@ -71,6 +76,7 @@ export type MatchState = {
   status?: string;
   statusDetail?: string;
   lastMove: LastMoveType | {};
+  positionHistory: PositionHistoryItem[];
 };
 
 export type DoMovePartialState = {

@@ -1,7 +1,7 @@
 import { log, warn } from '../utils/utils';
 import { CellType } from '../chess/types';
 import { newMatch, validateMove } from '../chess/match/match';
-import { makeLocalMoveAndPassTurn } from '../chess/engine/gameFlow';
+import { makeLocalMoveAndPassTurn, startTurn } from '../chess/engine/gameFlow';
 import { findOrCreateRoom, clientLeftRoom } from '../rooms';
 
 import { Client, WSMessage } from './clients';
@@ -38,6 +38,7 @@ function JOIN_ROOM(client: Client): void {
 
   if (room.numActiveClients === 2) {
     room.match = newMatch(room.clients);
+    startTurn(room.match);
     sendRoomReadyToPlayers(room, room.match);
   }
 }
@@ -61,6 +62,13 @@ function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): voi
     const moveResult = makeLocalMoveAndPassTurn(state, piece, move);
 
     sendMoveToOponent(client.id, room, { move, pieceId: piece.id, moveResult });
+
+    if (moveResult.status) {
+      if (moveResult.status !== 'CHECK') {
+        // TODO: Send result to current player
+        log(' *** Game ended due to ', moveResult.status, moveResult.target);
+      }
+    }
   } catch (err) {
     sendRoomMessage(room, { type: 'MOVE_ERROR' });
     warn('Error processing Move', { err, state, incommingMoveData }, '@PROCESS_MOVE');

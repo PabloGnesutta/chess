@@ -1,4 +1,4 @@
-import { log } from '../globals';
+import { log } from '../globals.js';
 import { initApp } from '../initialize.js';
 import { ColorType } from '../state/gameState';
 import { EndGameStatus } from '../engine/gameFlow';
@@ -50,7 +50,7 @@ function closeModal(callback?: () => void) {
 function wrapElements(elements: HTMLElement[], className = ''): HTMLElement {
   const container = createElement('div');
   container.className = className;
-  elements.forEach(el => container.appendChild(el));
+  elements.forEach((el) => container.appendChild(el));
   return container;
 }
 
