@@ -3,11 +3,11 @@ import { initApp } from '../initialize.js';
 import { ColorType } from '../state/gameState';
 import { EndGameStatus } from '../engine/gameFlow';
 
-import { createElement } from './DOM.js';
+import { $, createElement } from './DOM.js';
 
-const modal = document.getElementById('modal')!;
-const modalContent = document.getElementById('modal-content')!;
-const closeModalBtn = document.getElementById('close-modal-btn')!;
+const modal = $('modal')!;
+const modalContent = $('modal-content')!;
+const closeModalBtn = $('close-modal-btn')!;
 
 // Reusable elements
 const playSolo = createElement('button', { text: 'Play Solo' });

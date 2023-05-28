@@ -1,9 +1,10 @@
 import { COL_MAP, ROW_MAP, _Z } from '../globals.js';
 import { appState } from '../state/appState.js';
 import { CellType, ColorPiecesType, gameState } from '../state/gameState.js';
-
 import { makeLocalMoveAndPassTurn, signalMoveMultiplayer } from '../engine/gameFlow.js';
 import { MoveType, getPieceImage } from '../engine/piecesLib.js';
+
+import { $, createElement } from './DOM.js';
 
 const _squares = [
   new Array(8).fill(null),
@@ -27,7 +28,7 @@ const _imgContainers = [
   new Array(8).fill(null),
 ];
 
-const _board = document.getElementById('board')!;
+const _board = $('board')!;
 
 var selectedSquare: HTMLElement | null = null;
 var movementMarkSquares: HTMLElement[] = [];
@@ -36,38 +37,69 @@ var lastMoveCells: CellType[] = [
   [0, 0], // to
 ];
 
+type Indicators = {
+  rankIndicatorAtCol: number;
+  fileIndicatorAtRow: number;
+};
+
 function initializeBoard() {
+  const indicatorsByColor: { [key: string]: Indicators } = {
+    w: {
+      rankIndicatorAtCol: 0,
+      fileIndicatorAtRow: _Z,
+    },
+    b: {
+      rankIndicatorAtCol: _Z,
+      fileIndicatorAtRow: 0,
+    },
+  };
+
   for (let row = 0; row <= _Z; row++) {
-    const _row = document.createElement('row');
-    _row.className = 'row';
+    const _row = createElement('div', { className: 'row' });
 
     for (let col = 0; col <= _Z; col++) {
-      const _square = document.createElement('div');
-      _square.className = 'square';
+      const _square = createElement('div', { className: 'square' });
       _square.setAttribute('row', row.toString());
       _square.setAttribute('col', col.toString());
       _square.addEventListener('mousedown', () => squareClick([row, col]));
-
-      const _imgContainer = document.createElement('div');
-      _imgContainer.classList.add('img-container');
-      _square.appendChild(_imgContainer);
-
-      _imgContainers[row][col] = _imgContainer;
       _squares[row][col] = _square;
 
+      const _imgContainer = createElement('div', { className: 'img-container' });
+      _imgContainers[row][col] = _imgContainer;
+
+      _square.appendChild(_imgContainer);
       _row.appendChild(_square);
 
       // debug
-      const _rowCol = document.createElement('div');
-      _rowCol.innerText = row + '_' + col;
-      _rowCol.classList.add('row-col-indicator');
+      const _rowCol = createElement('div', { className: 'row-col-indicator', text: row + '_' + col });
       _square.appendChild(_rowCol);
+
+      for (const color in indicatorsByColor) {
+        const indicators = indicatorsByColor[color];
+        if (col === indicators.rankIndicatorAtCol) {
+          const rankIndicator = createElement('div', {
+            classList: ['rank-indicator', 'pov-' + color],
+            text: ROW_MAP[row].toString(),
+          });
+          _square.appendChild(rankIndicator);
+        }
+        if (row === indicators.fileIndicatorAtRow) {
+          const fileIndicator = createElement('div', {
+            classList: ['file-indicator', 'pov-' + color],
+            text: COL_MAP[col].toString(),
+          });
+          _square.appendChild(fileIndicator);
+        }
+      }
     }
   }
 }
 
 function drawBoard(pov = 'w') {
   _board.innerHTML = '';
+  _board.classList.remove('pov-w');
+  _board.classList.remove('pov-b');
+  _board.classList.add('pov-' + pov);
 
   let rowStart = 0;
   let rowEval = (row: number) => row <= _Z;
@@ -87,27 +119,11 @@ function drawBoard(pov = 'w') {
     colInc = -1;
   }
 
-  let rankIndicatorAtCol = pov === 'w' ? 0 : _Z;
-  let fileIndicatorAtRow = pov === 'w' ? _Z : 0;
-
   for (let row = rowStart; rowEval(row); row += rowInc) {
-    const _row = document.createElement('div');
-    _row.className = 'row';
+    const _row = createElement('div', { className: 'row' });
     for (let col = colStart; colEval(col); col += colInc) {
       const _square = _squares[row][col];
       _row.appendChild(_square);
-      if (col === rankIndicatorAtCol) {
-        const rankIndicator = document.createElement('div');
-        rankIndicator.classList.add('rank-indicator');
-        rankIndicator.innerText = ROW_MAP[row].toString();
-        _square.appendChild(rankIndicator);
-      }
-      if (row === fileIndicatorAtRow) {
-        const fileIndicator = document.createElement('div');
-        fileIndicator.classList.add('file-indicator');
-        fileIndicator.innerText = COL_MAP[col];
-        _square.appendChild(fileIndicator);
-      }
     }
     _board.appendChild(_row);
   }
@@ -116,7 +132,7 @@ function drawBoard(pov = 'w') {
 function drawPieces(colorPieces: ColorPiecesType) {
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
-    pieces.forEach(piece => {
+    pieces.forEach((piece) => {
       _imgContainers[piece.row][piece.col].innerHTML = getPieceImage(piece);
     });
   }
@@ -143,7 +159,7 @@ function markLastMove(from: CellType, to: CellType) {
 }
 
 function clearMoves() {
-  movementMarkSquares.forEach(_square => {
+  movementMarkSquares.forEach((_square) => {
     _square.classList.remove('potential-move');
     _square.classList.remove('potential-capture');
   });
@@ -152,7 +168,7 @@ function clearMoves() {
 
 function displayMoves(moves: MoveType[]) {
   clearMoves();
-  moves.forEach(move => {
+  moves.forEach((move) => {
     const [row, col] = move.moveTo;
     const _square = _squares[row][col];
     const type = move.captureAt ? 'capture' : 'move';

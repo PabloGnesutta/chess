@@ -3,16 +3,16 @@ import { signalLeaveGameToServer } from '../ws/outgoingMessages.js';
 import { appState, resetAppState } from '../state/appState.js';
 import { gameState, resetGameState } from '../state/gameState.js';
 
+import { $ } from './DOM';
+import { m_Welcome } from './modal.js';
 import { drawBoard, drawPieces } from './board.js';
 
-import { m_Welcome } from './modal.js';
-
-const _footer = document.getElementById('footer')!;
-const _debug = document.getElementById('debug')!;
+const _footer = $('footer')!;
+const _debug = $('debug')!;
 
 // GAME CONTROLS:
 
-const flipBoard = document.getElementById('flip-board')!;
+const flipBoard = $('flip-board')!;
 let pov = 'w';
 flipBoard.addEventListener('click', () => {
   pov = pov === 'w' ? 'b' : 'w';
@@ -20,7 +20,7 @@ flipBoard.addEventListener('click', () => {
   drawPieces(gameState.colorPieces);
 });
 
-const leaveGame = document.getElementById('leave-game')!;
+const leaveGame = $('leave-game')!;
 leaveGame.addEventListener('click', () => {
   if (!confirm('Sure you want to leave the current game?')) return;
 
@@ -35,22 +35,22 @@ leaveGame.addEventListener('click', () => {
 
 // DEBUG CONTROLS:
 
-const showState = document.getElementById('show-state')!;
+const showState = $('show-state')!;
 showState.addEventListener('click', () => {
   log(gameState);
 });
 
-const showBoard = document.getElementById('show-board')!;
+const showBoard = $('show-board')!;
 showBoard.addEventListener('click', () => {
   log(gameState.boardPieces);
 });
 
-const showPieces = document.getElementById('show-pieces')!;
+const showPieces = $('show-pieces')!;
 showPieces.addEventListener('click', () => {
   log(gameState.colorPieces);
 });
 
-const showMovesHistory = document.getElementById('show-moves-history')!;
+const showMovesHistory = $('show-moves-history')!;
 showMovesHistory.addEventListener('click', () => {
   log(gameState.movesHistory);
 });

@@ -1,6 +1,7 @@
 type CreateElementOptions = {
   text?: string;
   id?: string;
+  className?: string;
   classList?: string[];
 };
 
@@ -10,13 +11,18 @@ function createElement(tag: HTLMTag, options?: CreateElementOptions): HTMLElemen
   const el = document.createElement(tag);
 
   if (options) {
-    const { text, id, classList } = options;
+    const { text, id, classList, className } = options;
     if (id) el.id = id;
     if (text) el.innerText = text;
+    if (className) el.className = className;
     if (classList) el.classList.add(...classList);
   }
 
   return el;
 }
 
-export { createElement };
+function $(id: string): HTMLElement | null {
+  return document.getElementById(id);
+}
+
+export { $, createElement };

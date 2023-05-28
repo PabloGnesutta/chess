@@ -77,8 +77,9 @@
   font-size: 12px;
   z-index: 999;
   /* comment for debug: */
-  /* display: none; */
+  display: none;
 }
+
 
 .rank-indicator,
 .file-indicator {
@@ -86,8 +87,19 @@
   color: black;
   font-size: 12px;
   /* uncomment for debug: */
-  display: none; 
+  /* display: none;  */
 }
+
+.board.pov-w .rank-indicator.pov-b,
+.board.pov-w .file-indicator.pov-b {
+  display: none;
+}
+
+.board.pov-b .rank-indicator.pov-w,
+.board.pov-b .file-indicator.pov-w {
+  display: none;
+}
+
 .rank-indicator {
   top: 4px;
   left: 4px;
