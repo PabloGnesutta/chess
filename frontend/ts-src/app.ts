@@ -5,8 +5,8 @@ import { initApp } from './initialize.js';
 initializeBoard();
 
 {
-  // initApp('SOLO');
-  initApp('ONLINE');
+  initApp('SOLO');
+  // initApp('ONLINE');
 
   // m_Welcome();
 }

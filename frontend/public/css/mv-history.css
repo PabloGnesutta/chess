@@ -7,10 +7,30 @@
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   min-height: 24px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-right: 1rem;
+}
+
+#mv-history::-webkit-scrollbar {
+  height: 6px;
+}
+
+#mv-history::-webkit-scrollbar-track {
+  background: #c4c4c4;
+}
+
+#mv-history::-webkit-scrollbar-thumb {
+  background: teal;
+}
+
+#mv-history::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .mv-history-item {
   cursor: pointer;
+  user-select: none;
   padding: 4px;
 }
 

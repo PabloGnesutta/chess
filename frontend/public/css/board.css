@@ -1,6 +1,4 @@
 .board {
-  width: 544px;
-  height: 544px;
   margin: auto;
   box-shadow: 1px 1px 8px 3px rgba(0, 0, 0, 0.5);
 }
@@ -11,7 +9,7 @@
 
 .piece {
   position: absolute;
-  width: 56px;
+  width: 85%;
 }
 
 .img-container {

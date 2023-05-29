@@ -11,4 +11,7 @@
 #footer #debug {
   display: flex;
   gap: 0.5rem;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-right: 1rem;
 }

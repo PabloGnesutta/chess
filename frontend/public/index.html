@@ -1,66 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess</title>
 
-  <title>Chess</title>
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/utils.css" />
+    <link rel="stylesheet" href="css/modal.css" />
+    <link rel="stylesheet" href="css/header-footer.css" />
+    <link rel="stylesheet" href="css/lobby.css" />
+    <link rel="stylesheet" href="css/board.css" />
+    <link rel="stylesheet" href="css/squares.css" />
+    <link rel="stylesheet" href="css/mv-history.css" />
 
-  <link rel="stylesheet" href="css/variables.css" />
-  <link rel="stylesheet" href="css/common.css" />
-  <link rel="stylesheet" href="css/utils.css" />
-  <link rel="stylesheet" href="css/modal.css" />
-  <link rel="stylesheet" href="css/header-footer.css" />
-  <link rel="stylesheet" href="css/lobby.css" />
-  <link rel="stylesheet" href="css/board.css" />
-  <link rel="stylesheet" href="css/squares.css" />
-  <link rel="stylesheet" href="css/mv-history.css" />
+    <script src="js-build/globals.js" type="module" defer></script>
+    <script src="js-build/ui/footer-UI.js" type="module" defer></script>
+    <script src="js-build/app.js" type="module" defer></script>
+  </head>
 
-  <script src="js-build/globals.js" type="module" defer></script>
-  <script src="js-build/ui/footer-UI.js" type="module" defer></script>
-  <script src="js-build/app.js" type="module" defer></script>
-</head>
-
-<body>
-  <div id="app">
-    <main>
-      <div class="center-container">
-        <div class="connection-details">
-          <div id="client-id">Offline</div>
-          <div id="room-id"></div>
-        </div>
-
-        <div id="mv-history"></div>
-
-        <div id="board" class="board display-none"></div>
-
-        <footer id="footer" class="display-none">
-          <div class="inner">
-            <div id="debug" class="display-none">
-              <button id="show-state">State</button>
-              <button id="show-board">Board</button>
-              <button id="show-pieces">Pieces</button>
-              <button id="show-moves-history">Moves History</button>
-              <button id="show-board-history">Board History</button>
-            </div>
-            <button id="flip-board">Flip Board</button>
-            <button id="leave-game">Leave</button>
+  <body>
+    <div id="app">
+      <main>
+        <div class="center-container">
+          <div class="connection-details">
+            <div id="client-id">Offline</div>
+            <div id="room-id"></div>
           </div>
-        </footer>
-      </div>
 
-      <div id="modal" class="display-none">
-        <div class="modal-close-button-container">
-          <span id="close-modal-btn"> &times; </span>
-        </div>
-        <div id="modal-content">
-          <!-- Dynamic content -->
-        </div>
-      </div>
-    </main>
-  </div>
-</body>
+          <div id="mv-history">
+            <!-- Dynamic content -->
+          </div>
 
+          <div id="board" class="board display-none"></div>
+
+          <footer id="footer" class="display-none">
+            <div class="inner">
+              <div id="debug" class="display-none">
+                <button id="show-state">State</button>
+                <button id="show-board">Board</button>
+                <button id="show-pieces">Pieces</button>
+                <button id="show-moves-history">Moves History</button>
+                <button id="show-board-history">Board History</button>
+              </div>
+              <button id="flip-board">Flip Board</button>
+              <button id="leave-game">Leave</button>
+            </div>
+          </footer>
+        </div>
+
+        <div id="modal" class="display-none">
+          <div class="modal-close-button-container">
+            <span id="close-modal-btn"> &times; </span>
+          </div>
+          <div id="modal-content">
+            <!-- Dynamic content -->
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
 </html>
