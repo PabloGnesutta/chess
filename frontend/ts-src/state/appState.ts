@@ -3,12 +3,15 @@ import { _footer } from '../ui/footer-UI.js';
 import { _mvHistory } from '../ui/mvHistory.js';
 import { _roomIdElement } from '../ui/lobby-UI.js';
 
+type ViewMode = 'GAME' | 'HISTORY';
+
 export type AppState = {
   isMultiplayer: boolean;
   isWSOpen: boolean;
   clientId: number;
   activeRoomId: number;
   audioReady: boolean;
+  viewMode: ViewMode;
 };
 
 const appState: AppState = {
@@ -17,6 +20,7 @@ const appState: AppState = {
   clientId: 0,
   activeRoomId: 0,
   audioReady: false,
+  viewMode: 'GAME',
 };
 
 function resetAppState(): void {

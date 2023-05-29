@@ -195,20 +195,22 @@ function squareClick([row, col]: [number, number]) {
 
   const { selectedPiece, currentColor } = gameState;
 
-  if (selectedPiece) {
-    if (currentColor === selectedPiece.color) {
-      // Make move
-      const move = selectedPiece.moves.find(({ moveTo }) => moveTo[0] === row && moveTo[1] === col);
+  // Make move
+  if (appState.viewMode === 'GAME') {
+    if (selectedPiece) {
+      if (currentColor === selectedPiece.color) {
+        const move = selectedPiece.moves.find(({ moveTo }) => moveTo[0] === row && moveTo[1] === col);
 
-      if (move) {
-        if (appState.isMultiplayer) {
-          if (gameState.playerColor === currentColor) {
-            signalMoveMultiplayer(selectedPiece, move);
+        if (move) {
+          if (appState.isMultiplayer) {
+            if (gameState.playerColor === currentColor) {
+              signalMoveMultiplayer(selectedPiece, move);
+            }
+          } else {
+            makeLocalMoveAndPassTurn(selectedPiece, move);
           }
-        } else {
-          makeLocalMoveAndPassTurn(selectedPiece, move);
+          return;
         }
-        return;
       }
     }
   }

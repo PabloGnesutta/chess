@@ -13,3 +13,7 @@
   cursor: pointer;
   padding: 4px;
 }
+
+.mv-history-item.selected {
+  background-color: teal;
+}

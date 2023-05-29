@@ -1,8 +1,8 @@
 import { log, warn } from './globals.js';
 import { connectWebSocket } from './ws/ws.js';
 import { joinRoom } from './ws/outgoingMessages.js';
-import { appState } from './state/appState.js';
 import { initAudio } from './audio/audio.js';
+import { appState } from './state/appState.js';
 import { initGame } from './engine/gameFlow.js';
 import { closeModal, m_LookingForPlayers } from './ui/modal.js';
 

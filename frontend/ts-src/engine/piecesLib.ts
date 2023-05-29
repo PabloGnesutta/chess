@@ -99,7 +99,7 @@ function doMove(piece: Piece, move: MoveType): SoundName {
     // en-passant
     if (colTo !== captureCol || rowTo !== captureRow) {
       delete boardPieces[captureRow][captureCol];
-      _imgContainers[captureRow][captureCol].innerHTML = null; // render
+      // _imgContainers[captureRow][captureCol].innerHTML = null;
     }
   }
 
@@ -138,7 +138,7 @@ function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: Cel
   const promotedPiece = queen(pawn.id, row, col, currentColor);
   colorPieces[currentColor].push(promotedPiece);
   putPieceOnBoard(promotedPiece, boardPieces);
-  _imgContainers[row][col].innerHTML = getPieceImage(promotedPiece.name, currentColor); // render
+  // _imgContainers[row][col].innerHTML = getPieceImage(promotedPiece.name, currentColor);
 }
 
 function king(id: number, row: number, col: number, color: ColorType): Piece {

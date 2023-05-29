@@ -85,10 +85,12 @@ function m_OponentAbandoned() {
 }
 
 function m_gameEnded(status: EndGameStatus, currentColor: ColorType): void {
-  alert(`Game ended: ${status} - ${currentColor}`);
-  resetAppState();
-  resetGameState();
-  // TODO: Reset room on backend in any case the game ends
+  setTimeout(() => {
+    alert(`Game ended: ${status} - ${currentColor}`);
+    resetAppState();
+    resetGameState();
+    // TODO: Reset room on backend in any case the game ends
+  }, 100);
 }
 
 export { closeModal, m_gameEnded, m_LookingForPlayers, m_OponentAbandoned, m_Welcome };

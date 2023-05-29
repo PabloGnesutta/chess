@@ -3,6 +3,7 @@ import { NAME_MAP, defaultInitialPieces, warn } from '../globals.js';
 import { IncommingMoveData } from '../ws/incomingMessages.js';
 import { signalMoveToServer } from '../ws/outgoingMessages.js';
 import { playSound } from '../audio/audio.js';
+import { appState } from '../state/appState.js';
 import {
   BoardPiecesType,
   ColorPiecesType,
@@ -18,8 +19,8 @@ import {
   _board,
   clearLastMoveMarks,
   drawBoard,
-  drawMove,
   drawPieces,
+  drawPositionHistoryItem,
   markLastMove,
   unselectCurrentSquare,
 } from '../ui/board.js';
@@ -28,7 +29,7 @@ import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.
 import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
 import { computeMoves } from './computePieceMovements.js';
 import { m_gameEnded } from '../ui/modal.js';
-import { addMvHistoryItem } from '../ui/mvHistory.js';
+import { addMvHistoryItem, selectLastHistoryItem } from '../ui/mvHistory.js';
 
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
 
@@ -94,7 +95,7 @@ function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
 
   unselectCurrentSquare();
 
-  drawMove(piece, move);
+  // drawMove(piece, move);
 
   if (move.castleSteps) {
     gameState.soundToPlay = 'castle';
@@ -119,14 +120,17 @@ function startTurn(): void {
 
   const positionHistoryResult = updatePositionHistory(colorPieces, positionHistory);
 
-  if (positionHistoryResult === 'STALEMATE_BY_REPETITION') {
-    addMvHistoryItem(lastMove, false);
-    return endGame('STALEMATE_BY_REPETITION', currentColor);
-  }
+  drawPositionHistoryItem(positionHistory[positionHistory.length - 1].position);
+  appState.viewMode = 'GAME';
 
   const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
   addMvHistoryItem(lastMove, playerIsInCheck);
+  selectLastHistoryItem();
+
+  if (positionHistoryResult === 'STALEMATE_BY_REPETITION') {
+    return endGame('STALEMATE_BY_REPETITION', currentColor);
+  }
 
   if (playerIsInCheck) {
     players[currentColor].isInCheck = true;
