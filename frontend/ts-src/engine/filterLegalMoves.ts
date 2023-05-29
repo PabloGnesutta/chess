@@ -3,7 +3,7 @@ import { copyBoard, copyColorPieces } from '../utils/utils.js';
 import { BoardPiecesType, gameState } from '../state/gameState.js';
 
 import { computeMoves } from './computePieceMovements.js';
-import { KingMoveType, MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
+import { MoveType, Piece, updateBoardAndPieceWithMove } from './piecesLib.js';
 
 /**
  * For each oponent's piece
@@ -89,7 +89,7 @@ function filterLegalMoves(piece: Piece): MoveType[] {
   }
 
   // King
-  piece.moves.forEach((move: KingMoveType) => {
+  piece.moves.forEach(move => {
     const castleSteps = move.castleSteps;
     if (castleSteps) {
       let castleIsLegal = true;

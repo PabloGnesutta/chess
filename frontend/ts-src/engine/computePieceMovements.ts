@@ -1,7 +1,7 @@
 import { P, _Z } from '../globals.js';
 import { BoardPiecesType, ColorType, CellType, gameState } from '../state/gameState.js';
 
-import { King, KingMoveType, MoveType, Pawn, Piece } from './piecesLib.js';
+import { MoveType, Pawn, Piece } from './piecesLib.js';
 
 function moveObj(moveTo: CellType, captureAt?: CellType) {
   const obj: { moveTo: CellType; captureAt?: CellType } = {
@@ -157,7 +157,7 @@ function specificMoves(boardPieces: BoardPiecesType, potentialMoves: CellType[],
   return moves;
 }
 
-function king(boardPieces: BoardPiecesType, _king: King): void {
+function king(boardPieces: BoardPiecesType, _king: Piece): void {
   const { row, col } = _king;
   const potentialMoves: CellType[] = [
     [row + 1, col],
@@ -170,7 +170,7 @@ function king(boardPieces: BoardPiecesType, _king: King): void {
     [row, col - 1],
   ];
 
-  const castleMoves: KingMoveType[] = [];
+  const castleMoves: MoveType[] = [];
 
   castle: {
     if (!_king.hasntMoveYet || gameState.players[gameState.currentColor].isInCheck) {
@@ -224,7 +224,7 @@ function king(boardPieces: BoardPiecesType, _king: King): void {
     }
   }
 
-  const moves: KingMoveType[] = specificMoves(boardPieces, potentialMoves, _king.color);
+  const moves = specificMoves(boardPieces, potentialMoves, _king.color);
 
   _king.moves = moves.concat(castleMoves);
 }

@@ -1,12 +1,12 @@
 import { COL_MAP, NAME_MAP, ROW_MAP } from '../globals.js';
-import { LastMoveType, gameState } from '../state/gameState.js';
+import { HistoryItem, gameState } from '../state/gameState.js';
 
 import { $, createElement } from './DOM.js';
 import { drawPositionHistoryItem } from './board.js';
 
 const _mvHistory = $('mv-history')!;
 
-function addMvHistoryItem(lastMove: LastMoveType | null, isCheck: boolean): void {
+function addMvHistoryItem(lastMove: HistoryItem | null, isCheck: boolean): void {
   let itemText = '[*]'; // Starting position
 
   if (lastMove) {
@@ -25,4 +25,4 @@ function addMvHistoryItem(lastMove: LastMoveType | null, isCheck: boolean): void
   _mvHistory.appendChild(item);
 }
 
-export { addMvHistoryItem };
+export { _mvHistory, addMvHistoryItem };

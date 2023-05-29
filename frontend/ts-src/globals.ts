@@ -1,5 +1,5 @@
-import { InitialPieces } from './engine/gameFlow';
-import { PieceNameType } from './state/gameState';
+import { PieceNameType } from './state/gameState.js';
+import { InitialPieces } from './engine/gameFlow.js';
 
 const ROW_MAP = [8, 7, 6, 5, 4, 3, 2, 1];
 const COL_MAP = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -39,8 +39,8 @@ let defaultInitialPieces: InitialPieces;
 defaultInitialPieces = [
   [1, K, 7, 4, 'w'],
   [2, Q, 7, 3, 'w'],
-  // [3, R, 7, 0, 'w'],
-  // [4, R, 7, 7, 'w'],
+  [3, R, 7, 0, 'w'],
+  [4, R, 7, 7, 'w'],
   // [5, B, 7, 2, 'w'],
   // [6, B, 7, 5, 'w'],
   // [7, N, 7, 1, 'w'],

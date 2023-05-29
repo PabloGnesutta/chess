@@ -1,5 +1,6 @@
 import { _board } from '../ui/board.js';
 import { _footer } from '../ui/footer-UI.js';
+import { _mvHistory } from '../ui/mvHistory.js';
 import { _roomIdElement } from '../ui/lobby-UI.js';
 
 export type AppState = {
@@ -20,8 +21,14 @@ const appState: AppState = {
 
 function resetAppState(): void {
   appState.activeRoomId = 0;
+  resetUIState();
+}
+
+function resetUIState(): void {
   _roomIdElement.innerText = '';
   _footer.classList.add('display-none');
   _board.classList.add('display-none');
+  _mvHistory.innerHTML = '';
 }
+
 export { appState, resetAppState };

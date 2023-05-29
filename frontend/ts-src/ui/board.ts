@@ -1,8 +1,8 @@
-import { COL_MAP, NAME_MAP_INITIALS, ROW_MAP, _Z } from '../globals.js';
+import { COL_MAP, NAME_MAP_INITIALS, R, ROW_MAP, _Z } from '../globals.js';
 import { appState } from '../state/appState.js';
 import { CellType, ColorPiecesType, ColorType, gameState } from '../state/gameState.js';
 import { makeLocalMoveAndPassTurn, signalMoveMultiplayer } from '../engine/gameFlow.js';
-import { MoveType, getPieceImage } from '../engine/piecesLib.js';
+import { getPieceImage, MoveType, Piece } from '../engine/piecesLib.js';
 
 import { $, createElement } from './DOM.js';
 
@@ -132,8 +132,8 @@ function drawBoard(pov = 'w') {
 function drawPieces(colorPieces: ColorPiecesType) {
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
-    pieces.forEach((piece) => {
-      _imgContainers[piece.row][piece.col].innerHTML = getPieceImage(piece);
+    pieces.forEach(piece => {
+      _imgContainers[piece.row][piece.col].innerHTML = getPieceImage(piece.name, color as ColorType);
     });
   }
 }
@@ -159,7 +159,7 @@ function markLastMove(from: CellType, to: CellType) {
 }
 
 function clearMoves() {
-  movementMarkSquares.forEach((_square) => {
+  movementMarkSquares.forEach(_square => {
     _square.classList.remove('potential-move');
     _square.classList.remove('potential-capture');
   });
@@ -168,7 +168,7 @@ function clearMoves() {
 
 function displayMoves(moves: MoveType[]) {
   clearMoves();
-  moves.forEach((move) => {
+  moves.forEach(move => {
     const [row, col] = move.moveTo;
     const _square = _squares[row][col];
     const type = move.captureAt ? 'capture' : 'move';
@@ -230,16 +230,30 @@ function drawPositionHistoryItem(position: string) {
 
   const pieces = position.split(';');
 
-  pieces.forEach((piece) => {
+  pieces.forEach(piece => {
     const color = piece[0] as ColorType;
     const name = piece[1];
     const row = +piece[2];
     const col = +piece[3];
-    _imgContainers[row][col].innerHTML = getPieceImage({
-      color,
-      name: NAME_MAP_INITIALS[name],
-    });
+    _imgContainers[row][col].innerHTML = getPieceImage(NAME_MAP_INITIALS[name], color);
   });
+}
+
+function drawMove(piece: Piece, move: MoveType): void {
+  const { moveTo } = move;
+  let rowFrom = piece.row;
+  let colFrom = piece.col;
+  let [rowTo, colTo] = moveTo;
+  _imgContainers[rowFrom][colFrom].innerHTML = null;
+  _imgContainers[rowTo][colTo].innerHTML = getPieceImage(piece.name, piece.color);
+
+  if (move.castleSteps) {
+    const { rookFrom, rookTo } = move;
+    [rowFrom, colFrom] = rookFrom!;
+    [rowTo, colTo] = rookTo!;
+    _imgContainers[rowFrom][colFrom].innerHTML = null;
+    _imgContainers[rowTo][colTo].innerHTML = getPieceImage(R, piece.color);
+  }
 }
 
 export {
@@ -247,9 +261,10 @@ export {
   _imgContainers,
   unselectCurrentSquare,
   clearLastMoveMarks,
-  drawPositionHistoryItem,
   markLastMove,
   initializeBoard,
   drawBoard,
+  drawMove,
   drawPieces,
+  drawPositionHistoryItem,
 };

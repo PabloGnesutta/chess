@@ -11,11 +11,18 @@ import {
   gameState,
   resetGameState,
   PositionHistoryItem,
-  CellType,
-  LastMoveType,
+  HistoryItem,
 } from '../state/gameState.js';
 import { _debug, _footer } from '../ui/footer-UI.js';
-import { _board, clearLastMoveMarks, drawBoard, drawPieces, markLastMove, unselectCurrentSquare } from '../ui/board.js';
+import {
+  _board,
+  clearLastMoveMarks,
+  drawBoard,
+  drawMove,
+  drawPieces,
+  markLastMove,
+  unselectCurrentSquare,
+} from '../ui/board.js';
 
 import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
 import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
@@ -26,13 +33,6 @@ import { addMvHistoryItem } from '../ui/mvHistory.js';
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
 
 export type EndGameStatus = 'CHECKMATE' | 'STALEMATE_BY_REPETITION' | 'STALEMATE_BY_DRAWN_KING';
-
-export type HistoryItem = {
-  piece: string;
-  from: CellType;
-  to: CellType;
-  color: ColorType;
-};
 
 function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
   if (ALLOW_DEBUG) _debug?.classList.remove('display-none');
@@ -72,7 +72,7 @@ function putPieceOnBoard(piece: Piece, boardPieces: BoardPiecesType): void {
 
 function makeRemoteMove(moveData: IncommingMoveData): void {
   const { pieceId, move } = moveData;
-  const piece = gameState.colorPieces[gameState.currentColor].find((p) => p.id === pieceId);
+  const piece = gameState.colorPieces[gameState.currentColor].find(p => p.id === pieceId);
   if (piece) {
     makeLocalMoveAndPassTurn(piece, move);
   } else {
@@ -83,7 +83,7 @@ function makeRemoteMove(moveData: IncommingMoveData): void {
 function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
   markLastMove([piece.row, piece.col], move.moveTo);
 
-  const historyItem: LastMoveType = {
+  const historyItem: HistoryItem = {
     piece: piece.name,
     from: [piece.row, piece.col],
     to: move.moveTo,
@@ -93,6 +93,8 @@ function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
   gameState.lastMove = historyItem;
 
   unselectCurrentSquare();
+
+  drawMove(piece, move);
 
   if (move.castleSteps) {
     gameState.soundToPlay = 'castle';
@@ -148,7 +150,7 @@ function endGame(status: EndGameStatus, currentColor: ColorType): void {
 function computeLegalMovesForPlayer(boardPieces: BoardPiecesType, playerPieces: Piece[]) {
   let numLegalMoves = 0;
 
-  playerPieces.forEach((piece) => {
+  playerPieces.forEach(piece => {
     computeMoves[piece.name](boardPieces, piece);
     const legalMoves = filterLegalMoves(piece);
     piece.moves = legalMoves;

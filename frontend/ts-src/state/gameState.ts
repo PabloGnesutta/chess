@@ -6,7 +6,7 @@ export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'p
 
 export type CellType = [number, number];
 
-export type LastMoveType = {
+export type HistoryItem = {
   piece: PieceNameType;
   from: CellType;
   to: CellType;
@@ -44,7 +44,7 @@ export type GameState = {
   opositeColor: ColorType;
   selectedPiece: Piece | null;
   playerColor: ColorType | '';
-  lastMove: LastMoveType | null;
+  lastMove: HistoryItem | null;
   soundToPlay: SoundName;
   players: PlayersType;
   colorPieces: ColorPiecesType;

@@ -1,7 +1,7 @@
-import { log } from '../globals.js';
 import { initApp } from '../initialize.js';
-import { ColorType } from '../state/gameState';
-import { EndGameStatus } from '../engine/gameFlow';
+import { resetAppState } from '../state/appState.js';
+import { ColorType, resetGameState } from '../state/gameState.js';
+import { EndGameStatus } from '../engine/gameFlow.js';
 
 import { $, createElement } from './DOM.js';
 
@@ -21,6 +21,15 @@ type ModalOptions = {
   hideCloseBtn?: boolean;
   onClose?: () => void;
 };
+
+closeModalBtn.onclick = () => closeModal();
+
+function closeModal(callback?: () => void) {
+  modal.classList.add('display-none');
+  if (callback) {
+    callback();
+  }
+}
 
 function showModal(content: HTMLElement, options?: ModalOptions) {
   content.classList.add('modal-content-inner');
@@ -42,15 +51,10 @@ function showModal(content: HTMLElement, options?: ModalOptions) {
   }
 }
 
-function closeModal(callback?: () => void) {
-  modal.classList.add('display-none');
-  if (callback) callback();
-}
-
 function wrapElements(elements: HTMLElement[], className = ''): HTMLElement {
   const container = createElement('div');
   container.className = className;
-  elements.forEach((el) => container.appendChild(el));
+  elements.forEach(el => container.appendChild(el));
   return container;
 }
 
@@ -82,9 +86,9 @@ function m_OponentAbandoned() {
 
 function m_gameEnded(status: EndGameStatus, currentColor: ColorType): void {
   alert(`Game ended: ${status} - ${currentColor}`);
-  log(status, currentColor);
+  resetAppState();
+  resetGameState();
+  // TODO: Reset room on backend in any case the game ends
 }
-
-closeModalBtn.onclick = () => closeModal();
 
 export { closeModal, m_gameEnded, m_LookingForPlayers, m_OponentAbandoned, m_Welcome };
