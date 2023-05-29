@@ -1,4 +1,4 @@
-import { $ } from './DOM';
+import { $ } from './DOM.js';
 
 const _clientIdElement = $('client-id')!;
 const _roomIdElement = $('room-id')!;

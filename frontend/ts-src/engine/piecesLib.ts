@@ -95,7 +95,7 @@ function doMove(piece: Piece, move: MoveType): SoundName {
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
 
     // Remove captured piece from colorPieces
-    const colorPieceIndex = colorPieces[opositeColor].findIndex(piece => piece.id === captueredBoardPiece.id);
+    const colorPieceIndex = colorPieces[opositeColor].findIndex((piece) => piece.id === captueredBoardPiece.id);
     const [capturedColorPiece] = colorPieces[opositeColor].splice(colorPieceIndex, 1);
 
     // Add to player's captures
@@ -137,7 +137,7 @@ function doCastle(king: King, move: KingMoveType): void {
 
 function promotePawnAt(boardPieces: BoardPiecesType, pawn: Pawn, [row, col]: CellType): void {
   const { currentColor, colorPieces } = gameState;
-  const pieceIndex = colorPieces[currentColor].findIndex(piece => piece.id === pawn.id);
+  const pieceIndex = colorPieces[currentColor].findIndex((piece) => piece.id === pawn.id);
   colorPieces[currentColor].splice(pieceIndex, 1);
   delete boardPieces[row][col];
 
@@ -187,9 +187,9 @@ function pawn(id: number, row: number, col: number, color: ColorType): Pawn {
   };
 }
 
-function getPieceImage(piece: Piece): string {
+function getPieceImage(piece: Partial<Piece>): string {
   const colorCode = piece.color === 'w' ? 'l' : 'd';
-  let pieceCode = piece.name[0];
+  let pieceCode = piece.name![0];
   if (piece.name === N) pieceCode = 'n';
   const fileName = 'Chess_' + pieceCode + colorCode + 't45.svg';
   const filePath = `./svg/${fileName}`;

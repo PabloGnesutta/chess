@@ -1,5 +1,5 @@
 import { P, _Z } from '../globals.js';
-import { BoardPiecesType, ColorType, CellType, gameState, LastMoveType } from '../state/gameState.js';
+import { BoardPiecesType, ColorType, CellType, gameState } from '../state/gameState.js';
 
 import { King, KingMoveType, MoveType, Pawn, Piece } from './piecesLib.js';
 
@@ -291,17 +291,19 @@ function pawn(boardPieces: BoardPiecesType, _pawn: Pawn): void {
   // EN-PASSANT
   // Pawn is on en-passant rank
   if (_pawn.row === _pawn.enPassantRow) {
-    const lastMove = gameState.lastMove as LastMoveType;
-    // Last oponent move was a pawn
-    if (lastMove.piece === P) {
-      const lastMoveTo = lastMove.to;
-      const lastMoveFrom = lastMove.from;
-      // Oponent pawn was at starting rank and moved to _pawn' rank
-      if (lastMoveFrom[0] === _pawn.enPassantRow + _pawn.delta * 2 && lastMoveTo[0] === _pawn.enPassantRow) {
-        // Oponent pawn is adjacent to pawn
-        if (lastMoveTo[1] === _pawn.col + 1 || lastMoveTo[1] === _pawn.col - 1) {
-          // Capture one row ahead at opponent pawn's file
-          moves.push(moveObj([_pawn.row + _pawn.delta, lastMoveTo[1]], lastMoveTo));
+    const lastMove = gameState.lastMove;
+    if (lastMove) {
+      // Last oponent move was a pawn
+      if (lastMove.piece === P) {
+        const lastMoveTo = lastMove.to;
+        const lastMoveFrom = lastMove.from;
+        // Oponent pawn was at starting rank and moved to _pawn' rank
+        if (lastMoveFrom[0] === _pawn.enPassantRow + _pawn.delta * 2 && lastMoveTo[0] === _pawn.enPassantRow) {
+          // Oponent pawn is adjacent to pawn
+          if (lastMoveTo[1] === _pawn.col + 1 || lastMoveTo[1] === _pawn.col - 1) {
+            // Capture one row ahead at opponent pawn's file
+            moves.push(moveObj([_pawn.row + _pawn.delta, lastMoveTo[1]], lastMoveTo));
+          }
         }
       }
     }

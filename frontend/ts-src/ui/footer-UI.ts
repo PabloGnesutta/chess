@@ -3,7 +3,7 @@ import { signalLeaveGameToServer } from '../ws/outgoingMessages.js';
 import { appState, resetAppState } from '../state/appState.js';
 import { gameState, resetGameState } from '../state/gameState.js';
 
-import { $ } from './DOM';
+import { $ } from './DOM.js';
 import { m_Welcome } from './modal.js';
 import { drawBoard, drawPieces } from './board.js';
 

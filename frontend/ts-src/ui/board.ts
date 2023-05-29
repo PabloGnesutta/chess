@@ -1,6 +1,6 @@
-import { COL_MAP, ROW_MAP, _Z } from '../globals.js';
+import { COL_MAP, NAME_MAP_INITIALS, ROW_MAP, _Z } from '../globals.js';
 import { appState } from '../state/appState.js';
-import { CellType, ColorPiecesType, gameState } from '../state/gameState.js';
+import { CellType, ColorPiecesType, ColorType, gameState } from '../state/gameState.js';
 import { makeLocalMoveAndPassTurn, signalMoveMultiplayer } from '../engine/gameFlow.js';
 import { MoveType, getPieceImage } from '../engine/piecesLib.js';
 
@@ -223,11 +223,31 @@ function squareClick([row, col]: [number, number]) {
   }
 }
 
+function drawPositionHistoryItem(position: string) {
+  for (let row = 0; row <= _Z; row++) {
+    for (let col = 0; col <= _Z; col++) _imgContainers[row][col].innerHTML = '';
+  }
+
+  const pieces = position.split(';');
+
+  pieces.forEach((piece) => {
+    const color = piece[0] as ColorType;
+    const name = piece[1];
+    const row = +piece[2];
+    const col = +piece[3];
+    _imgContainers[row][col].innerHTML = getPieceImage({
+      color,
+      name: NAME_MAP_INITIALS[name],
+    });
+  });
+}
+
 export {
   _board,
   _imgContainers,
   unselectCurrentSquare,
   clearLastMoveMarks,
+  drawPositionHistoryItem,
   markLastMove,
   initializeBoard,
   drawBoard,

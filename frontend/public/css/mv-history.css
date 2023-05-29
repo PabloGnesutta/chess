@@ -1,0 +1,15 @@
+#mv-history {
+  display: flex;
+  gap: 4px;
+  font-size: 14px;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  min-height: 24px;
+}
+
+.mv-history-item {
+  cursor: pointer;
+  padding: 4px;
+}

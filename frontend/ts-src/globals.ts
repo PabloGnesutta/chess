@@ -1,7 +1,8 @@
 import { InitialPieces } from './engine/gameFlow';
+import { PieceNameType } from './state/gameState';
 
 const ROW_MAP = [8, 7, 6, 5, 4, 3, 2, 1];
-const COL_MAP = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+const COL_MAP = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
 const P = 'pawn';
 const K = 'king';
@@ -17,6 +18,15 @@ const NAME_MAP = {
   rook: 'R',
   knight: 'N',
   bishop: 'B',
+};
+
+const NAME_MAP_INITIALS: { [key: string]: PieceNameType } = {
+  P: 'pawn',
+  K: 'king',
+  Q: 'queen',
+  R: 'rook',
+  N: 'knight',
+  B: 'bishop',
 };
 
 const _Z = 7; // Largest row/col index
@@ -62,4 +72,4 @@ defaultInitialPieces = [
   // [32, P, 1, 7, 'b'],
 ];
 
-export { ROW_MAP, COL_MAP, P, K, Q, R, N, B, _Z, NAME_MAP, defaultInitialPieces, log, warn };
+export { ROW_MAP, COL_MAP, P, K, Q, R, N, B, _Z, NAME_MAP, NAME_MAP_INITIALS, defaultInitialPieces, log, warn };

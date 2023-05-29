@@ -11,26 +11,28 @@ import {
   gameState,
   resetGameState,
   PositionHistoryItem,
+  CellType,
+  LastMoveType,
 } from '../state/gameState.js';
 import { _debug, _footer } from '../ui/footer-UI.js';
-import {
-  _board,
-  _imgContainers,
-  clearLastMoveMarks,
-  drawBoard,
-  drawPieces,
-  markLastMove,
-  unselectCurrentSquare,
-} from '../ui/board.js';
+import { _board, clearLastMoveMarks, drawBoard, drawPieces, markLastMove, unselectCurrentSquare } from '../ui/board.js';
 
 import { filterLegalMoves, isPlayerInCheckAtPosition } from './filterLegalMoves.js';
 import { Piece, doCastle, doMove, MoveType, createPiece } from './piecesLib.js';
 import { computeMoves } from './computePieceMovements.js';
 import { m_gameEnded } from '../ui/modal.js';
+import { addMvHistoryItem } from '../ui/mvHistory.js';
 
 export type InitialPieces = [number, PieceNameType, number, number, ColorType][];
 
 export type EndGameStatus = 'CHECKMATE' | 'STALEMATE_BY_REPETITION' | 'STALEMATE_BY_DRAWN_KING';
+
+export type HistoryItem = {
+  piece: string;
+  from: CellType;
+  to: CellType;
+  color: ColorType;
+};
 
 function initGame(playerColor: ColorType, initialPieces?: InitialPieces) {
   if (ALLOW_DEBUG) _debug?.classList.remove('display-none');
@@ -81,14 +83,12 @@ function makeRemoteMove(moveData: IncommingMoveData): void {
 function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
   markLastMove([piece.row, piece.col], move.moveTo);
 
-  const historyItem = {
+  const historyItem: LastMoveType = {
     piece: piece.name,
     from: [piece.row, piece.col],
     to: move.moveTo,
     color: gameState.currentColor,
   };
-
-  gameState.movesHistory.push(JSON.stringify(historyItem));
 
   gameState.lastMove = historyItem;
 
@@ -113,15 +113,18 @@ function passTurn(): void {
 }
 
 function startTurn(): void {
-  const { boardPieces, positionHistory, colorPieces, currentColor, opositeColor, players } = gameState;
+  const { boardPieces, positionHistory, colorPieces, currentColor, lastMove, opositeColor, players } = gameState;
 
   const positionHistoryResult = updatePositionHistory(colorPieces, positionHistory);
 
   if (positionHistoryResult === 'STALEMATE_BY_REPETITION') {
+    addMvHistoryItem(lastMove, false);
     return endGame('STALEMATE_BY_REPETITION', currentColor);
   }
 
   const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
+
+  addMvHistoryItem(lastMove, playerIsInCheck);
 
   if (playerIsInCheck) {
     players[currentColor].isInCheck = true;
@@ -164,25 +167,27 @@ function updatePositionHistory(
   let updatePositionResult: UpdatePositionHistoryResult = '';
 
   // Build history item
-  const currentBoardPositionArray = [];
+  const currentPositionArray = [];
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
     for (let i = 0; i < pieces.length; i++) {
       const { name, row, col } = pieces[i];
-      const str = `${color}_${NAME_MAP[name]}_${row}_${col}`;
-      currentBoardPositionArray.push(str);
-      currentBoardPositionArray.sort();
+      const str = `${color}${NAME_MAP[name]}${row}${col}`;
+      // TODO: If piece is pawn, check en-passants
+      // if piece is king, check castles
+      currentPositionArray.push(str);
+      currentPositionArray.sort();
     }
   }
 
-  const currentBoardPositionStr = currentBoardPositionArray.join(';');
+  const currentPositionStr = currentPositionArray.join(';');
 
   // Find if the position previously occurred
   let positionIsNew = true;
   for (let i = 0; i < positionHistory.length; i++) {
     const historyItem = positionHistory[i];
     const position = historyItem.position;
-    if (position === currentBoardPositionStr) {
+    if (position === currentPositionStr) {
       positionIsNew = false;
       historyItem.occuredTimes++;
       if (historyItem.occuredTimes === 3) {
@@ -195,7 +200,7 @@ function updatePositionHistory(
   if (updatePositionResult !== 'STALEMATE_BY_REPETITION' && positionIsNew) {
     positionHistory.push({
       occuredTimes: 1,
-      position: currentBoardPositionStr,
+      position: currentPositionStr,
     });
   }
 

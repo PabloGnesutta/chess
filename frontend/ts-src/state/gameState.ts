@@ -1,6 +1,5 @@
 import { SoundName } from '../audio/audio.js';
 import { Piece } from '../engine/piecesLib.js';
-import { _imgContainers } from '../ui/board.js';
 
 export type ColorType = 'w' | 'b';
 export type PieceNameType = 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
@@ -45,7 +44,7 @@ export type GameState = {
   opositeColor: ColorType;
   selectedPiece: Piece | null;
   playerColor: ColorType | '';
-  lastMove: LastMoveType | {};
+  lastMove: LastMoveType | null;
   soundToPlay: SoundName;
   players: PlayersType;
   colorPieces: ColorPiecesType;
@@ -66,7 +65,7 @@ function getInitialState(): GameState {
     opositeColor: 'b',
     selectedPiece: null,
     playerColor: '',
-    lastMove: {},
+    lastMove: null,
     soundToPlay: '',
     boardPieces: {
       0: {},

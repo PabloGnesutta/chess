@@ -130,25 +130,27 @@ function updatePositionHistory(
   let updatePositionResult: UpdatePositionHistoryResult = '';
 
   // Build history item
-  const currentBoardPositionArray = [];
+  const currentPositionArray = [];
   for (const color in colorPieces) {
     const pieces = colorPieces[color];
     for (let i = 0; i < pieces.length; i++) {
       const { name, row, col } = pieces[i];
       const str = `${color}_${NAME_MAP[name]}${row}${col}`;
-      currentBoardPositionArray.push(str);
-      currentBoardPositionArray.sort();
+      // TODO: If piece is pawn, check en-passants
+      // if piece is king, check castles
+      currentPositionArray.push(str);
+      currentPositionArray.sort();
     }
   }
 
-  const currentBoardPositionStr = currentBoardPositionArray.join(';');
+  const currentPositionStr = currentPositionArray.join(';');
 
   // Find if the position previously occurred
   let positionIsNew = true;
   for (let i = 0; i < positionHistory.length; i++) {
     const historyItem = positionHistory[i];
     const position = historyItem.position;
-    if (position === currentBoardPositionStr) {
+    if (position === currentPositionStr) {
       positionIsNew = false;
       historyItem.occuredTimes++;
       if (historyItem.occuredTimes === 3) {
@@ -161,7 +163,7 @@ function updatePositionHistory(
   if (updatePositionResult !== 'STALEMATE_BY_REPETITION' && positionIsNew) {
     positionHistory.push({
       occuredTimes: 1,
-      position: currentBoardPositionStr,
+      position: currentPositionStr,
     });
   }
 
