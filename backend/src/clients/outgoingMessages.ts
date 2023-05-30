@@ -3,7 +3,7 @@ import { MoveResult } from '../chess/engine/gameFlow';
 import { MatchState, MoveType } from '../chess/types';
 import { RoomType } from '../rooms';
 
-import { WSPayloadType } from './clients';
+import { Client, WSPayloadType } from './clients';
 import { writeSocket } from './websocket';
 
 export type MoveDataPayload = {
@@ -55,4 +55,8 @@ function sendMoveToOponent(clientId: number, room: RoomType, moveData: MoveDataP
   sendRoomMessage(room, { type: 'OPONENT_MOVED', data: moveData }, clientId);
 }
 
-export { sendMoveToOponent, sendRoomMessage, sendRoomReadyToPlayers };
+function sendGameEndedToPlayer(client: Client, moveResult: MoveResult): void {
+  writeSocket(client._s, { type: 'GAME_ENDED', data: moveResult });
+}
+
+export { sendGameEndedToPlayer, sendMoveToOponent, sendRoomMessage, sendRoomReadyToPlayers };

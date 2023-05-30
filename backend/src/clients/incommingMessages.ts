@@ -2,10 +2,10 @@ import { log, warn } from '../utils/utils';
 import { CellType } from '../chess/types';
 import { newMatch, validateMove } from '../chess/match/match';
 import { makeLocalMoveAndPassTurn, startTurn } from '../chess/engine/gameFlow';
-import { findOrCreateRoom, clientLeftRoom } from '../rooms';
+import { findOrCreateRoom, resetRoomAndItsClients } from '../rooms';
 
 import { Client, WSMessage } from './clients';
-import { sendMoveToOponent, sendRoomMessage, sendRoomReadyToPlayers } from './outgoingMessages';
+import { sendGameEndedToPlayer, sendMoveToOponent, sendRoomMessage, sendRoomReadyToPlayers } from './outgoingMessages';
 
 type IncommingMoveData = {
   from: CellType;
@@ -44,7 +44,10 @@ function JOIN_ROOM(client: Client): void {
 }
 
 function LEAVE_GAME(client: Client): void {
-  clientLeftRoom(client);
+  const room = client.activeRoom;
+  if (!room) return warn('--- Room not assigned to client @LEAVE_GAME');
+  resetRoomAndItsClients(room);
+  sendRoomMessage(room, { type: 'OPONENT_ABANDONED' }, client.id);
 }
 
 function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): void {
@@ -65,8 +68,10 @@ function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): voi
 
     if (moveResult.status) {
       if (moveResult.status !== 'CHECK') {
+        log(' * * * Game ended due to ', moveResult.status, moveResult.target);
         // TODO: Send result to current player
-        log(' *** Game ended due to ', moveResult.status, moveResult.target);
+        sendGameEndedToPlayer(client, moveResult);
+        reset;
       }
     }
   } catch (err) {
