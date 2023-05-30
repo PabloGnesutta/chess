@@ -1,6 +1,5 @@
 import { B, K, N, P, Q, R, _Z } from '../globals.js';
-import { SoundName } from '../audio/audio.js';
-import { BoardPiecesType, CellType, ColorType, PieceNameType, gameState } from '../state/gameState.js';
+import { BoardPiecesType, CellType, ColorType, LocalMoveResult, PieceNameType, gameState } from '../state/gameState.js';
 import { _imgContainers } from '../ui/board.js';
 
 import { putPieceOnBoard } from './gameFlow.js';
@@ -74,17 +73,17 @@ function updateBoardAndPieceWithMove(
   }
 }
 
-function doMove(piece: Piece, move: MoveType): SoundName {
+function doMove(piece: Piece, move: MoveType): LocalMoveResult {
   const { boardPieces, colorPieces, currentColor, opositeColor, players } = gameState;
   const { moveTo, captureAt } = move;
 
   const [rowTo, colTo] = moveTo;
 
-  let soundToPlay: SoundName = 'moveSelf';
+  let moveResult: LocalMoveResult = 'MOVE_SELF';
 
   // Capture:
   if (captureAt) {
-    soundToPlay = 'capture';
+    moveResult = 'CAPTURE';
 
     const [captureRow, captureCol] = captureAt;
     const captueredBoardPiece = boardPieces[captureRow][captureCol];
@@ -108,10 +107,10 @@ function doMove(piece: Piece, move: MoveType): SoundName {
   // Pawn Promotion
   if (piece.name === P && (rowTo === 0 || rowTo === _Z)) {
     promotePawnAt(boardPieces, piece as Pawn, [rowTo, colTo]);
-    soundToPlay = 'promote';
+    moveResult = 'PROMOTE';
   }
 
-  return soundToPlay;
+  return moveResult;
 }
 
 function doCastle(king: Piece, move: MoveType): void {

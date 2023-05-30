@@ -1,4 +1,3 @@
-import { SoundName } from '../audio/audio.js';
 import { Piece } from '../engine/piecesLib.js';
 
 export type ColorType = 'w' | 'b';
@@ -39,13 +38,15 @@ export type PositionHistoryItem = {
   occuredTimes: number;
 };
 
+export type LocalMoveResult = 'CAPTURE' | 'CASTLE' | 'CHECK' | 'MOVE_SELF' | 'PROMOTE' | '';
+
 export type GameState = {
   currentColor: ColorType;
   opositeColor: ColorType;
   selectedPiece: Piece | null;
   playerColor: ColorType | '';
   lastMove: HistoryItem | null;
-  soundToPlay: SoundName;
+  moveResult: LocalMoveResult;
   players: PlayersType;
   colorPieces: ColorPiecesType;
   boardPieces: BoardPiecesType;
@@ -66,7 +67,7 @@ function getInitialState(): GameState {
     selectedPiece: null,
     playerColor: '',
     lastMove: null,
-    soundToPlay: '',
+    moveResult: '',
     boardPieces: {
       0: {},
       1: {},

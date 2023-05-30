@@ -1,9 +1,10 @@
 import { Duplex } from 'node:stream';
 
 import { log } from '../utils/utils';
-import { RoomType, clientLeftRoom } from '../rooms';
+import { RoomType, resetRoomMatchAndClients } from '../rooms';
 
 import { readSocket, writeSocket } from './websocket';
+import { sendRoomMessage } from './outgoingMessages';
 
 export type WSPayloadType = {
   type: string;
@@ -59,9 +60,21 @@ function registerClient(_s: Duplex): void {
 
 function deleteClient(client: Client): void {
   log(' / @deleteClient');
-  clientLeftRoom(client);
-  client._s.destroy();
-  delete clients[client.id];
+
+  const { id, _s, activeRoom } = client;
+
+  if (activeRoom) {
+    sendRoomMessage(activeRoom, { type: 'OPONENT_DISCONECTED' }, id);
+    resetRoomMatchAndClients(activeRoom);
+  }
+
+  _s.destroy();
+  delete clients[id];
 }
 
-export { clients, registerClient };
+function resetClient(client: Client): void {
+  client.activeRoom = null;
+  client.playerColor = '';
+}
+
+export { clients, registerClient, resetClient };

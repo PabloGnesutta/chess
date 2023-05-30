@@ -8,14 +8,27 @@ import { _clientIdElement, _roomIdElement } from '../ui/lobby-UI.js';
 
 import { WSMessage } from './ws.js';
 
-export type IncommingMoveData = {
-  pieceId: number;
-  move: MoveType;
-};
-type RoomReady = {
+type IncommingRoomReadyData = {
   roomId: number;
   playerColor: ColorType;
   initialPieces: InitialPieces;
+};
+
+type IncommingMoveResultStatus = 'CHECK' | 'CHECKMATE' | 'STALEMATE_BY_DRAWN_KING' | 'STALEMATE_BY_REPETITION' | '';
+
+type IncommingMoveResult = {
+  status: IncommingMoveResultStatus;
+  target: string;
+};
+
+type IncommingGameEndedData = {
+  moveResult: IncommingMoveResult;
+};
+
+export type IncommingMoveData = {
+  pieceId: number;
+  move: MoveType;
+  moveResult: IncommingMoveResult;
 };
 
 function processIncomingMessage(msg: WSMessage): void {
@@ -28,7 +41,10 @@ function processIncomingMessage(msg: WSMessage): void {
     case 'OPONENT_MOVED':
       return OPONENT_MOVED(msg.data);
     case 'OPONENT_ABANDONED':
+    case 'OPONENT_DISCONECTED':
       return OPONENT_ABANDONED();
+    case 'GAME_ENDED':
+      return GAME_ENDED(msg.data);
     default:
       return warn('--- Message type not supported');
   }
@@ -39,7 +55,7 @@ function CLIENT_REGISTERED(data: any): void {
   _clientIdElement.innerText = 'Online | Client ID: ' + data.clientId;
 }
 
-function ROOM_READY(data: RoomReady) {
+function ROOM_READY(data: IncommingRoomReadyData) {
   appState.activeRoomId = data.roomId;
   gameState.playerColor = data.playerColor;
   _roomIdElement.innerText = 'On Room ' + data.roomId;
@@ -50,6 +66,10 @@ function ROOM_READY(data: RoomReady) {
 
 function OPONENT_MOVED(data: IncommingMoveData) {
   makeRemoteMove(data);
+}
+
+function GAME_ENDED(data: IncommingGameEndedData) {
+  log('GAME ENDED', data);
 }
 
 function OPONENT_ABANDONED() {
