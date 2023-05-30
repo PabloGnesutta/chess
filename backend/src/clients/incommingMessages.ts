@@ -4,7 +4,7 @@ import { newMatch, validateMove } from '../chess/match/match';
 import { makeLocalMoveAndPassTurn, startTurn } from '../chess/engine/gameFlow';
 import { findOrCreateRoom, resetRoomMatchAndClients } from '../rooms';
 
-import { Client, WSMessage } from './clients';
+import { Client, WSMessage, deleteClient } from './clients';
 import { sendGameEndedToPlayer, sendMoveToOponent, sendRoomMessage, sendRoomReadyToPlayers } from './outgoingMessages';
 
 type IncommingMoveData = {
@@ -24,6 +24,7 @@ function processIncommingMessage(client: Client, msg: WSMessage): void {
       case 'LEAVE_GAME':
         return LEAVE_GAME(client);
       default:
+        deleteClient(client);
         return log('--- Invalid message type @processIncommingMessage');
     }
   } catch (err) {
@@ -53,11 +54,17 @@ function LEAVE_GAME(client: Client): void {
 function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): void {
   const room = client.activeRoom;
 
-  if (!room) throw new Error('--- client room not found @PROCESS_MOVE');
+  if (!room) {
+    deleteClient(client);
+    throw new Error('--- Client has no active Room @PROCESS_MOVE');
+  }
 
   const state = room.match;
 
-  if (!state) throw new Error('--- Room has no match @PROCESS_MOVE');
+  if (!state) {
+    resetRoomMatchAndClients(room);
+    throw new Error('--- Room has no Match @PROCESS_MOVE');
+  }
 
   try {
     const { piece, move } = validateMove(state, client, incommingMoveData.from, incommingMoveData.to);
@@ -77,10 +84,6 @@ function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): voi
   } catch (err) {
     warn('Error processing Move', { err, state, incommingMoveData }, '@PROCESS_MOVE');
     sendRoomMessage(room, { type: 'MOVE_ERROR' });
-    if (room) {
-      log('Resetting room');
-      resetRoomMatchAndClients(room);
-    }
   }
 }
 

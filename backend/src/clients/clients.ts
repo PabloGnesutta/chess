@@ -77,4 +77,4 @@ function resetClient(client: Client): void {
   client.playerColor = '';
 }
 
-export { clients, registerClient, resetClient };
+export { clients, deleteClient, registerClient, resetClient };
