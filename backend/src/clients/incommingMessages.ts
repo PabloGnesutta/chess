@@ -2,7 +2,7 @@ import { log, warn } from '../utils/utils';
 import { CellType } from '../chess/types';
 import { newMatch, validateMove } from '../chess/match/match';
 import { makeLocalMoveAndPassTurn, startTurn } from '../chess/engine/gameFlow';
-import { findOrCreateRoom, resetRoomAndItsClients } from '../rooms';
+import { findOrCreateRoom, resetRoomMatchAndClients } from '../rooms';
 
 import { Client, WSMessage } from './clients';
 import { sendGameEndedToPlayer, sendMoveToOponent, sendRoomMessage, sendRoomReadyToPlayers } from './outgoingMessages';
@@ -46,8 +46,8 @@ function JOIN_ROOM(client: Client): void {
 function LEAVE_GAME(client: Client): void {
   const room = client.activeRoom;
   if (!room) return warn('--- Room not assigned to client @LEAVE_GAME');
-  resetRoomAndItsClients(room);
   sendRoomMessage(room, { type: 'OPONENT_ABANDONED' }, client.id);
+  resetRoomMatchAndClients(room);
 }
 
 function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): void {
@@ -66,17 +66,21 @@ function PROCESS_MOVE(client: Client, incommingMoveData: IncommingMoveData): voi
 
     sendMoveToOponent(client.id, room, { move, pieceId: piece.id, moveResult });
 
+    // Game ended
     if (moveResult.status) {
       if (moveResult.status !== 'CHECK') {
         log(' * * * Game ended due to ', moveResult.status, moveResult.target);
-        // TODO: Send result to current player
         sendGameEndedToPlayer(client, moveResult);
-        reset;
+        resetRoomMatchAndClients(room);
       }
     }
   } catch (err) {
-    sendRoomMessage(room, { type: 'MOVE_ERROR' });
     warn('Error processing Move', { err, state, incommingMoveData }, '@PROCESS_MOVE');
+    sendRoomMessage(room, { type: 'MOVE_ERROR' });
+    if (room) {
+      log('Resetting room');
+      resetRoomMatchAndClients(room);
+    }
   }
 }
 

@@ -1,18 +1,19 @@
 import { API_URL } from '../env.js';
 import { log } from '../globals.js';
 import { appState } from '../state/appState.js';
+import { LocalMoveResult } from '../state/gameState.js';
 
-export type SoundName = 'capture' | 'castle' | 'check' | 'moveSelf' | 'promote' | '';
+export type SoundName = 'CAPTURE' | 'CASTLE' | 'CHECK' | 'MOVE_SELF' | 'PROMOTE' | '';
 
 let ctx: AudioContext;
 let audioOut: AudioDestinationNode;
 
 const audioBuffers: { [key: string]: AudioBuffer | null } = {
-  capture: null,
-  castle: null,
-  check: null,
-  moveSelf: null,
-  promote: null,
+  CAPTURE: null,
+  CASTLE: null,
+  CHECK: null,
+  MOVE_SELF: null,
+  PROMOTE: null,
 };
 
 function playBuffer(audioBuffer: AudioBuffer) {
@@ -46,7 +47,7 @@ async function initAudio(): Promise<void> {
   }
 }
 
-function playSound(sound: SoundName): void {
+function playSound(sound: LocalMoveResult): void {
   if (appState.audioReady && sound) {
     playBuffer(audioBuffers[sound] as AudioBuffer);
   }

@@ -9,12 +9,14 @@ const _mvHistory = $('mv-history')!;
 
 const _mvHistoryItems: HTMLElement[] = [];
 
-function addMvHistoryItem(lastMove: HistoryItem | null, isCheck: boolean): void {
+function addMvHistoryItem(lastMove: HistoryItem | null, isCapture: boolean, isCheck: boolean): void {
   let itemText = '[*]'; // Starting position
 
   if (lastMove) {
     const { color, piece, to } = lastMove;
-    itemText = color + NAME_MAP[piece] + COL_MAP[to[1]] + ROW_MAP[to[0]];
+    itemText = color + NAME_MAP[piece];
+    if (isCapture) itemText += 'x';
+    itemText += COL_MAP[to[1]] + ROW_MAP[to[0]];
   }
 
   if (isCheck) itemText += '!';

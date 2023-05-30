@@ -72,6 +72,10 @@ function newMatch(clients: ClientsById): MatchState {
   return match;
 }
 
+function deleteMatch(id: number): void {
+  delete matches[id];
+}
+
 type OutgoingMoveData = {
   piece: Piece;
   move: MoveType;
@@ -139,4 +143,4 @@ function validateMove(state: MatchState, client: Client, moveFrom: CellType, to:
   };
 }
 
-export { matches, newMatch, validateMove };
+export { matches, deleteMatch, newMatch, validateMove };

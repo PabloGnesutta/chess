@@ -1,7 +1,6 @@
-import { log, warn } from './utils/utils';
 import { MatchState } from './chess/types';
-import { Client, ClientsById } from './clients/clients';
-import { sendRoomMessage } from './clients/outgoingMessages';
+import { Client, ClientsById, resetClient } from './clients/clients';
+import { deleteMatch } from './chess/match/match';
 
 export type RoomType = {
   id: number;
@@ -35,26 +34,23 @@ function newRoom(): RoomType {
 }
 
 function findOrCreateRoom(client: Client): RoomType {
-  var room = rooms.find((r) => r.numActiveClients < 2);
+  var room = rooms.find(r => r.numActiveClients < 2);
+
   if (!room) room = newRoom();
+
   room.clients[client.id] = client;
   room.numActiveClients++;
+
   return room;
 }
 
-function resetRoomAndItsClients(room: RoomType): void {
-  const match = room.match;
-
-  if (match) {
-    match.status = 'CLOSED';
-    match.statusDetail = 'PLAYER_LEFT';
+function resetRoomMatchAndClients(room: RoomType): void {
+  if (room.match) {
+    deleteMatch(room.match.id);
   }
 
-  const clients = room.clients;
-  for (const clientId in clients) {
-    const client = clients[clientId];
-    client.activeRoom = null;
-    client.playerColor = '';
+  for (const clientId in room.clients) {
+    resetClient(room.clients[clientId]);
   }
 
   room.match = undefined;
@@ -62,4 +58,4 @@ function resetRoomAndItsClients(room: RoomType): void {
   room.numActiveClients = 0;
 }
 
-export { rooms, findOrCreateRoom, resetRoomAndItsClients };
+export { rooms, findOrCreateRoom, resetRoomMatchAndClients };

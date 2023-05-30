@@ -98,10 +98,10 @@ function makeLocalMoveAndPassTurn(piece: Piece, move: MoveType): void {
   // drawMove(piece, move);
 
   if (move.castleSteps) {
-    gameState.soundToPlay = 'castle';
+    gameState.moveResult = 'CASTLE';
     doCastle(piece, move);
   } else {
-    gameState.soundToPlay = doMove(piece, move);
+    gameState.moveResult = doMove(piece, move);
   }
 
   passTurn();
@@ -125,7 +125,7 @@ function startTurn(): void {
 
   const playerIsInCheck = isPlayerInCheckAtPosition(boardPieces, colorPieces[opositeColor]);
 
-  addMvHistoryItem(lastMove, playerIsInCheck);
+  addMvHistoryItem(lastMove, gameState.moveResult === 'CAPTURE', playerIsInCheck);
   selectLastHistoryItem();
 
   if (positionHistoryResult === 'STALEMATE_BY_REPETITION') {
@@ -134,12 +134,12 @@ function startTurn(): void {
 
   if (playerIsInCheck) {
     players[currentColor].isInCheck = true;
-    gameState.soundToPlay = 'check';
+    gameState.moveResult = 'CHECK';
   }
 
   const numLegalMoves = computeLegalMovesForPlayer(boardPieces, colorPieces[currentColor]);
 
-  playSound(gameState.soundToPlay);
+  playSound(gameState.moveResult);
 
   if (!numLegalMoves) {
     if (playerIsInCheck) endGame('CHECKMATE', currentColor);
