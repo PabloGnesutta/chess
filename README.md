@@ -1,3 +1,7 @@
+A multiplayer online chess application.
+Backend made in node.js with no dependencies, including websocket management and messaging.
+Frontend made in vanilla JavaScript.
+
 Development:
     /frontend:
         npm i
