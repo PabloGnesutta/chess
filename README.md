@@ -1,6 +1,10 @@
 A multiplayer online chess application.
-Backend made in node.js with no dependencies, including websocket management and messaging.
+Backend made in node.js with no dependencies, including Websocket management and messaging.
 Frontend made in vanilla JavaScript.
+
+See it live at https://chess.pablognesutta.com 
+The UI is not great. I concentrated my efforts on functionality, game logic, and WebSocket implementation.
+In order to play, join in two separate tabs/browser windows.
 
 Development:
     /frontend:
